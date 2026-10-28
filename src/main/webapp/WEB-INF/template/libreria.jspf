@@ -1,0 +1,30 @@
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+
+<%
+    response.setHeader("Pragma", "no-cache");
+    response.addHeader("Cache-Control", "must-revalidate");
+    response.addHeader("Cache-Control", "no-cache");
+    response.addHeader("Cache-Control", "no-store");
+    response.setDateHeader("Expires", 0);
+
+    HttpSession sesion = request.getSession();
+%>
+
+<c:choose>
+    <c:when test="${empty sessionScope.Dni}">
+        <c:redirect url="index.jsp">
+            <c:param name="error" value="Usted debe autenticarse...!"/>
+        </c:redirect>
+    </c:when>
+    <c:otherwise>
+        <%
+            int idUser = (Integer) sesion.getAttribute("idUsuario");
+            String nombre = (String) sesion.getAttribute("Nombre");
+            String apellido = (String) sesion.getAttribute("Apellido");
+            int dni = (Integer) sesion.getAttribute("Dni");
+            String tiporol = (String) sesion.getAttribute("TipoRol");
+        %>
+        <!-- Aquí va el resto de tu código -->
+    </c:otherwise>
+</c:choose>

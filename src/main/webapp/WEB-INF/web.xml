@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="3.1" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
+    <servlet>
+        <servlet-name>MenuController</servlet-name>
+        <servlet-class>pe.edu.utp.controller.MenuController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>InicioSesionController</servlet-name>
+        <servlet-class>pe.edu.utp.controller.InicioSesionController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>MenuController</servlet-name>
+        <url-pattern>/MenuController</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>jsp</servlet-name>
+        <servlet-class>org.apache.jasper.servlet.JspServlet</servlet-class>
+        <init-param>
+            <param-name>fork</param-name>
+            <param-value>false</param-value>
+        </init-param>
+        <init-param>
+            <param-name>xpoweredBy</param-name>
+            <param-value>false</param-value>
+        </init-param>
+        <load-on-startup>3</load-on-startup>
+    </servlet>
+    <servlet>
+        <servlet-name>HistorialController</servlet-name>
+        <servlet-class>pe.edu.utp.controller.HistorialController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ReprogramacionController</servlet-name>
+        <servlet-class>pe.edu.utp.controller.ReprogramacionController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>InicioSesionController</servlet-name>
+        <url-pattern>/InicioSesionController</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>HistorialController</servlet-name>
+        <url-pattern>/HistorialController</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ReprogramacionController</servlet-name>
+        <url-pattern>/ReprogramacionController</url-pattern>
+    </servlet-mapping>
+
+    <session-config>
+        <session-timeout>
+            30
+        </session-timeout>
+    </session-config>
+</web-app>

@@ -1,0 +1,529 @@
+/* ==========================================================================
+   Centro Odontológico Art Dent - Sistema Maestro de Diseño Institucional (RNF01)
+   Paleta Oficial de Marca:
+   - Primario (Cyan Dental):        #30a4c6 (Hover: #268da9)
+   - Blanco Puro (Superficies/Card):#ffffff
+   - Acento (Verde Salud/Acciones): #9fcc3a (Hover: #8bb532)
+   - Menta Suave (Insignias/Borde): #b4ddc2
+   - Oscuro (Carbón Texto/Sidebar): #212529
+   ========================================================================== */
+
+:root {
+    --artdent-primary: #30a4c6;
+    --artdent-primary-hover: #268da9;
+    --artdent-white: #ffffff;
+    --artdent-accent: #9fcc3a;
+    --artdent-accent-hover: #8bb532;
+    --artdent-mint: #b4ddc2;
+    --artdent-mint-light: #f0fbf6;
+    --artdent-dark: #212529;
+    --artdent-dark-surface: #2b3035;
+    --artdent-light-bg: #f7fafc;
+    --artdent-border: #e2e8f0;
+    --artdent-gray-muted: #6c757d;
+    --artdent-shadow-sm: 0 2px 8px rgba(33, 37, 41, 0.06);
+    --artdent-shadow-md: 0 6px 20px rgba(33, 37, 41, 0.08);
+    --artdent-shadow-lg: 0 12px 32px rgba(48, 164, 198, 0.15);
+
+    /* Neutralizadores de variables heredadas (SB Admin 2 / Flat UI) */
+    --primary-color: #30a4c6 !important;
+    --secondary-color: #9fcc3a !important;
+    --sidebar-color: #212529 !important;
+    --sidebar-bg: #212529 !important;
+    --sidebar-hover: #2b3035 !important;
+    --active-item: #30a4c6 !important;
+    --dark-blue: #30a4c6 !important;
+    --gold: #9fcc3a !important;
+    --blue: #30a4c6 !important;
+
+    accent-color: var(--artdent-primary);
+}
+
+/* --- Tipografía y Fondo Base --- */
+body {
+    font-family: 'Open Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    color: var(--artdent-dark);
+    background-color: var(--artdent-light-bg);
+    line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6, .card-title, .modal-title {
+    font-family: 'Roboto', 'Segoe UI', sans-serif;
+    color: var(--artdent-dark);
+    font-weight: 700;
+}
+
+code, .code-ref, .badge-code {
+    font-family: 'Space Mono', monospace;
+}
+
+/* --- Botones Corporativos Unificados --- */
+.btn {
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.25s ease-in-out;
+}
+
+.btn-primary, .btn-artdent-primary {
+    background-color: var(--artdent-primary) !important;
+    border-color: var(--artdent-primary) !important;
+    color: var(--artdent-white) !important;
+}
+
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active,
+.btn-artdent-primary:hover, .btn-artdent-primary:focus {
+    background-color: var(--artdent-primary-hover) !important;
+    border-color: var(--artdent-primary-hover) !important;
+    color: var(--artdent-white) !important;
+    box-shadow: 0 4px 12px rgba(48, 164, 198, 0.3) !important;
+    transform: translateY(-1px);
+}
+
+.btn-outline-primary, .btn-outline-artdent-primary {
+    color: var(--artdent-primary) !important;
+    border-color: var(--artdent-primary) !important;
+    background-color: transparent !important;
+}
+
+.btn-outline-primary:hover, .btn-outline-artdent-primary:hover,
+.btn-outline-primary:focus, .btn-outline-primary:active {
+    background-color: var(--artdent-primary) !important;
+    border-color: var(--artdent-primary) !important;
+    color: var(--artdent-white) !important;
+    box-shadow: 0 4px 12px rgba(48, 164, 198, 0.25) !important;
+    transform: translateY(-1px);
+}
+
+.btn-success, .btn-artdent-accent, .btn-gold {
+    background-color: var(--artdent-accent) !important;
+    border-color: var(--artdent-accent) !important;
+    color: var(--artdent-white) !important;
+}
+
+.btn-success:hover, .btn-success:focus, .btn-success:active,
+.btn-artdent-accent:hover, .btn-gold:hover, .btn-gold:focus {
+    background-color: var(--artdent-accent-hover) !important;
+    border-color: var(--artdent-accent-hover) !important;
+    color: var(--artdent-white) !important;
+    box-shadow: 0 4px 12px rgba(159, 204, 58, 0.3) !important;
+    transform: translateY(-1px);
+}
+
+.btn-outline-success {
+    color: var(--artdent-accent) !important;
+    border-color: var(--artdent-accent) !important;
+    background-color: transparent !important;
+}
+
+.btn-outline-success:hover {
+    background-color: var(--artdent-accent) !important;
+    border-color: var(--artdent-accent) !important;
+    color: var(--artdent-white) !important;
+}
+
+.btn-dark {
+    background-color: var(--artdent-dark) !important;
+    border-color: var(--artdent-dark) !important;
+    color: var(--artdent-white) !important;
+}
+
+.btn-dark:hover {
+    background-color: #111417 !important;
+    border-color: #111417 !important;
+}
+
+.btn-secondary {
+    background-color: #6c757d !important;
+    border-color: #6c757d !important;
+    color: var(--artdent-white) !important;
+}
+
+.btn-info {
+    background-color: var(--artdent-mint) !important;
+    border-color: var(--artdent-mint) !important;
+    color: var(--artdent-dark) !important;
+}
+
+.btn-info:hover {
+    background-color: #9cd1af !important;
+    border-color: #9cd1af !important;
+    color: var(--artdent-dark) !important;
+}
+
+/* --- Formularios e Inputs de Marca --- */
+.form-control, .form-select {
+    border-radius: 8px;
+    border: 1px solid var(--artdent-border);
+    padding: 0.625rem 0.875rem;
+    color: var(--artdent-dark);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--artdent-primary) !important;
+    box-shadow: 0 0 0 0.25rem rgba(48, 164, 198, 0.2) !important;
+    outline: none;
+}
+
+.input-group-text {
+    background-color: #f1f5f9;
+    border-color: var(--artdent-border);
+    color: var(--artdent-primary);
+}
+
+/* --- Badges e Indicadores de Estado --- */
+.badge {
+    border-radius: 6px;
+    padding: 0.45em 0.75em;
+    font-weight: 600;
+}
+
+.badge-primary, .badge.bg-primary {
+    background-color: var(--artdent-primary) !important;
+    color: var(--artdent-white) !important;
+}
+
+.badge-success, .badge.bg-success {
+    background-color: var(--artdent-accent) !important;
+    color: var(--artdent-white) !important;
+}
+
+.badge-mint, .badge.bg-mint {
+    background-color: var(--artdent-mint) !important;
+    color: var(--artdent-dark) !important;
+}
+
+.badge-dark, .badge.bg-dark {
+    background-color: var(--artdent-dark) !important;
+    color: var(--artdent-white) !important;
+}
+
+.badge-warning, .badge.bg-warning {
+    background-color: #f59e0b !important;
+    color: var(--artdent-white) !important;
+}
+
+.badge-danger, .badge.bg-danger {
+    background-color: #ef4444 !important;
+    color: var(--artdent-white) !important;
+}
+
+/* --- Tarjetas y Elevación --- */
+.card {
+    border-radius: 12px;
+    border: 1px solid var(--artdent-border);
+    background-color: var(--artdent-white);
+    box-shadow: var(--artdent-shadow-sm);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    box-shadow: var(--artdent-shadow-md);
+}
+
+.card-header {
+    background-color: var(--artdent-white);
+    border-bottom: 1px solid var(--artdent-border);
+    padding: 1rem 1.25rem;
+}
+
+.card-header-artdent {
+    background-color: var(--artdent-primary) !important;
+    color: var(--artdent-white) !important;
+    border-bottom: 3px solid var(--artdent-accent) !important;
+}
+
+.card-header-artdent h1, .card-header-artdent h2, 
+.card-header-artdent h3, .card-header-artdent h4, 
+.card-header-artdent h5, .card-header-artdent h6 {
+    color: var(--artdent-white) !important;
+}
+
+.card-kpi-artdent {
+    border: none;
+    border-radius: 12px;
+    box-shadow: var(--artdent-shadow-sm);
+    background: var(--artdent-white);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-kpi-artdent:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--artdent-shadow-lg);
+}
+
+/* --- Tablas Modernas Institucionales --- */
+.table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+}
+
+.table thead th, .table-artdent thead th {
+    background-color: #edf7fa !important;
+    color: var(--artdent-dark) !important;
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid var(--artdent-primary) !important;
+    padding: 0.875rem 1rem;
+}
+
+.table tbody tr td {
+    vertical-align: middle;
+    padding: 0.875rem 1rem;
+    border-bottom: 1px solid var(--artdent-border);
+}
+
+.table-hover tbody tr:hover td {
+    background-color: #f3fafc !important;
+}
+
+/* --- Alertas de Marca --- */
+.alert-artdent-info {
+    background-color: #eaf6fa;
+    border: 1px solid var(--artdent-primary);
+    color: var(--artdent-dark);
+    border-radius: 8px;
+}
+
+.alert-artdent-mint {
+    background-color: var(--artdent-mint-light);
+    border: 1px solid var(--artdent-mint);
+    color: var(--artdent-dark);
+    border-radius: 8px;
+}
+
+/* --- Utilidades Cromáticas Rápidas --- */
+.text-brand-primary { color: var(--artdent-primary) !important; }
+.text-brand-accent { color: var(--artdent-accent) !important; }
+.text-brand-mint { color: var(--artdent-mint) !important; }
+.text-brand-dark { color: var(--artdent-dark) !important; }
+
+.bg-brand-primary { background-color: var(--artdent-primary) !important; color: #fff !important; }
+.bg-brand-accent { background-color: var(--artdent-accent) !important; color: #fff !important; }
+.bg-brand-mint { background-color: var(--artdent-mint) !important; color: var(--artdent-dark) !important; }
+.bg-brand-dark { background-color: var(--artdent-dark) !important; color: #fff !important; }
+.bg-brand-light { background-color: var(--artdent-light-bg) !important; }
+
+.border-brand-primary { border-color: var(--artdent-primary) !important; }
+.border-brand-accent { border-color: var(--artdent-accent) !important; }
+.border-brand-mint { border-color: var(--artdent-mint) !important; }
+
+/* ==========================================================================
+   NAVEGACIÓN INSTITUCIONAL (Navbar y Sidebars)
+   ========================================================================== */
+
+/* Navbar Pública Superior */
+.artdent-navbar {
+    background-color: var(--artdent-white) !important;
+    box-shadow: 0 2px 10px rgba(33, 37, 41, 0.05);
+    border-bottom: 2px solid var(--artdent-primary);
+    padding: 0.6rem 1rem;
+}
+
+.artdent-navbar .nav-link {
+    color: var(--artdent-dark) !important;
+    font-weight: 600;
+    font-size: 0.95rem;
+    padding: 0.5rem 1rem !important;
+    transition: color 0.2s ease;
+}
+
+.artdent-navbar .nav-link:hover,
+.artdent-navbar .nav-link.active {
+    color: var(--artdent-primary) !important;
+}
+
+/* Barra Lateral Interna (Sidebar y ADMPSlidebar) */
+.sidebar, .admin-sidebar, #sidebarWrapper, .bg-gradient-primary {
+    background: var(--artdent-dark) !important;
+    background-color: var(--artdent-dark) !important;
+    background-image: none !important;
+}
+
+.sidebar .nav-item .nav-link,
+.admin-sidebar .nav-item .nav-link {
+    color: rgba(255, 255, 255, 0.85) !important;
+    font-weight: 500;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    margin: 0.2rem 0.5rem;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+}
+
+.sidebar .nav-item .nav-link i,
+.admin-sidebar .nav-item .nav-link i {
+    color: var(--artdent-primary) !important;
+    margin-right: 0.75rem;
+    font-size: 1.1rem;
+}
+
+.sidebar .nav-item .nav-link:hover,
+.admin-sidebar .nav-item .nav-link:hover {
+    color: var(--artdent-white) !important;
+    background-color: rgba(48, 164, 198, 0.15) !important;
+}
+
+.sidebar .nav-item .nav-link.active,
+.admin-sidebar .nav-item .nav-link.active {
+    color: var(--artdent-white) !important;
+    background-color: rgba(48, 164, 198, 0.25) !important;
+    border-left: 4px solid var(--artdent-accent) !important;
+    font-weight: 700;
+}
+
+.sidebar .sidebar-heading,
+.admin-sidebar .sidebar-heading {
+    color: var(--artdent-mint) !important;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 1rem 1rem 0.5rem 1rem;
+}
+
+.sidebar-divider {
+    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+    margin: 0.5rem 0;
+}
+
+/* ==========================================================================
+   ASISTENTE VIRTUAL CON IA (CHATBOT) - ESTILOS OFICIALES DE MARCA
+   ========================================================================== */
+.chatbot-toggler, #chat-circle, .btn-chat-toggle {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    width: 60px;
+    height: 60px;
+    background-color: var(--artdent-primary) !important;
+    border: none;
+    border-radius: 50%;
+    color: var(--artdent-white) !important;
+    font-size: 24px;
+    box-shadow: 0 6px 24px rgba(48, 164, 198, 0.4);
+    cursor: pointer;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.chatbot-toggler:hover, #chat-circle:hover {
+    background-color: var(--artdent-primary-hover) !important;
+    transform: scale(1.08);
+    box-shadow: 0 8px 28px rgba(48, 164, 198, 0.5);
+}
+
+.chatbot-window, .chat-box {
+    position: fixed;
+    bottom: 95px;
+    right: 25px;
+    width: 380px;
+    max-width: 90vw;
+    height: 520px;
+    max-height: 80vh;
+    background: var(--artdent-white);
+    border-radius: 16px;
+    box-shadow: 0 12px 40px rgba(33, 37, 41, 0.2);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 9999;
+    border: 1px solid var(--artdent-border);
+}
+
+.chatbot-header, .chat-box-header {
+    background: linear-gradient(135deg, var(--artdent-primary), var(--artdent-primary-hover));
+    color: var(--artdent-white);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.chatbot-header h5, .chat-box-header h5 {
+    color: var(--artdent-white) !important;
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+}
+
+.chat-logs, .chatbot-body {
+    flex: 1;
+    padding: 16px;
+    overflow-y: auto;
+    background-color: #f9fbfd;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.chat-msg-bot {
+    background-color: var(--artdent-white);
+    color: var(--artdent-dark);
+    padding: 12px 16px;
+    border-radius: 14px 14px 14px 2px;
+    max-width: 82%;
+    align-self: flex-start;
+    box-shadow: 0 2px 8px rgba(33, 37, 41, 0.05);
+    border-left: 3px solid var(--artdent-primary);
+    font-size: 0.92rem;
+}
+
+.chat-msg-user {
+    background-color: var(--artdent-primary);
+    color: var(--artdent-white);
+    padding: 12px 16px;
+    border-radius: 14px 14px 2px 14px;
+    max-width: 82%;
+    align-self: flex-end;
+    box-shadow: 0 2px 8px rgba(48, 164, 198, 0.25);
+    font-size: 0.92rem;
+}
+
+.chat-input-area {
+    padding: 12px 16px;
+    background-color: var(--artdent-white);
+    border-top: 1px solid var(--artdent-border);
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.chat-input-area input {
+    flex: 1;
+    border: 1px solid var(--artdent-border);
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    outline: none;
+}
+
+.chat-input-area input:focus {
+    border-color: var(--artdent-primary);
+}
+
+.chat-input-area button, .btn-chat-send {
+    background-color: var(--artdent-accent) !important;
+    border: none;
+    color: var(--artdent-white) !important;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.chat-input-area button:hover, .btn-chat-send:hover {
+    background-color: var(--artdent-accent-hover) !important;
+    transform: scale(1.05);
+}

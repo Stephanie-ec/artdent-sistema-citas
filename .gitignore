@@ -1,0 +1,10 @@
+
+# Configuraciones y credenciales
+src/main/resources/config.properties
+target/
+*.class
+.idea/
+*.iml
+.settings/
+.project
+.classpath
