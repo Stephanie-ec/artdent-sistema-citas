@@ -178,7 +178,8 @@ public class ReprogramacionController extends HttpServlet {
 
         // D-14: completar (Confirmado -> Completado) solo lo hace el Odontólogo (RF16);
         // aprobar o confirmar lo hace la Secretaria (RF14)
-        boolean completar = "Confirmado".equalsIgnoreCase(estadoActual);
+        boolean completar = "Confirmado".equalsIgnoreCase(estadoActual)
+                || String.valueOf(request.getParameter("accion")).startsWith("updateEstadoCompletado");
         if (!rolPermitido(request, completar)) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "Acción no permitida para su rol.");
             return;
@@ -247,7 +248,8 @@ public class ReprogramacionController extends HttpServlet {
         System.out.println("id " + idCita);
         System.out.println("estado " + estadoActual);
         // D-14: completar (Confirmado -> Completado) solo lo hace el Odontólogo (RF16)
-        boolean completar = "Confirmado".equalsIgnoreCase(estadoActual);
+        boolean completar = "Confirmado".equalsIgnoreCase(estadoActual)
+                || String.valueOf(request.getParameter("accion")).startsWith("updateEstadoCompletado");
         if (!rolPermitido(request, completar)) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "Acción no permitida para su rol.");
             return;

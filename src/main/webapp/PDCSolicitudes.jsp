@@ -244,7 +244,7 @@
                                                                     </form>
                                                                 </c:when>
 
-                                                                <c:when test="${reserva.estado == 'Confirmado'}">
+                                                                <c:when test="${reserva.estado == 'Confirmado' && sessionScope.TipoRol == 'Odontologo'}">
                                                                     <form action="ReprogramacionController" method="post" class="d-inline">
                                                                         <input type="hidden" name="idReserva" value="${reserva.idReserva}" />
                                                                         <input type="hidden" name="estado" value="${reserva.estado}" />
@@ -345,7 +345,7 @@
                                                                         <button class="btn btn-sm btn-primary rounded-pill px-3" type="submit">Confirmar</button>
                                                                     </form>
                                                                 </c:when>
-                                                                <c:when test="${cita.estado == 'Confirmado'}">
+                                                                <c:when test="${cita.estado == 'Confirmado' && sessionScope.TipoRol == 'Odontologo'}">
                                                                     <form action="ReprogramacionController" method="post" class="d-inline">
                                                                         <input type="hidden" name="idCita" value="${cita.idCita}" />
                                                                         <input type="hidden" name="estado" value="${cita.estado}" />
