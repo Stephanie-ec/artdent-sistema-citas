@@ -15,10 +15,10 @@ public class EmailService {
     private static final String SENDER_EMAIL = ConfigLoader.getProperty("mail.sender"); 
     private static final String SENDER_PASSWORD = ConfigLoader.getProperty("mail.password"); 
 
-    public static void sendEmail(String recipientEmail, String subject, String body) {
+    public static boolean sendEmail(String recipientEmail, String subject, String body) {
         if (recipientEmail == null || recipientEmail.isEmpty()) {
             System.err.println("Correo de destino inválido.");
-            return;
+            return false;
         }
 
         Properties props = new Properties();
@@ -45,10 +45,12 @@ public class EmailService {
 
             Transport.send(message);
             System.out.println("Correo enviado exitosamente a: " + recipientEmail);
+            return true;
 
         } catch (MessagingException e) {
             System.err.println("Error al enviar el correo a " + recipientEmail);
             e.printStackTrace();
+            return false;
         }
     }
 

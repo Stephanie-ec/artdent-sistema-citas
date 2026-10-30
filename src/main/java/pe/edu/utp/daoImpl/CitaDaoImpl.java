@@ -865,13 +865,17 @@ public class CitaDaoImpl implements CitaDao {
     }
 
     @Override
-    public int registrarNotificacion(String asunto, int idEstado, int idCita) {
-        String sql = "INSERT INTO Notificacion (Asunto, FechaEnvio, Enviado, Estado_idEstado, Cita_idCita) VALUES (?, NOW(), 1, ?, ?)";
+    public int registrarNotificacion(String asunto, int idEstado, int idCita, boolean enviado) {
+        String sql = "INSERT INTO Notificacion (Asunto, FechaEnvio, Enviado, Estado_idEstado, Cita_idCita) VALUES (?, NOW(), ?, ?, ?)";
+        if (asunto != null && asunto.length() > 100) {
+            asunto = asunto.substring(0, 100);
+        }
         try (Connection conn = Conexion.getConection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, asunto);
-            ps.setInt(2, idEstado);
-            ps.setInt(3, idCita);
+            ps.setInt(2, enviado ? 1 : 0);
+            ps.setInt(3, idEstado);
+            ps.setInt(4, idCita);
             return ps.executeUpdate();
         } catch (SQLException e) {
             System.err.println("Error al registrar notificación (RF09): " + e.getMessage());

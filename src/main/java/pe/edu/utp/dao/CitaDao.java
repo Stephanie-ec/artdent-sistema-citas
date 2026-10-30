@@ -53,5 +53,5 @@ public interface CitaDao {
 
     public int createCitaPresencial(Paciente p, Cita c, double importe, String descripcion, int idSecretaria);
 
-    public int registrarNotificacion(String asunto, int idEstado, int idCita);
+    public int registrarNotificacion(String asunto, int idEstado, int idCita, boolean enviado);
 }
