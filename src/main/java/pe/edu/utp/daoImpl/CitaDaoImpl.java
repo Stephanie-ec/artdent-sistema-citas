@@ -128,7 +128,7 @@ public class CitaDaoImpl implements CitaDao {
             System.out.println("No se pudo establecer conexión con la base de datos.");
             return 0;  // Retorna 0 si no hay conexión
         }
-        String sql = "SELECT idPaciente FROM paciente WHERE DNI = ?";
+        String sql = "SELECT idPaciente FROM Paciente WHERE DNI = ?";
         int idPaciente;
 
         try {
@@ -485,7 +485,7 @@ public class CitaDaoImpl implements CitaDao {
             System.out.println("No se pudo establecer conexión con la base de datos.");
             return 0;
         }
-        String SQL = "UPDATE cita SET Estado_idEstado = 6 WHERE idCita = ?";
+        String SQL = "UPDATE Cita SET Estado_idEstado = 6 WHERE idCita = ?";
         try {
             ps = cx.prepareStatement(SQL);
             ps.setInt(1, idCita);
@@ -590,7 +590,7 @@ public class CitaDaoImpl implements CitaDao {
             System.out.println("No se pudo establecer conexión con la base de datos.");
             return 0;
         }
-        String SQL = "UPDATE cita SET Estado_idEstado = ? WHERE idCita = ?";
+        String SQL = "UPDATE Cita SET Estado_idEstado = ? WHERE idCita = ?";
         int nuevoEstado;
         if ("Reprogramado".equalsIgnoreCase(estadoActual)) {
             nuevoEstado = 3;
@@ -634,7 +634,7 @@ public class CitaDaoImpl implements CitaDao {
             System.out.println("No se pudo establecer conexión con la base de datos.");
             return 0;
         }
-        String SQL = "UPDATE cita SET Estado_idEstado = 5 WHERE idCita = ?";
+        String SQL = "UPDATE Cita SET Estado_idEstado = 5 WHERE idCita = ?";
         try {
             ps = cx.prepareStatement(SQL);
             ps.setInt(1, idCita);
@@ -686,7 +686,7 @@ public class CitaDaoImpl implements CitaDao {
     @Override
     public int obtenerTotalCitasReservas() {
         int total = 0;
-        String sql = "SELECT (SELECT COUNT(idCita) FROM cita) + (SELECT COUNT(idReserva) FROM reserva) AS TotalContado";
+        String sql = "SELECT (SELECT COUNT(idCita) FROM Cita) + (SELECT COUNT(idReserva) FROM reserva) AS TotalContado";
         try (Connection conn = Conexion.getConection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             if (rs.next()) {
                 total = rs.getInt("TotalContado");
@@ -700,7 +700,7 @@ public class CitaDaoImpl implements CitaDao {
     @Override
     public String getEmailPacienteByCitaId(int idCita) {
         String correo = "";
-        String SQL = "SELECT p.Correo FROM cita c INNER JOIN paciente p ON c.Paciente_idPaciente = p.idPaciente WHERE c.idCita = ?";
+        String SQL = "SELECT p.Correo FROM Cita c INNER JOIN Paciente p ON c.Paciente_idPaciente = p.idPaciente WHERE c.idCita = ?";
         try (Connection conn = Conexion.getConection(); PreparedStatement ps = conn.prepareStatement(SQL)) {
             ps.setInt(1, idCita);
             try (ResultSet rs = ps.executeQuery()) {

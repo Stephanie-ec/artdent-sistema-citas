@@ -55,7 +55,7 @@ public class ServicioDaoImpl implements ServicioDao {
     @Override
     public Servicio ListService(int id) {
         Servicio ser = new Servicio(); // Aquí se crea una nueva instancia de Servicio para cada llamada
-        String SQL = "SELECT * FROM servicio WHERE IdServicio = ?";
+        String SQL = "SELECT * FROM Servicio WHERE IdServicio = ?";
         try {
             cx = Conexion.getConection();
             ps = cx.prepareStatement(SQL);
@@ -78,7 +78,7 @@ public class ServicioDaoImpl implements ServicioDao {
     @Override
     public List<Servicio> listarServicios() {
         List<Servicio> servicios = new ArrayList<>();
-        String SQL = "SELECT idServicio, TipoServicio, Costo, img FROM servicio WHERE Activo = 1";
+        String SQL = "SELECT idServicio, TipoServicio, Costo, img FROM Servicio WHERE Activo = 1";
 
         try {
             cx = Conexion.getConection();
@@ -102,7 +102,7 @@ public class ServicioDaoImpl implements ServicioDao {
     @Override
     public List<Servicio> listarTodosLosServicios() {
         List<Servicio> servicios = new ArrayList<>();
-        String SQL = "SELECT idServicio, TipoServicio, Lema, Descripcion, Respuesta, Costo, img, Activo FROM servicio ORDER BY idServicio ASC";
+        String SQL = "SELECT idServicio, TipoServicio, Lema, Descripcion, Respuesta, Costo, img, Activo FROM Servicio ORDER BY idServicio ASC";
 
         try {
             cx = Conexion.getConection();
@@ -215,7 +215,7 @@ public class ServicioDaoImpl implements ServicioDao {
 
     @Override
     public boolean reactivarServicio(int id) {
-        String SQL = "UPDATE servicio SET Activo = 1 WHERE idServicio = ?";
+        String SQL = "UPDATE Servicio SET Activo = 1 WHERE idServicio = ?";
         boolean resultado = false;
         try {
             cx = Conexion.getConection();

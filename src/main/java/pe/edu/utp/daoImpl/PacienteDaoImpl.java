@@ -15,7 +15,7 @@ public class PacienteDaoImpl implements PacienteDao {
     @Override
     public Paciente obtenerPacientePorDNI(String dni) {
         Paciente paciente = null;
-        String SQL = "SELECT * FROM paciente WHERE DNI = ?";
+        String SQL = "SELECT * FROM Paciente WHERE DNI = ?";
         try (Connection cx = Conexion.getConection();
              PreparedStatement ps = cx.prepareStatement(SQL)) {
             ps.setString(1, dni);
@@ -39,7 +39,7 @@ public class PacienteDaoImpl implements PacienteDao {
     @Override
     public Paciente obtenerPacientePorId(int id) {
         Paciente paciente = null;
-        String SQL = "SELECT * FROM paciente WHERE idPaciente = ?";
+        String SQL = "SELECT * FROM Paciente WHERE idPaciente = ?";
         try (Connection cx = Conexion.getConection();
              PreparedStatement ps = cx.prepareStatement(SQL)) {
             ps.setInt(1, id);
@@ -63,7 +63,7 @@ public class PacienteDaoImpl implements PacienteDao {
     @Override
     public List<Paciente> listarPacientes() {
         List<Paciente> lista = new ArrayList<>();
-        String SQL = "SELECT * FROM paciente ORDER BY idPaciente DESC";
+        String SQL = "SELECT * FROM Paciente ORDER BY idPaciente DESC";
         try (Connection cx = Conexion.getConection();
              PreparedStatement ps = cx.prepareStatement(SQL);
              ResultSet rs = ps.executeQuery()) {
@@ -86,7 +86,7 @@ public class PacienteDaoImpl implements PacienteDao {
     @Override
     public List<Paciente> buscarPacientes(String criterio) {
         List<Paciente> lista = new ArrayList<>();
-        String SQL = "SELECT * FROM paciente WHERE DNI LIKE ? OR Nombre LIKE ? OR Apellido LIKE ? ORDER BY idPaciente DESC";
+        String SQL = "SELECT * FROM Paciente WHERE DNI LIKE ? OR Nombre LIKE ? OR Apellido LIKE ? ORDER BY idPaciente DESC";
         try (Connection cx = Conexion.getConection();
              PreparedStatement ps = cx.prepareStatement(SQL)) {
             String patron = "%" + criterio + "%";
@@ -113,7 +113,7 @@ public class PacienteDaoImpl implements PacienteDao {
 
     @Override
     public boolean registrarPaciente(Paciente p) {
-        String SQL = "INSERT INTO paciente (Nombre, Apellido, DNI, Telefono, Correo) VALUES (?, ?, ?, ?, ?)";
+        String SQL = "INSERT INTO Paciente (Nombre, Apellido, DNI, Telefono, Correo) VALUES (?, ?, ?, ?, ?)";
         try (Connection cx = Conexion.getConection();
              PreparedStatement ps = cx.prepareStatement(SQL)) {
             ps.setString(1, p.getNombre());
@@ -130,7 +130,7 @@ public class PacienteDaoImpl implements PacienteDao {
 
     @Override
     public boolean actualizarPaciente(Paciente p) {
-        String SQL = "UPDATE paciente SET Nombre = ?, Apellido = ?, Telefono = ?, Correo = ? WHERE idPaciente = ?";
+        String SQL = "UPDATE Paciente SET Nombre = ?, Apellido = ?, Telefono = ?, Correo = ? WHERE idPaciente = ?";
         try (Connection cx = Conexion.getConection();
              PreparedStatement ps = cx.prepareStatement(SQL)) {
             ps.setString(1, p.getNombre());
