@@ -61,7 +61,14 @@ public class PagoController extends HttpServlet {
             throws ServletException, IOException {
         try {
             int idCita = Integer.parseInt(request.getParameter("idCita"));
-            double monto = Double.parseDouble(request.getParameter("monto"));
+            // D-11: el monto se calcula en el servidor desde Servicio.Costo, no se toma del formulario
+            Double costo = pagoDao.obtenerCostoServicioPorCita(idCita);
+            if (costo == null) {
+                request.setAttribute("error", "No se encontró la cita indicada.");
+                request.getRequestDispatcher("error.jsp").forward(request, response);
+                return;
+            }
+            double monto = costo;
             String nombreCliente = request.getParameter("nombreCliente");
             String dniCliente = request.getParameter("dniCliente");
 
@@ -102,7 +109,14 @@ public class PagoController extends HttpServlet {
             throws ServletException, IOException {
         try {
             int idCita = Integer.parseInt(request.getParameter("idCita"));
-            double monto = Double.parseDouble(request.getParameter("monto"));
+            // D-11: el monto se calcula en el servidor desde Servicio.Costo, no se toma del formulario
+            Double costo = pagoDao.obtenerCostoServicioPorCita(idCita);
+            if (costo == null) {
+                request.setAttribute("error", "No se encontró la cita indicada.");
+                request.getRequestDispatcher("error.jsp").forward(request, response);
+                return;
+            }
+            double monto = costo;
             String nombreCliente = request.getParameter("nombreCliente");
             String dniCliente = request.getParameter("dniCliente");
             String codigoReserva = request.getParameter("codigoReserva");

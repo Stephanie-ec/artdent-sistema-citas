@@ -215,6 +215,12 @@ public class ReservaController extends HttpServlet {
             }
         }
 
+        // D-11: el importe se toma del costo vigente del servicio, no del formulario
+        Servicio servicioSel = servicioDAO.obtenerServicioPorId(idServicio);
+        if (servicioSel != null && servicioSel.getCosto() != null) {
+            precio_servicio = servicioSel.getCosto().doubleValue();
+        }
+
         int id_odontologo = 4;
         String medicoStr = request.getParameter("medico");
         if (medicoStr != null && !medicoStr.trim().isEmpty()) {
