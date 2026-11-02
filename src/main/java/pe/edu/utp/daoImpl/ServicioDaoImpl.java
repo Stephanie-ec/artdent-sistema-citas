@@ -228,33 +228,37 @@ public class ServicioDaoImpl implements ServicioDao {
         return resultado;
     }
 
+    /**
+     * Imagen del servicio. Los servicios conocidos usan ilustraciones locales
+     * (img/servicios); antes se usaban enlaces externos que mostraban fotos ajenas
+     * a la odontología. Un servicio nuevo usa la URL registrada por el administrador
+     * o, si no tiene, una ilustración genérica.
+     */
     private String obtenerImagenValida(String tipo, String imgActual) {
         String t = tipo != null ? tipo.toLowerCase().trim() : "";
+        String base = "img/servicios/";
 
         if (t.contains("blanqueamiento")) {
-            return "https://img.freepik.com/foto-gratis/primer-plano-mujer-dientes-blancos-perfectos_186202-4573.jpg";
+            return base + "blanqueamiento.png";
         } else if (t.contains("caries")) {
-            return "https://img.freepik.com/foto-gratis/dentista-examinando-dientes-paciente-femenino-espejo-bucal_23-2149176709.jpg";
+            return base + "caries.png";
         } else if (t.contains("endodoncia")) {
-            return "https://img.freepik.com/foto-gratis/dentista-tratando-paciente-clinica_23-2149176729.jpg";
+            return base + "endodoncia.png";
         } else if (t.contains("prótesis") || t.contains("protesis")) {
-            return "https://img.freepik.com/foto-gratis/dentista-sosteniendo-protesis-dental_23-2149176719.jpg";
+            return base + "protesis.png";
         } else if (t.contains("cirug")) {
-            return "https://img.freepik.com/foto-gratis/medico-examinando-dientes-paciente-femenino-usando-herramientas-dentales_23-2149176721.jpg";
+            return base + "cirugia.png";
         } else if (t.contains("ortodoncia")) {
-            return "https://img.freepik.com/foto-gratis/paciente-femenina-que-muestra-sus-nuevos-frenillos-dental-clinica_23-2149301072.jpg";
-        } else if (t.contains("2.0")) {
-            return "https://img.freepik.com/foto-gratis/dentista-realizando-higiene-bucal-paciente_23-2149176715.jpg";
+            return base + "ortodoncia.png";
         } else if (t.contains("limpieza")) {
-            return "https://img.freepik.com/foto-gratis/primer-plano-dentista-limpiando-dientes-paciente_23-2149176713.jpg";
+            return base + "limpieza.png";
+        } else if (t.contains("carilla")) {
+            return base + "carillas.png";
         }
 
-        if (imgActual != null && !imgActual.trim().isEmpty() && imgActual.startsWith("http")
-                && !imgActual.contains("aenor.com") && !imgActual.contains("placeholder")
-                && !imgActual.contains("photo-1629909613654")) {
-            return imgActual;
+        if (imgActual != null && imgActual.trim().startsWith("http") && !imgActual.contains("freepik")) {
+            return imgActual.trim();
         }
-
-        return "https://img.freepik.com/foto-gratis/primer-plano-dentista-limpiando-dientes-paciente_23-2149176713.jpg";
+        return base + "generico.png";
     }
 }
