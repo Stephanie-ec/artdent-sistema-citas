@@ -219,19 +219,44 @@ public class ReservaController extends HttpServlet {
             precio_servicio = servicioSel.getCosto().doubleValue();
         }
 
-        int id_odontologo = 4;
+        // Datos de Reserva
+        String fecha = request.getParameter("fecha");
+        String hora = request.getParameter("hora");
+
+        // RF12: el odontólogo debe atender ese servicio y estar disponible en esa fecha y hora.
+        // Si el paciente no eligió uno, se asigna el primero disponible (antes se usaba siempre el id 4).
+        int id_odontologo = 0;
         String medicoStr = request.getParameter("medico");
         if (medicoStr != null && !medicoStr.trim().isEmpty()) {
             try {
                 id_odontologo = Integer.parseInt(medicoStr.trim());
             } catch (NumberFormatException e) {
-                id_odontologo = 4;
+                id_odontologo = 0;
             }
         }
+        List<pe.edu.utp.entity.Usuario> disponibles = new ArrayList<>();
+        try {
+            disponibles = new pe.edu.utp.daoImpl.UsuarioDaoImpl().obtenerMedicosPorServicioYDisponibilidad(
+                    idServicio, LocalDate.parse(fecha), java.time.LocalTime.parse(hora.length() > 5 ? hora.substring(0, 5) : hora));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        boolean elegidoDisponible = false;
+        for (pe.edu.utp.entity.Usuario u : disponibles) {
+            if (u.getIdUsuario() == id_odontologo) {
+                elegidoDisponible = true;
+                break;
+            }
+        }
+        if (!elegidoDisponible) {
+            if (disponibles.isEmpty()) {
+                request.setAttribute("error", "No hay un odontólogo disponible para ese servicio en la fecha y hora elegidas. Por favor, elija otro horario.");
+                request.getRequestDispatcher("error.jsp").forward(request, response);
+                return;
+            }
+            id_odontologo = disponibles.get(0).getIdUsuario();
+        }
 
-        // Datos de Reserva
-        String fecha = request.getParameter("fecha");
-        String hora = request.getParameter("hora");
         String descripcion = request.getParameter("descripcion");
         if (descripcion == null || descripcion.trim().isEmpty()) {
             descripcion = "Reserva Web - En espera";
