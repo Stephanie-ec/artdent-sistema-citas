@@ -47,6 +47,10 @@ public interface CitaDao {
 
     public int obtenerTotalCitasReservas();
 
+    public int contarPacientes();
+
+    public int contarEnEspera();
+
     public String getEmailPacienteByCitaId(int idCita);
 
     public int createReservaWeb(Paciente p, Cita c, double importe, String descripcion);

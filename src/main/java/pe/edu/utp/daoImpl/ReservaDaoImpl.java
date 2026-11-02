@@ -763,7 +763,7 @@ public class ReservaDaoImpl implements ReservaDao {
     @Override
     public double obtenerTotalIngresos() {
         double total = 0.0;
-        String sql = "SELECT (SELECT SUM(Costo) FROM Servicio WHERE idServicio IN (SELECT Servicio_idServicio FROM Cita)) + (SELECT SUM(importe) FROM reserva) AS Total";
+        String sql = "SELECT IFNULL(SUM(Monto), 0) AS Total FROM Pago"; // ingresos = pagos realmente registrados
         try (Connection conn = Conexion.getConection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             if (rs.next()) {
                 total = rs.getDouble("Total");

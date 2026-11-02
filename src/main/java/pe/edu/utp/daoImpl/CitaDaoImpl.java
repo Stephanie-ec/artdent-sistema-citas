@@ -684,9 +684,28 @@ public class CitaDaoImpl implements CitaDao {
     }
     
     @Override
+    public int contarPacientes() {
+        return contar("SELECT COUNT(*) FROM Paciente");
+    }
+
+    @Override
+    public int contarEnEspera() {
+        return contar("SELECT COUNT(*) FROM Cita c INNER JOIN Estado e ON c.Estado_idEstado = e.idEstado WHERE e.TipoEstado = 'En espera'");
+    }
+
+    private int contar(String sql) {
+        try (Connection conn = Conexion.getConection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+            return rs.next() ? rs.getInt(1) : 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
+    @Override
     public int obtenerTotalCitasReservas() {
         int total = 0;
-        String sql = "SELECT (SELECT COUNT(idCita) FROM Cita) + (SELECT COUNT(idReserva) FROM reserva) AS TotalContado";
+        String sql = "SELECT COUNT(*) AS TotalContado FROM Cita"; // reserva es una vista de Cita: no sumar dos veces
         try (Connection conn = Conexion.getConection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             if (rs.next()) {
                 total = rs.getInt("TotalContado");

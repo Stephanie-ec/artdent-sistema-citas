@@ -96,7 +96,7 @@
                                 <div class="d-flex align-items-center justify-content-between">
                                     <div>
                                         <div class="text-muted small fw-bold text-uppercase mb-1">Pacientes Totales</div>
-                                        <h3 class="fw-bold mb-0 text-dark">1,200</h3>
+                                        <h3 class="fw-bold mb-0 text-dark">${totalPacientes}</h3>
                                     </div>
                                     <div class="rounded-circle d-flex align-items-center justify-content-center p-3" style="background-color: rgba(180, 221, 194, 0.3); width: 50px; height: 50px;">
                                         <i class="bi bi-people-fill fs-4" style="color: var(--artdent-primary);"></i>
@@ -112,7 +112,7 @@
                                 <div class="d-flex align-items-center justify-content-between">
                                     <div>
                                         <div class="text-muted small fw-bold text-uppercase mb-1">En Espera / Pendientes</div>
-                                        <h3 class="fw-bold mb-0 text-dark">18</h3>
+                                        <h3 class="fw-bold mb-0 text-dark">${totalEnEspera}</h3>
                                     </div>
                                     <div class="rounded-circle d-flex align-items-center justify-content-center p-3" style="background-color: rgba(33, 37, 41, 0.1); width: 50px; height: 50px;">
                                         <i class="bi bi-hourglass-split fs-4" style="color: var(--artdent-dark);"></i>
