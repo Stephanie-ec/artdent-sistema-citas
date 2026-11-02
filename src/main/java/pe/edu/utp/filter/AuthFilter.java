@@ -120,10 +120,11 @@ public class AuthFilter implements Filter {
         boolean secretaria = SECRETARIA.equalsIgnoreCase(rol);
         boolean odontologo = ODONTOLOGO.equalsIgnoreCase(rol);
 
-        // Funciones exclusivas del Administrador
+        // Funciones exclusivas del Administrador (incluye reportes, RF08)
         if (ruta.startsWith("/ADMP") || ruta.equals("/UsuarioController") || ruta.equals("/DashboardController")
                 || ruta.equals("/ServicioController") || ruta.equals("/MenuController")
-                || ruta.startsWith("/resources")) {
+                || ruta.startsWith("/resources") || ruta.equals("/ReporteController")
+                || ruta.equals("/PDCReportes.jsp")) {
             return admin;
         }
         // Registro de pago en efectivo: Secretaria (o Administrador)
