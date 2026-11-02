@@ -91,6 +91,16 @@
                 </div>
             </c:if>
 
+            <c:if test="${param.msg == 'canceladoOk'}">
+                <div class="alert alert-secondary alert-dismissible fade show d-flex align-items-center mb-3" role="alert">
+                    <i class="bi bi-ban fs-4 me-2"></i>
+                    <div>
+                        <strong>Cita cancelada:</strong> el estado cambió a <strong>Cancelado</strong> y se notificó al paciente.
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </c:if>
+
             <!-- Barra de Acciones y Filtros -->
             <div class="card p-3 mb-4 border-0 shadow-sm" style="border-radius: 12px; background: #ffffff;">
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
@@ -263,14 +273,16 @@
                                                                 </button>
                                                             </form>
 
-                                                            <!-- Cancelar -->
-                                                            <form action="ReprogramacionController" method="post" class="d-inline">
+                                                            <!-- Cancelar: solo citas vigentes y con confirmación -->
+                                                            <c:if test="${reserva.estado == 'En espera' || reserva.estado == 'Confirmado' || reserva.estado == 'Reprogramado'}">
+                                                            <form action="ReprogramacionController" method="post" class="d-inline" onsubmit="return confirm('¿Cancelar esta reserva? Se notificará al paciente.');">
                                                                 <input type="hidden" name="idReserva" value="${reserva.idReserva}" />
                                                                 <input type="hidden" name="accion" value="updateEstadoCancelar" />
-                                                                <button class="btn btn-sm btn-outline-secondary rounded-pill ${sessionScope.TipoRol == 'Odontologo' ? 'd-none' : ''}" type="submit" title="Cancelar cita">
+                                                                <button class="btn btn-sm btn-outline-secondary rounded-pill ${sessionScope.TipoRol == 'Odontologo' ? 'd-none' : ''}" type="submit" title="Cancelar reserva">
                                                                     <i class="bi bi-ban"></i>
                                                                 </button>
                                                             </form>
+                                                            </c:if>
                                                         </c:otherwise>
                                                     </c:choose>
                                                 </div>
@@ -361,13 +373,15 @@
                                                                     <i class="bi bi-calendar2-range"></i>
                                                                 </button>
                                                             </form>
-                                                            <form action="ReprogramacionController" method="post" class="d-inline">
+                                                            <c:if test="${cita.estado == 'En espera' || cita.estado == 'Confirmado' || cita.estado == 'Reprogramado'}">
+                                                            <form action="ReprogramacionController" method="post" class="d-inline" onsubmit="return confirm('¿Cancelar esta cita? Se notificará al paciente.');">
                                                                 <input type="hidden" name="idCita" value="${cita.idCita}" />
                                                                 <input type="hidden" name="accion" value="updateEstadoCanceladoCita" />
-                                                                <button class="btn btn-sm btn-outline-secondary rounded-pill ${sessionScope.TipoRol == 'Odontologo' ? 'd-none' : ''}" type="submit">
+                                                                <button class="btn btn-sm btn-outline-secondary rounded-pill ${sessionScope.TipoRol == 'Odontologo' ? 'd-none' : ''}" type="submit" title="Cancelar cita">
                                                                     <i class="bi bi-ban"></i>
                                                                 </button>
                                                             </form>
+                                                            </c:if>
                                                         </c:otherwise>
                                                     </c:choose>
                                                 </div>
