@@ -55,6 +55,12 @@ public class ReprogramacionController extends HttpServlet {
 
         String accion = request.getParameter("accion");
 
+        // Reprogramar es función de la Secretaria (CU-03)
+        if (("VerReproRe".equals(accion) || "VerReproCi".equals(accion)) && !rolPermitido(request, false)) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Acción no permitida para su rol.");
+            return;
+        }
+
         try {
             if ("VerReproRe".equals(accion)) {
                 ReproRe(request, response);
@@ -93,6 +99,14 @@ public class ReprogramacionController extends HttpServlet {
             throws ServletException, IOException {
 
         String accion = request.getParameter("accion");
+
+        // Completar es del Odontólogo; reprogramar, cancelar, rechazar y eliminar son de la Secretaria
+        boolean completar = accion != null && accion.startsWith("updateEstadoCompletado");
+        if (!rolPermitido(request, completar)) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Acción no permitida para su rol.");
+            return;
+        }
+
         try {
             if ("UpdateReserva".equals(accion)) {
                 UpdateReserva(request, response);
