@@ -21,7 +21,7 @@ import pe.edu.utp.entity.VerCita;
 import pe.edu.utp.entity.VerReserva;
 import pe.edu.utp.dao.PagoDao;
 import pe.edu.utp.daoImpl.PagoDaoImpl;
-import pe.edu.utp.utils.EmailService;
+import pe.edu.utp.utils.NotificacionService;
 
 /**
  *
@@ -54,6 +54,12 @@ public class ReprogramacionController extends HttpServlet {
             throws ServletException, IOException {
 
         String accion = request.getParameter("accion");
+
+        // Reprogramar es función de la Secretaria (CU-03)
+        if (("VerReproRe".equals(accion) || "VerReproCi".equals(accion)) && !rolPermitido(request, false)) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Acción no permitida para su rol.");
+            return;
+        }
 
         try {
             if ("VerReproRe".equals(accion)) {
@@ -93,6 +99,14 @@ public class ReprogramacionController extends HttpServlet {
             throws ServletException, IOException {
 
         String accion = request.getParameter("accion");
+
+        // Completar es del Odontólogo; reprogramar, cancelar, rechazar y eliminar son de la Secretaria
+        boolean completar = accion != null && accion.startsWith("updateEstadoCompletado");
+        if (!rolPermitido(request, completar)) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Acción no permitida para su rol.");
+            return;
+        }
+
         try {
             if ("UpdateReserva".equals(accion)) {
                 UpdateReserva(request, response);
@@ -139,14 +153,10 @@ public class ReprogramacionController extends HttpServlet {
         int resultado = citaDao.updateCita(idCita, nuevaFecha, nuevaHora);
 
         if (resultado > 0) {
-            // RF03 / RF09: Registrar notificación de reprogramación
-            citaDao.registrarNotificacion("Cita Reprogramada", 4, idCita);
-
+            // RF03 / RF09: correo y registro de la notificación de reprogramación
             String correo = citaDao.getEmailPacienteByCitaId(idCita);
-            if (correo != null && !correo.isEmpty()) {
-                EmailService.sendEmail(correo, "Cita Reprogramada - ArtDent", 
+            NotificacionService.notificar(idCita, 4, "Cita Reprogramada", correo,
                     "Estimado paciente, su cita ha sido reprogramada para la fecha: " + nuevaFecha + " a las " + nuevaHora + ".");
-            }
             request.getRequestDispatcher("PDCCalendario.jsp").forward(request, response); // Redirige a la página principal
         } else {
             // Si hubo un error en la actualización
@@ -166,10 +176,8 @@ public class ReprogramacionController extends HttpServlet {
 
         if (resultado > 0) {
             String correo = reservaDao.getEmailPacienteByReservaId(idReserva);
-            if (correo != null && !correo.isEmpty()) {
-                EmailService.sendEmail(correo, "Reserva Reprogramada - ArtDent", 
+            NotificacionService.notificar(idReserva, 4, "Reserva Reprogramada", correo,
                     "Estimado paciente, su reserva ha sido reprogramada para la fecha: " + nuevaFecha + " a las " + nuevaHora + ".");
-            }
             request.getRequestDispatcher("PDCCalendario.jsp").forward(request, response); // Redirige a la página principal
         } else {
             request.getRequestDispatcher("error.jsp").forward(request, response); // Redirige a la página de error
@@ -181,6 +189,15 @@ public class ReprogramacionController extends HttpServlet {
         String estadoActual = request.getParameter("estado");
         System.out.println("id " + idReserva);
         System.out.println("estado " + estadoActual);
+
+        // D-14: completar (Confirmado -> Completado) solo lo hace el Odontólogo (RF16);
+        // aprobar o confirmar lo hace la Secretaria (RF14)
+        boolean completar = "Confirmado".equalsIgnoreCase(estadoActual)
+                || String.valueOf(request.getParameter("accion")).startsWith("updateEstadoCompletado");
+        if (!rolPermitido(request, completar)) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Acción no permitida para su rol.");
+            return;
+        }
 
         // RF14: Solo puede aprobar una reserva web que tenga un pago registrado previamente
         if ("En espera".equalsIgnoreCase(estadoActual)) {
@@ -194,20 +211,17 @@ public class ReprogramacionController extends HttpServlet {
         ReservaDao reservaDao = new ReservaDaoImpl();
         int resultado = reservaDao.updateEstadoReserv(idReserva, estadoActual);
         if (resultado > 0) {
-            // RF09: Registrar notificación de aprobación si venía de En espera
-            CitaDao citaDao = new CitaDaoImpl();
-            if ("En espera".equalsIgnoreCase(estadoActual)) {
-                citaDao.registrarNotificacion("Reserva Web Aprobada", 3, idReserva);
-            }
+            // RF09: correo y registro de la notificación con el resultado real del envío
             String correo = reservaDao.getEmailPacienteByReservaId(idReserva);
-            if (correo != null && !correo.isEmpty()) {
-                String asunto = "En espera".equalsIgnoreCase(estadoActual) 
-                    ? "Reserva Web Confirmada - ArtDent" 
-                    : "Actualización de Reserva - ArtDent";
-                String mensaje = "En espera".equalsIgnoreCase(estadoActual)
-                    ? "Estimado paciente, su reserva web ha sido APROBADA y confirmada por la secretaría tras verificar su pago."
-                    : "Estimado paciente, el estado de su reserva ha cambiado a: " + estadoActual + ".";
-                EmailService.sendEmail(correo, asunto, mensaje);
+            if (completar) {
+                NotificacionService.notificar(idReserva, 2, "Atención Completada", correo,
+                        "Estimado paciente, su atención en el Centro Odontológico ArtDent ha sido registrada como completada. Gracias por su visita.");
+            } else if ("En espera".equalsIgnoreCase(estadoActual)) {
+                NotificacionService.notificar(idReserva, 3, "Reserva Web Confirmada", correo,
+                        "Estimado paciente, su reserva web ha sido APROBADA y confirmada por la secretaría tras verificar su pago.");
+            } else {
+                NotificacionService.notificar(idReserva, 3, "Reserva Confirmada", correo,
+                        "Estimado paciente, su reserva ha sido confirmada.");
             }
             String rol = (request.getSession() != null && request.getSession().getAttribute("TipoRol") != null) 
                     ? request.getSession().getAttribute("TipoRol").toString() : "";
@@ -232,15 +246,10 @@ public class ReprogramacionController extends HttpServlet {
         ReservaDao reservaDao = new ReservaDaoImpl();
         int resultado = reservaDao.rechazarReserva(idReserva);
         if (resultado > 0) {
-            // RF09: Notificación automática registrada en tabla Notificacion (estado 6 = Rechazado)
-            CitaDao citaDao = new CitaDaoImpl();
-            citaDao.registrarNotificacion("Reserva Rechazada: " + motivo, 6, idReserva);
-
+            // RF09: correo y registro de la notificación (estado 6 = Rechazado)
             String correo = reservaDao.getEmailPacienteByReservaId(idReserva);
-            if (correo != null && !correo.isEmpty()) {
-                EmailService.sendEmail(correo, "Reserva Rechazada - ArtDent", 
+            NotificacionService.notificar(idReserva, 6, "Reserva Rechazada", correo,
                     "Estimado paciente, lamentamos informarle que su reserva web ha sido rechazada por el siguiente motivo: " + motivo + ".");
-            }
             response.sendRedirect("ReservaController?accion=listar&msg=rechazadoOk");
         } else {
             request.getRequestDispatcher("error.jsp").forward(request, response);
@@ -252,15 +261,23 @@ public class ReprogramacionController extends HttpServlet {
         String estadoActual = request.getParameter("estado");
         System.out.println("id " + idCita);
         System.out.println("estado " + estadoActual);
+        // D-14: completar (Confirmado -> Completado) solo lo hace el Odontólogo (RF16)
+        boolean completar = "Confirmado".equalsIgnoreCase(estadoActual)
+                || String.valueOf(request.getParameter("accion")).startsWith("updateEstadoCompletado");
+        if (!rolPermitido(request, completar)) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Acción no permitida para su rol.");
+            return;
+        }
         CitaDao CitaDao = new CitaDaoImpl();
         int resultado = CitaDao.updateEstadoCita(idCita, estadoActual);
         if (resultado > 0) {
-            int nuevoEstado = "Confirmado".equalsIgnoreCase(estadoActual) ? 2 : 3;
-            CitaDao.registrarNotificacion("Actualización de Cita: " + estadoActual, nuevoEstado, idCita);
             String correo = CitaDao.getEmailPacienteByCitaId(idCita);
-            if (correo != null && !correo.isEmpty()) {
-                EmailService.sendEmail(correo, "Actualización de Cita - ArtDent", 
-                    "Estimado paciente, el estado de su cita ha cambiado a: " + estadoActual + ".");
+            if (completar) {
+                NotificacionService.notificar(idCita, 2, "Atención Completada", correo,
+                        "Estimado paciente, su atención en el Centro Odontológico ArtDent ha sido registrada como completada. Gracias por su visita.");
+            } else {
+                NotificacionService.notificar(idCita, 3, "Cita Confirmada", correo,
+                        "Estimado paciente, su cita ha sido confirmada.");
             }
             String rol = (request.getSession() != null && request.getSession().getAttribute("TipoRol") != null) 
                     ? request.getSession().getAttribute("TipoRol").toString() : "";
@@ -281,10 +298,8 @@ public class ReprogramacionController extends HttpServlet {
         int resultado = reservaDao.updateEstadoCancelado(idReserva);
         if (resultado > 0) {
             String correo = reservaDao.getEmailPacienteByReservaId(idReserva);
-            if (correo != null && !correo.isEmpty()) {
-                EmailService.sendEmail(correo, "Reserva Cancelada - ArtDent", 
+            NotificacionService.notificar(idReserva, 5, "Reserva Cancelada", correo,
                     "Estimado paciente, su reserva ha sido cancelada.");
-            }
             request.getRequestDispatcher("PDCCalendario.jsp").forward(request, response);
         } else {
             request.getRequestDispatcher("error.jsp").forward(request, response);
@@ -297,14 +312,10 @@ public class ReprogramacionController extends HttpServlet {
         CitaDao CitaDao = new CitaDaoImpl();
         int resultado = CitaDao.updateEstadoCitaCancelado(idCita);
         if (resultado > 0) {
-            // RF03 / RF09: Registrar notificación de cancelación
-            CitaDao.registrarNotificacion("Cita Cancelada", 5, idCita);
-
+            // RF03 / RF09: correo y registro de la notificación de cancelación
             String correo = CitaDao.getEmailPacienteByCitaId(idCita);
-            if (correo != null && !correo.isEmpty()) {
-                EmailService.sendEmail(correo, "Cita Cancelada - ArtDent", 
+            NotificacionService.notificar(idCita, 5, "Cita Cancelada", correo,
                     "Estimado paciente, su cita ha sido cancelada.");
-            }
             request.getRequestDispatcher("PDCCalendario.jsp").forward(request, response);
         } else {
             request.getRequestDispatcher("error.jsp").forward(request, response);
@@ -341,4 +352,17 @@ public class ReprogramacionController extends HttpServlet {
         return "Short description";
     }// </editor-fold>
 
+
+    /**
+     * D-14: completar una atención es exclusivo del Odontólogo; aprobar, confirmar
+     * o reprogramar corresponde a la Secretaria (o al Administrador).
+     */
+    private boolean rolPermitido(HttpServletRequest request, boolean completar) {
+        Object rolObj = request.getSession(false) != null ? request.getSession(false).getAttribute("TipoRol") : null;
+        String rol = rolObj != null ? rolObj.toString() : "";
+        if (completar) {
+            return rol.equalsIgnoreCase("Odontologo");
+        }
+        return rol.equalsIgnoreCase("Secretaria") || rol.equalsIgnoreCase("Administrador");
+    }
 }

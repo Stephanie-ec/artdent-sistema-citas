@@ -128,7 +128,7 @@ public class CitaDaoImpl implements CitaDao {
             System.out.println("No se pudo establecer conexión con la base de datos.");
             return 0;  // Retorna 0 si no hay conexión
         }
-        String sql = "SELECT idPaciente FROM paciente WHERE DNI = ?";
+        String sql = "SELECT idPaciente FROM Paciente WHERE DNI = ?";
         int idPaciente;
 
         try {
@@ -485,7 +485,7 @@ public class CitaDaoImpl implements CitaDao {
             System.out.println("No se pudo establecer conexión con la base de datos.");
             return 0;
         }
-        String SQL = "UPDATE cita SET Estado_idEstado = 6 WHERE idCita = ?";
+        String SQL = "UPDATE Cita SET Estado_idEstado = 6 WHERE idCita = ?";
         try {
             ps = cx.prepareStatement(SQL);
             ps.setInt(1, idCita);
@@ -590,7 +590,7 @@ public class CitaDaoImpl implements CitaDao {
             System.out.println("No se pudo establecer conexión con la base de datos.");
             return 0;
         }
-        String SQL = "UPDATE cita SET Estado_idEstado = ? WHERE idCita = ?";
+        String SQL = "UPDATE Cita SET Estado_idEstado = ? WHERE idCita = ?";
         int nuevoEstado;
         if ("Reprogramado".equalsIgnoreCase(estadoActual)) {
             nuevoEstado = 3;
@@ -634,7 +634,7 @@ public class CitaDaoImpl implements CitaDao {
             System.out.println("No se pudo establecer conexión con la base de datos.");
             return 0;
         }
-        String SQL = "UPDATE cita SET Estado_idEstado = 5 WHERE idCita = ?";
+        String SQL = "UPDATE Cita SET Estado_idEstado = 5 WHERE idCita = ?";
         try {
             ps = cx.prepareStatement(SQL);
             ps.setInt(1, idCita);
@@ -684,9 +684,45 @@ public class CitaDaoImpl implements CitaDao {
     }
     
     @Override
+    public int contarPacientes() {
+        return contar("SELECT COUNT(*) FROM Paciente");
+    }
+
+    @Override
+    public int contarEnEspera() {
+        return contar("SELECT COUNT(*) FROM Cita c INNER JOIN Estado e ON c.Estado_idEstado = e.idEstado WHERE e.TipoEstado = 'En espera'");
+    }
+
+    @Override
+    public java.util.Set<Integer> idsCitasDeOdontologo(int idOdontologo) {
+        java.util.Set<Integer> ids = new java.util.HashSet<>();
+        String sql = "SELECT idCita FROM Cita WHERE Odontologo_idUsuario = ?";
+        try (Connection conn = Conexion.getConection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, idOdontologo);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    ids.add(rs.getInt(1));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return ids;
+    }
+
+    private int contar(String sql) {
+        try (Connection conn = Conexion.getConection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+            return rs.next() ? rs.getInt(1) : 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
+    @Override
     public int obtenerTotalCitasReservas() {
         int total = 0;
-        String sql = "SELECT (SELECT COUNT(idCita) FROM cita) + (SELECT COUNT(idReserva) FROM reserva) AS TotalContado";
+        String sql = "SELECT COUNT(*) AS TotalContado FROM Cita"; // reserva es una vista de Cita: no sumar dos veces
         try (Connection conn = Conexion.getConection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             if (rs.next()) {
                 total = rs.getInt("TotalContado");
@@ -700,7 +736,7 @@ public class CitaDaoImpl implements CitaDao {
     @Override
     public String getEmailPacienteByCitaId(int idCita) {
         String correo = "";
-        String SQL = "SELECT p.Correo FROM cita c INNER JOIN paciente p ON c.Paciente_idPaciente = p.idPaciente WHERE c.idCita = ?";
+        String SQL = "SELECT p.Correo FROM Cita c INNER JOIN Paciente p ON c.Paciente_idPaciente = p.idPaciente WHERE c.idCita = ?";
         try (Connection conn = Conexion.getConection(); PreparedStatement ps = conn.prepareStatement(SQL)) {
             ps.setInt(1, idCita);
             try (ResultSet rs = ps.executeQuery()) {
@@ -865,13 +901,17 @@ public class CitaDaoImpl implements CitaDao {
     }
 
     @Override
-    public int registrarNotificacion(String asunto, int idEstado, int idCita) {
-        String sql = "INSERT INTO Notificacion (Asunto, FechaEnvio, Enviado, Estado_idEstado, Cita_idCita) VALUES (?, NOW(), 1, ?, ?)";
+    public int registrarNotificacion(String asunto, int idEstado, int idCita, boolean enviado) {
+        String sql = "INSERT INTO Notificacion (Asunto, FechaEnvio, Enviado, Estado_idEstado, Cita_idCita) VALUES (?, NOW(), ?, ?, ?)";
+        if (asunto != null && asunto.length() > 100) {
+            asunto = asunto.substring(0, 100);
+        }
         try (Connection conn = Conexion.getConection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, asunto);
-            ps.setInt(2, idEstado);
-            ps.setInt(3, idCita);
+            ps.setInt(2, enviado ? 1 : 0);
+            ps.setInt(3, idEstado);
+            ps.setInt(4, idCita);
             return ps.executeUpdate();
         } catch (SQLException e) {
             System.err.println("Error al registrar notificación (RF09): " + e.getMessage());

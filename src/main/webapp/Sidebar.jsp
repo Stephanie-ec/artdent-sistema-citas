@@ -68,12 +68,6 @@
                 <i class="bi bi-bar-chart-line me-2 text-brand-mint"></i>
                 <span>Reportes</span>
             </a>
-            <% } else if (userRol.equalsIgnoreCase("Secretaria")) { %>
-            <a class="nav-link text-white d-flex align-items-center <%= "reporte".equals(activePage) ? "active bg-brand-primary" : "" %>" 
-               href="ReporteController?accion=reporte">
-                <i class="bi bi-bar-chart-line me-2 text-brand-mint"></i>
-                <span>Reportes</span>
-            </a>
             <% } %>
         </li>
     </ul>

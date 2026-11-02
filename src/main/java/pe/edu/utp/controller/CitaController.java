@@ -20,7 +20,7 @@ import pe.edu.utp.entity.Paciente;
 import pe.edu.utp.entity.Servicio;
 import pe.edu.utp.entity.Usuario;
 import pe.edu.utp.entity.Venta;
-import pe.edu.utp.utils.EmailService;
+import pe.edu.utp.utils.NotificacionService;
 
 /**
  *
@@ -189,16 +189,13 @@ public class CitaController extends HttpServlet {
 
             // RF03 / RF09: Registrar notificación de cita presencial
             if (idCitaGenerada > 0) {
-                citaDao.registrarNotificacion("Cita Presencial Registrada", 3, idCitaGenerada);
-                if (correo != null && !correo.trim().isEmpty()) {
-                    EmailService.sendEmail(correo, "Cita Presencial Confirmada - ArtDent",
-                            "Estimado(a) " + nombre + " " + apellido + ",\n\n" +
-                            "Su cita presencial ha sido registrada con éxito en el Centro Odontológico ArtDent.\n" +
-                            "Código de Cita: " + codigoReserva + "\n" +
-                            "Fecha: " + fecha + "\n" +
-                            "Hora: " + hora + "\n\n" +
-                            "Gracias por su preferencia.");
-                }
+                NotificacionService.notificar(idCitaGenerada, 3, "Cita Presencial Confirmada", correo,
+                        "Estimado(a) " + nombre + " " + apellido + ",\n\n" +
+                        "Su cita presencial ha sido registrada con éxito en el Centro Odontológico ArtDent.\n" +
+                        "Código de Cita: " + codigoReserva + "\n" +
+                        "Fecha: " + fecha + "\n" +
+                        "Hora: " + hora + "\n\n" +
+                        "Gracias por su preferencia.");
             }
 
             response.sendRedirect("ReservaController?accion=listarCitas&msg=presencialOk&codigo=" + codigoReserva);

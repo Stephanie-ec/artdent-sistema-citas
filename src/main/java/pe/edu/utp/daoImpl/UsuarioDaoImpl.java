@@ -195,7 +195,7 @@ public class UsuarioDaoImpl implements UsuarioDao {
     @Override
     public List<Usuario> obtenerMedicosDisponibles() {
         List<Usuario> medicos = new ArrayList<>();
-        String sql = "SELECT * FROM usuario WHERE Rol_idRol = 3";
+        String sql = "SELECT * FROM Usuario WHERE Rol_idRol = 3";
 
         try (Connection conn = Conexion.getConection();
              PreparedStatement stmt = conn.prepareStatement(sql);
@@ -224,7 +224,7 @@ public class UsuarioDaoImpl implements UsuarioDao {
         String diaSemanaTexto = convertirDiaSemana(fechaConv);
 
         String sql = "SELECT DISTINCT u.idUsuario, u.Nombre, u.Apellido "
-                + "FROM usuario u "
+                + "FROM Usuario u "
                 + "INNER JOIN Usuario_Servicio us ON u.idUsuario = us.idUsuario "
                 + "INNER JOIN Usuario_Horario uh ON u.idUsuario = uh.Usuario_idUsuario "
                 + "INNER JOIN Horario h ON uh.Horario_idHorario = h.idHorario "
