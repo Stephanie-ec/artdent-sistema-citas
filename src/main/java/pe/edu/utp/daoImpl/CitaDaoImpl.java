@@ -693,6 +693,23 @@ public class CitaDaoImpl implements CitaDao {
         return contar("SELECT COUNT(*) FROM Cita c INNER JOIN Estado e ON c.Estado_idEstado = e.idEstado WHERE e.TipoEstado = 'En espera'");
     }
 
+    @Override
+    public java.util.Set<Integer> idsCitasDeOdontologo(int idOdontologo) {
+        java.util.Set<Integer> ids = new java.util.HashSet<>();
+        String sql = "SELECT idCita FROM Cita WHERE Odontologo_idUsuario = ?";
+        try (Connection conn = Conexion.getConection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, idOdontologo);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    ids.add(rs.getInt(1));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return ids;
+    }
+
     private int contar(String sql) {
         try (Connection conn = Conexion.getConection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             return rs.next() ? rs.getInt(1) : 0;

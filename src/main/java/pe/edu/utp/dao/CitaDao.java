@@ -49,6 +49,9 @@ public interface CitaDao {
 
     public int contarPacientes();
 
+    /** Ids de las citas y reservas asignadas a un odontólogo (Cita.Odontologo_idUsuario). */
+    public java.util.Set<Integer> idsCitasDeOdontologo(int idOdontologo);
+
     public int contarEnEspera();
 
     public String getEmailPacienteByCitaId(int idCita);

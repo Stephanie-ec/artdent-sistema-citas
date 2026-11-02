@@ -117,24 +117,24 @@ public class ReservaController extends HttpServlet {
         Map<String, List<VerCita>> citasPorDia = new HashMap<>();
 
         String tipoRol = (String) request.getSession().getAttribute("TipoRol");
-        String nombreDoc = (String) request.getSession().getAttribute("Nombre");
-        String apellidoDoc = (String) request.getSession().getAttribute("Apellido");
         boolean esOdontologo = tipoRol != null && tipoRol.equalsIgnoreCase("Odontologo");
+
+        // RF04: el odontólogo ve solo sus citas, filtradas por su id (antes se comparaban nombres)
+        java.util.Set<Integer> idsPropios = null;
+        if (esOdontologo) {
+            Object idObj = request.getSession().getAttribute("idUsuario");
+            int idOdontologo = (idObj instanceof Integer) ? (Integer) idObj : -1;
+            idsPropios = citaDao.idsCitasDeOdontologo(idOdontologo);
+        }
 
         for (String dia : diasSemana) {
             List<VerCita> citas = citaDao.listarCitasPorDiaSemana(dia, semanaActual);
             List<VerReserva> reservas = reservaDao.listarReservasPorDiaSemana(dia, semanaActual);
 
-            if (esOdontologo && nombreDoc != null && apellidoDoc != null) {
-                // RF04: Filtrar estrictamente citas y reservas del odontólogo en sesión
-                final String nDoc = nombreDoc.trim().toLowerCase();
-                final String aDoc = apellidoDoc.trim().toLowerCase();
-
+            if (idsPropios != null) {
                 List<VerCita> citasFiltradas = new ArrayList<>();
                 for (VerCita c : citas) {
-                    String cNom = (c.getNombreUsuario() != null) ? c.getNombreUsuario().trim().toLowerCase() : "";
-                    String cApe = (c.getApellidoUsuario() != null) ? c.getApellidoUsuario().trim().toLowerCase() : "";
-                    if ((cNom.contains(nDoc) || nDoc.contains(cNom)) && (cApe.contains(aDoc) || aDoc.contains(cApe))) {
+                    if (idsPropios.contains(c.getIdCita())) {
                         citasFiltradas.add(c);
                     }
                 }
@@ -142,9 +142,7 @@ public class ReservaController extends HttpServlet {
 
                 List<VerReserva> reservasFiltradas = new ArrayList<>();
                 for (VerReserva r : reservas) {
-                    String rNom = (r.getNombreUsuario() != null) ? r.getNombreUsuario().trim().toLowerCase() : "";
-                    String rApe = (r.getApellidoUsuario() != null) ? r.getApellidoUsuario().trim().toLowerCase() : "";
-                    if ((rNom.contains(nDoc) || nDoc.contains(rNom)) && (rApe.contains(aDoc) || aDoc.contains(rApe))) {
+                    if (idsPropios.contains(r.getIdReserva())) {
                         reservasFiltradas.add(r);
                     }
                 }
