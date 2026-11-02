@@ -94,7 +94,7 @@
             <!-- Barra de Acciones y Filtros -->
             <div class="card p-3 mb-4 border-0 shadow-sm" style="border-radius: 12px; background: #ffffff;">
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                    <a href="CitaController?accion=formPresencial" class="btn btn-success fw-semibold rounded-pill px-4 shadow-sm">
+                    <a href="CitaController?accion=formPresencial" class="btn btn-success fw-semibold rounded-pill px-4 shadow-sm ${sessionScope.TipoRol == 'Odontologo' ? 'd-none' : ''}">
                         <i class="bi bi-calendar-plus me-1"></i> + Registrar Cita Presencial
                     </a>
 
@@ -184,7 +184,7 @@
                                                         <span class="badge bg-warning text-dark px-2 py-1 d-inline-block mb-1">
                                                             <i class="bi bi-hourglass-split me-1"></i>Pendiente
                                                         </span>
-                                                        <c:if test="${reserva.estado == 'En espera'}">
+                                                        <c:if test="${reserva.estado == 'En espera' && sessionScope.TipoRol != 'Odontologo'}">
                                                             <div>
                                                                 <button type="button" class="btn btn-sm btn-outline-success mt-1 py-0 px-2 rounded-pill" data-bs-toggle="modal" data-bs-target="#modalPagoReserva${reserva.idReserva}" title="Cobrar en Efectivo (Ventanilla)">
                                                                     <i class="bi bi-cash-coin me-1"></i>Cobrar
@@ -211,7 +211,7 @@
 
                                                         <c:otherwise>
                                                             <c:choose>
-                                                                <c:when test="${reserva.estado == 'En espera'}">
+                                                                <c:when test="${reserva.estado == 'En espera' && sessionScope.TipoRol != 'Odontologo'}">
                                                                     <c:choose>
                                                                         <c:when test="${reserva.tienePago}">
                                                                             <form action="ReprogramacionController" method="post" class="d-inline">
@@ -258,7 +258,7 @@
                                                             <form action="ReprogramacionController" method="get" class="d-inline">
                                                                 <input type="hidden" name="id" value="${reserva.idReserva}" />
                                                                 <input type="hidden" name="accion" value="VerReproRe" />
-                                                                <button class="btn btn-sm btn-outline-primary rounded-pill" type="submit" title="Reprogramar fecha u hora">
+                                                                <button class="btn btn-sm btn-outline-primary rounded-pill ${sessionScope.TipoRol == 'Odontologo' ? 'd-none' : ''}" type="submit" title="Reprogramar fecha u hora">
                                                                     <i class="bi bi-calendar2-range"></i>
                                                                 </button>
                                                             </form>
@@ -267,7 +267,7 @@
                                                             <form action="ReprogramacionController" method="post" class="d-inline">
                                                                 <input type="hidden" name="idReserva" value="${reserva.idReserva}" />
                                                                 <input type="hidden" name="accion" value="updateEstadoCancelar" />
-                                                                <button class="btn btn-sm btn-outline-secondary rounded-pill" type="submit" title="Cancelar cita">
+                                                                <button class="btn btn-sm btn-outline-secondary rounded-pill ${sessionScope.TipoRol == 'Odontologo' ? 'd-none' : ''}" type="submit" title="Cancelar cita">
                                                                     <i class="bi bi-ban"></i>
                                                                 </button>
                                                             </form>
@@ -316,7 +316,7 @@
                                                             <i class="bi bi-hourglass-split me-1"></i>Pendiente
                                                         </span>
                                                         <div>
-                                                            <button type="button" class="btn btn-sm btn-outline-success mt-1 py-0 px-2 rounded-pill" data-bs-toggle="modal" data-bs-target="#modalPagoCita${cita.idCita}" title="Cobrar en Efectivo (Ventanilla)">
+                                                            <button type="button" class="btn btn-sm btn-outline-success mt-1 py-0 px-2 rounded-pill ${sessionScope.TipoRol == 'Odontologo' ? 'd-none' : ''}" data-bs-toggle="modal" data-bs-target="#modalPagoCita${cita.idCita}" title="Cobrar en Efectivo (Ventanilla)">
                                                                 <i class="bi bi-cash-coin me-1"></i>Cobrar
                                                             </button>
                                                         </div>
@@ -357,14 +357,14 @@
                                                             <form action="ReprogramacionController" method="get" class="d-inline">
                                                                 <input type="hidden" name="id" value="${cita.idCita}" />
                                                                 <input type="hidden" name="accion" value="VerReproCi" />
-                                                                <button class="btn btn-sm btn-outline-primary rounded-pill" type="submit">
+                                                                <button class="btn btn-sm btn-outline-primary rounded-pill ${sessionScope.TipoRol == 'Odontologo' ? 'd-none' : ''}" type="submit">
                                                                     <i class="bi bi-calendar2-range"></i>
                                                                 </button>
                                                             </form>
                                                             <form action="ReprogramacionController" method="post" class="d-inline">
                                                                 <input type="hidden" name="idCita" value="${cita.idCita}" />
                                                                 <input type="hidden" name="accion" value="updateEstadoCanceladoCita" />
-                                                                <button class="btn btn-sm btn-outline-secondary rounded-pill" type="submit">
+                                                                <button class="btn btn-sm btn-outline-secondary rounded-pill ${sessionScope.TipoRol == 'Odontologo' ? 'd-none' : ''}" type="submit">
                                                                     <i class="bi bi-ban"></i>
                                                                 </button>
                                                             </form>
