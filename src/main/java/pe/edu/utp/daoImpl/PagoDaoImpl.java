@@ -120,6 +120,21 @@ public class PagoDaoImpl implements PagoDao {
     }
 
     @Override
+    public Double obtenerCostoServicioPorCita(int idCita) {
+        String sql = "SELECT s.Costo FROM Cita c INNER JOIN Servicio s ON c.Servicio_idServicio = s.idServicio WHERE c.idCita = ?";
+        try (Connection conn = Conexion.getConection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, idCita);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getDouble("Costo") : null;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
     public boolean tienePago(int idCita) {
         String sql = "SELECT idPago FROM Pago WHERE Cita_idCita = ?";
         try (Connection conn = Conexion.getConection();

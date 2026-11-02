@@ -117,24 +117,24 @@ public class ReservaController extends HttpServlet {
         Map<String, List<VerCita>> citasPorDia = new HashMap<>();
 
         String tipoRol = (String) request.getSession().getAttribute("TipoRol");
-        String nombreDoc = (String) request.getSession().getAttribute("Nombre");
-        String apellidoDoc = (String) request.getSession().getAttribute("Apellido");
         boolean esOdontologo = tipoRol != null && tipoRol.equalsIgnoreCase("Odontologo");
+
+        // RF04: el odontólogo ve solo sus citas, filtradas por su id (antes se comparaban nombres)
+        java.util.Set<Integer> idsPropios = null;
+        if (esOdontologo) {
+            Object idObj = request.getSession().getAttribute("idUsuario");
+            int idOdontologo = (idObj instanceof Integer) ? (Integer) idObj : -1;
+            idsPropios = citaDao.idsCitasDeOdontologo(idOdontologo);
+        }
 
         for (String dia : diasSemana) {
             List<VerCita> citas = citaDao.listarCitasPorDiaSemana(dia, semanaActual);
             List<VerReserva> reservas = reservaDao.listarReservasPorDiaSemana(dia, semanaActual);
 
-            if (esOdontologo && nombreDoc != null && apellidoDoc != null) {
-                // RF04: Filtrar estrictamente citas y reservas del odontólogo en sesión
-                final String nDoc = nombreDoc.trim().toLowerCase();
-                final String aDoc = apellidoDoc.trim().toLowerCase();
-
+            if (idsPropios != null) {
                 List<VerCita> citasFiltradas = new ArrayList<>();
                 for (VerCita c : citas) {
-                    String cNom = (c.getNombreUsuario() != null) ? c.getNombreUsuario().trim().toLowerCase() : "";
-                    String cApe = (c.getApellidoUsuario() != null) ? c.getApellidoUsuario().trim().toLowerCase() : "";
-                    if ((cNom.contains(nDoc) || nDoc.contains(cNom)) && (cApe.contains(aDoc) || aDoc.contains(cApe))) {
+                    if (idsPropios.contains(c.getIdCita())) {
                         citasFiltradas.add(c);
                     }
                 }
@@ -142,9 +142,7 @@ public class ReservaController extends HttpServlet {
 
                 List<VerReserva> reservasFiltradas = new ArrayList<>();
                 for (VerReserva r : reservas) {
-                    String rNom = (r.getNombreUsuario() != null) ? r.getNombreUsuario().trim().toLowerCase() : "";
-                    String rApe = (r.getApellidoUsuario() != null) ? r.getApellidoUsuario().trim().toLowerCase() : "";
-                    if ((rNom.contains(nDoc) || nDoc.contains(rNom)) && (rApe.contains(aDoc) || aDoc.contains(rApe))) {
+                    if (idsPropios.contains(r.getIdReserva())) {
                         reservasFiltradas.add(r);
                     }
                 }
@@ -183,6 +181,18 @@ public class ReservaController extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
 
+        // O-18 / PA-02: validar en el servidor antes de convertir los datos
+        String correoForm = request.getParameter("correo") != null ? request.getParameter("correo") : request.getParameter("email");
+        String errorValidacion = pe.edu.utp.utils.Validador.validarDatosPaciente(request.getParameter("dni"), request.getParameter("nombre"),
+                request.getParameter("apellido"), request.getParameter("telefono"), correoForm,
+                request.getParameter("fecha"), request.getParameter("hora"));
+        if (errorValidacion != null) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            request.setAttribute("error", errorValidacion);
+            request.getRequestDispatcher("error.jsp").forward(request, response);
+            return;
+        }
+
         // Datos de Usuario
         String nombre = request.getParameter("nombre");
         String apellido = request.getParameter("apellido");
@@ -215,19 +225,50 @@ public class ReservaController extends HttpServlet {
             }
         }
 
-        int id_odontologo = 4;
-        String medicoStr = request.getParameter("medico");
-        if (medicoStr != null && !medicoStr.trim().isEmpty()) {
-            try {
-                id_odontologo = Integer.parseInt(medicoStr.trim());
-            } catch (NumberFormatException e) {
-                id_odontologo = 4;
-            }
+        // D-11: el importe se toma del costo vigente del servicio, no del formulario
+        Servicio servicioSel = servicioDAO.obtenerServicioPorId(idServicio);
+        if (servicioSel != null && servicioSel.getCosto() != null) {
+            precio_servicio = servicioSel.getCosto().doubleValue();
         }
 
         // Datos de Reserva
         String fecha = request.getParameter("fecha");
         String hora = request.getParameter("hora");
+
+        // RF12: el odontólogo debe atender ese servicio y estar disponible en esa fecha y hora.
+        // Si el paciente no eligió uno, se asigna el primero disponible (antes se usaba siempre el id 4).
+        int id_odontologo = 0;
+        String medicoStr = request.getParameter("medico");
+        if (medicoStr != null && !medicoStr.trim().isEmpty()) {
+            try {
+                id_odontologo = Integer.parseInt(medicoStr.trim());
+            } catch (NumberFormatException e) {
+                id_odontologo = 0;
+            }
+        }
+        List<pe.edu.utp.entity.Usuario> disponibles = new ArrayList<>();
+        try {
+            disponibles = new pe.edu.utp.daoImpl.UsuarioDaoImpl().obtenerMedicosPorServicioYDisponibilidad(
+                    idServicio, LocalDate.parse(fecha), java.time.LocalTime.parse(hora.length() > 5 ? hora.substring(0, 5) : hora));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        boolean elegidoDisponible = false;
+        for (pe.edu.utp.entity.Usuario u : disponibles) {
+            if (u.getIdUsuario() == id_odontologo) {
+                elegidoDisponible = true;
+                break;
+            }
+        }
+        if (!elegidoDisponible) {
+            if (disponibles.isEmpty()) {
+                request.setAttribute("error", "No hay un odontólogo disponible para ese servicio en la fecha y hora elegidas. Por favor, elija otro horario.");
+                request.getRequestDispatcher("error.jsp").forward(request, response);
+                return;
+            }
+            id_odontologo = disponibles.get(0).getIdUsuario();
+        }
+
         String descripcion = request.getParameter("descripcion");
         if (descripcion == null || descripcion.trim().isEmpty()) {
             descripcion = "Reserva Web - En espera";

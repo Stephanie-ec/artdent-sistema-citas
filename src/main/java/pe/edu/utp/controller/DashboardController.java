@@ -55,6 +55,8 @@ public class DashboardController extends HttpServlet {
     
         request.setAttribute("totalCitasReservas", totalCitasReservas);
     request.setAttribute("totalIngresos", totalIngresos);
+        request.setAttribute("totalPacientes", citaDao.contarPacientes());
+        request.setAttribute("totalEnEspera", citaDao.contarEnEspera());
         request.setAttribute("citasRecientes", citasRecientes);
         request.setAttribute("reservasRecientes", reservasRecientes);
 

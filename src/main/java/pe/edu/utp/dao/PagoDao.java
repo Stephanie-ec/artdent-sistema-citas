@@ -12,4 +12,7 @@ public interface PagoDao {
     Comprobante obtenerComprobantePorPago(int idPago);
     Comprobante obtenerComprobantePorId(int idComprobante);
     Map<Integer, Comprobante> obtenerMapaComprobantesPorCita();
+
+    /** Costo vigente del servicio de la cita; null si la cita no existe. */
+    Double obtenerCostoServicioPorCita(int idCita);
 }

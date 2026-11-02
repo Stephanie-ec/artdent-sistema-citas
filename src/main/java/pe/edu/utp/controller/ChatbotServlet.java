@@ -183,7 +183,7 @@ public class ChatbotServlet extends HttpServlet {
 
     private String obtenerServiciosDeBaseDeDatos() {
         StringJoiner servicios = new StringJoiner("\\n");
-        String sql = "SELECT * FROM servicio";
+        String sql = "SELECT * FROM Servicio";
 
         try (Connection conn = Conexion.getConection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();

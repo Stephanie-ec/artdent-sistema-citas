@@ -20,7 +20,7 @@ import pe.edu.utp.entity.Paciente;
 import pe.edu.utp.entity.Servicio;
 import pe.edu.utp.entity.Usuario;
 import pe.edu.utp.entity.Venta;
-import pe.edu.utp.utils.EmailService;
+import pe.edu.utp.utils.NotificacionService;
 
 /**
  *
@@ -104,6 +104,17 @@ public class CitaController extends HttpServlet {
 
         // Obtener los datos del formulario
         String dniStr = request.getParameter("dni");
+        // O-18 / PA-02: validar en el servidor antes de convertir los datos
+        String correoForm = request.getParameter("correo") != null ? request.getParameter("correo") : request.getParameter("email");
+        String errorValidacion = pe.edu.utp.utils.Validador.validarDatosPaciente(dniStr, request.getParameter("nombre"),
+                request.getParameter("apellido"), request.getParameter("telefono"), correoForm,
+                request.getParameter("fecha"), request.getParameter("hora"));
+        if (errorValidacion != null) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            request.setAttribute("error", errorValidacion);
+            request.getRequestDispatcher("error.jsp").forward(request, response);
+            return;
+        }
         int dni = (dniStr != null && !dniStr.trim().isEmpty()) ? Integer.parseInt(dniStr.trim()) : 0;
         String nombre = request.getParameter("nombre");
         String apellido = request.getParameter("apellido");
@@ -134,6 +145,12 @@ public class CitaController extends HttpServlet {
             }
         }
 
+        // D-11: el importe se toma del costo vigente del servicio, no del formulario
+        pe.edu.utp.entity.Servicio servicioSel = new pe.edu.utp.daoImpl.ServicioDaoImpl().obtenerServicioPorId(idServicio);
+        if (servicioSel != null && servicioSel.getCosto() != null) {
+            precio_servicio = servicioSel.getCosto().doubleValue();
+        }
+
         String fecha = request.getParameter("fecha");
         String hora = request.getParameter("hora");
         String descripcion = request.getParameter("descripcion");
@@ -150,6 +167,31 @@ public class CitaController extends HttpServlet {
             } catch (NumberFormatException e) {
                 idOdontologo = 4;
             }
+        }
+
+        // RF12 / D-21: el odontólogo debe atender el servicio y estar libre en esa fecha y hora
+        java.util.List<pe.edu.utp.entity.Usuario> disponibles = new java.util.ArrayList<>();
+        try {
+            disponibles = new pe.edu.utp.daoImpl.UsuarioDaoImpl().obtenerMedicosPorServicioYDisponibilidad(
+                    idServicio, java.time.LocalDate.parse(fecha.trim()),
+                    java.time.LocalTime.parse(hora.trim().length() > 5 ? hora.trim().substring(0, 5) : hora.trim()));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        boolean elegidoDisponible = false;
+        for (pe.edu.utp.entity.Usuario u : disponibles) {
+            if (u.getIdUsuario() == idOdontologo) {
+                elegidoDisponible = true;
+                break;
+            }
+        }
+        if (!elegidoDisponible) {
+            if (disponibles.isEmpty()) {
+                request.setAttribute("error", "No hay un odontólogo disponible para ese servicio en la fecha y hora elegidas. Por favor, elija otro horario.");
+                request.getRequestDispatcher("error.jsp").forward(request, response);
+                return;
+            }
+            idOdontologo = disponibles.get(0).getIdUsuario();
         }
 
         int x = citaDao.verificarExistencia(dni);
@@ -189,16 +231,13 @@ public class CitaController extends HttpServlet {
 
             // RF03 / RF09: Registrar notificación de cita presencial
             if (idCitaGenerada > 0) {
-                citaDao.registrarNotificacion("Cita Presencial Registrada", 3, idCitaGenerada);
-                if (correo != null && !correo.trim().isEmpty()) {
-                    EmailService.sendEmail(correo, "Cita Presencial Confirmada - ArtDent",
-                            "Estimado(a) " + nombre + " " + apellido + ",\n\n" +
-                            "Su cita presencial ha sido registrada con éxito en el Centro Odontológico ArtDent.\n" +
-                            "Código de Cita: " + codigoReserva + "\n" +
-                            "Fecha: " + fecha + "\n" +
-                            "Hora: " + hora + "\n\n" +
-                            "Gracias por su preferencia.");
-                }
+                NotificacionService.notificar(idCitaGenerada, 3, "Cita Presencial Confirmada", correo,
+                        "Estimado(a) " + nombre + " " + apellido + ",\n\n" +
+                        "Su cita presencial ha sido registrada con éxito en el Centro Odontológico ArtDent.\n" +
+                        "Código de Cita: " + codigoReserva + "\n" +
+                        "Fecha: " + fecha + "\n" +
+                        "Hora: " + hora + "\n\n" +
+                        "Gracias por su preferencia.");
             }
 
             response.sendRedirect("ReservaController?accion=listarCitas&msg=presencialOk&codigo=" + codigoReserva);

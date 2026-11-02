@@ -14,7 +14,7 @@ public class RolDaoImpl implements RolDao {
     @Override
     public List<Rol> listarRoles() {
         List<Rol> lista = new ArrayList<>();
-        String sql = "SELECT * FROM rol";
+        String sql = "SELECT * FROM Rol";
         try (Connection conn = Conexion.getConection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {

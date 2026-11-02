@@ -216,7 +216,7 @@ public class ReservaDaoImpl implements ReservaDao {
             System.out.println("No se pudo establecer conexión con la base de datos.");
             return 0;
         }
-        String SQL = "UPDATE cita SET Estado_idEstado = 6 WHERE idCita = ?";
+        String SQL = "UPDATE Cita SET Estado_idEstado = 6 WHERE idCita = ?";
 
         try {
             ps = cx.prepareStatement(SQL);
@@ -315,7 +315,7 @@ public class ReservaDaoImpl implements ReservaDao {
             System.out.println("No se pudo establecer conexión con la base de datos.");
             return 0;  // Retorna 0 si no hay conexión
         }
-        String sql = "SELECT idPaciente FROM paciente WHERE DNI = ?";
+        String sql = "SELECT idPaciente FROM Paciente WHERE DNI = ?";
         int idPaciente;
 
         try {
@@ -763,7 +763,7 @@ public class ReservaDaoImpl implements ReservaDao {
     @Override
     public double obtenerTotalIngresos() {
         double total = 0.0;
-        String sql = "SELECT (SELECT SUM(Costo) FROM servicio WHERE idServicio IN (SELECT Servicio_idServicio FROM cita)) + (SELECT SUM(importe) FROM reserva) AS Total";
+        String sql = "SELECT IFNULL(SUM(Monto), 0) AS Total FROM Pago"; // ingresos = pagos realmente registrados
         try (Connection conn = Conexion.getConection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             if (rs.next()) {
                 total = rs.getDouble("Total");
@@ -777,7 +777,7 @@ public class ReservaDaoImpl implements ReservaDao {
     @Override
     public String getEmailPacienteByReservaId(int idReserva) {
         String correo = "";
-        String SQL = "SELECT p.Correo FROM reserva r INNER JOIN paciente p ON r.Paciente_idPaciente = p.idPaciente WHERE r.idReserva = ?";
+        String SQL = "SELECT p.Correo FROM reserva r INNER JOIN Paciente p ON r.Paciente_idPaciente = p.idPaciente WHERE r.idReserva = ?";
         try (Connection conn = Conexion.getConection(); PreparedStatement ps = conn.prepareStatement(SQL)) {
             ps.setInt(1, idReserva);
             try (ResultSet rs = ps.executeQuery()) {
