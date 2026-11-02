@@ -181,6 +181,18 @@ public class ReservaController extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
 
+        // O-18 / PA-02: validar en el servidor antes de convertir los datos
+        String correoForm = request.getParameter("correo") != null ? request.getParameter("correo") : request.getParameter("email");
+        String errorValidacion = pe.edu.utp.utils.Validador.validarDatosPaciente(request.getParameter("dni"), request.getParameter("nombre"),
+                request.getParameter("apellido"), request.getParameter("telefono"), correoForm,
+                request.getParameter("fecha"), request.getParameter("hora"));
+        if (errorValidacion != null) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            request.setAttribute("error", errorValidacion);
+            request.getRequestDispatcher("error.jsp").forward(request, response);
+            return;
+        }
+
         // Datos de Usuario
         String nombre = request.getParameter("nombre");
         String apellido = request.getParameter("apellido");
