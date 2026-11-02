@@ -11,3 +11,7 @@ mail.smtp.port=587
 
 # Configuración de Gemini AI
 gemini.api.key=TU_API_KEY_AQUI
+
+# Verificación de DNI en RENIEC (CR-06). Token del proveedor; si se deja vacío, la verificación se desactiva.
+reniec.api.url=https://api.decolecta.com/v1/reniec/dni?numero={dni}
+reniec.api.token=

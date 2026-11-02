@@ -190,36 +190,27 @@
             }
 
             function buscarPacienteRapido() {
-                var dni = document.getElementById("dni").value.trim();
-                var feedback = document.getElementById("dniFeedback");
-                if (dni.length !== 8) {
-                    feedback.className = "text-danger";
-                    feedback.innerText = "Ingrese un DNI válido de 8 dígitos.";
-                    return;
-                }
-                feedback.className = "text-muted";
-                feedback.innerText = "Buscando paciente...";
-
-                fetch("PacienteController?dni=" + encodeURIComponent(dni))
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data && data.existe) {
-                            document.getElementById("nombre").value = data.nombre || "";
-                            document.getElementById("apellido").value = data.apellido || "";
-                            document.getElementById("telefono").value = data.telefono || "";
-                            document.getElementById("correo").value = data.correo || "";
-                            feedback.className = "text-success fw-semibold";
-                            feedback.innerText = "✓ Paciente registrado encontrado.";
-                        } else {
-                            feedback.className = "text-primary fw-semibold";
-                            feedback.innerText = "Paciente nuevo. Ingrese los datos para su registro.";
-                        }
-                    })
-                    .catch(err => {
-                        feedback.className = "text-muted";
-                        feedback.innerText = "No se pudo consultar automáticamente. Complete los datos manualmente.";
-                    });
-            }
+            const dni = document.getElementById('dni').value.trim();
+            const fb = document.getElementById('dniFeedback');
+            const pintar = (clase, texto) => { if (fb) { fb.className = 'small d-block mt-1 ' + clase; fb.innerText = texto; } };
+            if (!/^\d{8}$/.test(dni)) { pintar('text-danger', 'Ingrese un DNI de 8 dígitos.'); return; }
+            pintar('text-muted', 'Verificando DNI...');
+            fetch('ConsultaDniController?dni=' + encodeURIComponent(dni))
+                .then(r => r.json())
+                .then(d => {
+                    const poner = (id, v) => { const el = document.getElementById(id); if (el && v) el.value = v; };
+                    if (d.estado === 'PACIENTE' || d.estado === 'RENIEC') {
+                        poner('nombre', d.nombre); poner('apellido', d.apellido);
+                        poner('telefono', d.telefono); poner('correo', d.correo);
+                        pintar('text-success fw-semibold', '✓ ' + d.mensaje);
+                    } else if (d.estado === 'NO_EXISTE' || d.estado === 'INVALIDO') {
+                        pintar('text-danger fw-semibold', d.mensaje);
+                    } else {
+                        pintar('text-muted', d.mensaje);
+                    }
+                })
+                .catch(() => pintar('text-muted', 'No se pudo verificar ahora. Complete los datos manualmente.'));
+        }
         </script>
     </body>
 </html>

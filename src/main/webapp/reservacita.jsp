@@ -49,12 +49,12 @@
                                         <input type="text" class="form-control" id="dni" name="dni" 
                                                placeholder="8 dígitos" maxlength="8" 
                                                value="${param.dni}" required 
-                                               onkeyup="if (event.keyCode === 13) buscarPaciente();"
-                                               onblur="buscarPaciente();">
-                                        <button class="btn btn-outline-primary" type="button" onclick="buscarPaciente();">
+                                               onkeyup="if (event.keyCode === 13) buscarPaciente();">
+                                        <button class="btn btn-outline-primary" type="button" onclick="buscarPaciente();" title="Verificar DNI">
                                             <i class="bi bi-search"></i>
                                         </button>
                                     </div>
+                                    <small id="dniFeedback" class="small d-block mt-1 text-muted"></small>
                                 </div>
                                 <div class="col-md-6">
                                     <label for="telefono" class="form-label fw-semibold">Celular <span class="text-danger">*</span></label>
@@ -190,30 +190,25 @@
 
         function buscarPaciente() {
             const dni = document.getElementById('dni').value.trim();
-            if (dni.length === 8) {
-                const xhr = new XMLHttpRequest();
-                xhr.open('GET', 'PacienteController?action=complet&dni=' + dni, true);
-                xhr.onreadystatechange = function () {
-                    if (xhr.readyState == 4 && xhr.status == 200) {
-                        try {
-                            const parser = new DOMParser();
-                            const doc = parser.parseFromString(xhr.responseText, 'text/html');
-                            const nombre = doc.getElementById('nombre') ? doc.getElementById('nombre').value : '';
-                            const apellido = doc.getElementById('apellido') ? doc.getElementById('apellido').value : '';
-                            const correo = doc.getElementById('correo') ? doc.getElementById('correo').value : '';
-                            const telefono = doc.getElementById('telefono') ? doc.getElementById('telefono').value : '';
-
-                            if (nombre) document.getElementById('nombre').value = nombre;
-                            if (apellido) document.getElementById('apellido').value = apellido;
-                            if (correo) document.getElementById('correo').value = correo;
-                            if (telefono) document.getElementById('telefono').value = telefono;
-                        } catch(e) {
-                            console.error(e);
-                        }
+            const fb = document.getElementById('dniFeedback');
+            const pintar = (clase, texto) => { if (fb) { fb.className = 'small d-block mt-1 ' + clase; fb.innerText = texto; } };
+            if (!/^\d{8}$/.test(dni)) { pintar('text-danger', 'Ingrese un DNI de 8 dígitos.'); return; }
+            pintar('text-muted', 'Verificando DNI...');
+            fetch('ConsultaDniController?dni=' + encodeURIComponent(dni))
+                .then(r => r.json())
+                .then(d => {
+                    const poner = (id, v) => { const el = document.getElementById(id); if (el && v) el.value = v; };
+                    if (d.estado === 'PACIENTE' || d.estado === 'RENIEC') {
+                        poner('nombre', d.nombre); poner('apellido', d.apellido);
+                        poner('telefono', d.telefono); poner('correo', d.correo);
+                        pintar('text-success fw-semibold', '✓ ' + d.mensaje);
+                    } else if (d.estado === 'NO_EXISTE' || d.estado === 'INVALIDO') {
+                        pintar('text-danger fw-semibold', d.mensaje);
+                    } else {
+                        pintar('text-muted', d.mensaje);
                     }
-                };
-                xhr.send();
-            }
+                })
+                .catch(() => pintar('text-muted', 'No se pudo verificar ahora. Complete los datos manualmente.'));
         }
 
         function ajustarHora() {

@@ -43,8 +43,8 @@
                     if (idUserHeader == null) { 
                 %>
                 <!-- Botón de Iniciar Sesión para visitantes -->
-                <a href="iniciosesion.jsp" class="btn btn-primary rounded-pill px-4 shadow-sm">
-                    <i class="bi bi-box-arrow-in-right me-1"></i> Iniciar Sesión
+                <a href="iniciosesion.jsp" class="text-muted small text-decoration-none" title="Solo para el personal del centro">
+                    <i class="bi bi-lock me-1"></i>Acceso del personal
                 </a>
                 <% } else { %>
                 <!-- Menú desplegable si el usuario está autenticado -->

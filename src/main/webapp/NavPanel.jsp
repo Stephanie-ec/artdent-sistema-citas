@@ -6,6 +6,29 @@
     String nombreNav = (sesionNav != null) ? (String) sesionNav.getAttribute("Nombre") : null;
     String tiporolNav = (sesionNav != null) ? (String) sesionNav.getAttribute("TipoRol") : null;
 %>
+<!-- Paneles: sistema de botones unificado (observación del docente: botones muy coloridos).
+     Acción principal = azul de la marca; acciones secundarias = contorno; eliminar/rechazar = rojo suave. -->
+<style>
+    .btn { font-weight: 500; box-shadow: none !important; }
+    .btn.rounded-pill { border-radius: 8px !important; }
+    .btn-primary, .btn-success, .btn-info, .btn-warning {
+        background-color: var(--artdent-primary, #30a4c6) !important; border-color: var(--artdent-primary, #30a4c6) !important; color: #fff !important;
+    }
+    .btn-primary:hover, .btn-success:hover, .btn-info:hover, .btn-warning:hover {
+        background-color: var(--artdent-primary-hover, #268da9) !important; border-color: var(--artdent-primary-hover, #268da9) !important;
+    }
+    .btn-outline-primary, .btn-outline-success, .btn-outline-info, .btn-outline-warning {
+        color: var(--artdent-primary, #30a4c6) !important; border-color: #bfe3ee !important; background-color: #fff !important;
+    }
+    .btn-outline-primary:hover, .btn-outline-success:hover, .btn-outline-info:hover, .btn-outline-warning:hover {
+        background-color: #eef8fb !important;
+    }
+    .btn-outline-secondary { color: #6c757d !important; border-color: #dee2e6 !important; background-color: #fff !important; }
+    .btn-outline-secondary:hover { background-color: #f4f5f7 !important; }
+    .btn-danger, .btn-outline-danger { color: #c0392b !important; border-color: #ebc0bb !important; background-color: #fff !important; }
+    .btn-danger:hover, .btn-outline-danger:hover { background-color: #fdf1f0 !important; }
+    .btn-secondary { background-color: #e9ecef !important; border-color: #e9ecef !important; color: #6c757d !important; }
+</style>
 <nav class="navbar navbar-expand-lg bg-white border-bottom shadow-sm px-4 py-2" style="border-bottom: 2px solid var(--artdent-primary) !important;">
     <div class="container-fluid d-flex justify-content-between align-items-center">
         <!-- Brand & Logotipo -->
