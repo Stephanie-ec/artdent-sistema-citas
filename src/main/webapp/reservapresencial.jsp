@@ -136,7 +136,7 @@
 
                                         <div class="col-md-4">
                                             <label for="hora" class="form-label fw-semibold">Hora de Cita <span class="text-danger">*</span></label>
-                                            <input type="time" class="form-control" id="hora" name="hora" required>
+                                            <select class="form-select" id="hora" name="hora" required><option value="" selected disabled>Elija primero la fecha</option></select>
                                         </div>
 
                                         <div class="col-md-4">
@@ -230,11 +230,13 @@
                     .then(html => {
                         if (html.indexOf('<option') === -1) {
                             medico.innerHTML = '<option value="" disabled selected>Sin odontólogo disponible: elija otra fecha u hora</option>';
+                            ayuda.textContent = 'Nadie libre para ese servicio, día y hora. Atención: L–V 8:00–18:30 y sábado 9:00–13:00.';
                             ayuda.className = 'small text-danger';
                         } else {
                             medico.innerHTML = '<option value="" disabled selected>Seleccione el odontólogo...</option>' + html;
                             medico.disabled = false;
                             ayuda.className = 'small text-muted';
+                            ayuda.textContent = 'Solo aparecen los odontólogos que atienden ese servicio y están libres en ese horario.';
                         }
                     })
                     .catch(() => {
@@ -247,5 +249,6 @@
         })();
     </script>
     <script src="${pageContext.request.contextPath}/js/validacion-campos.js"></script>
+<script src="${pageContext.request.contextPath}/js/horarios.js"></script>
 </body>
 </html>

@@ -77,7 +77,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <label for="hora" class="form-label fw-semibold">Hora de Cita <span class="text-danger">*</span></label>
-                                    <input type="time" class="form-control" id="hora" name="hora" onchange="ajustarHora();verificarCampos();" min="08:00" max="20:00" required>
+                                    <select class="form-select" id="hora" name="hora" onchange="verificarCampos();" required><option value="" selected disabled>Elija primero la fecha</option></select>
                                 </div>
                             </div>
 
@@ -183,6 +183,7 @@
                     var doctoresSelect = document.getElementById('medico');
                     doctoresSelect.innerHTML = '<option value="" selected disabled>Seleccionar Odontólogo...</option>';
                     doctoresSelect.innerHTML += xhr.responseText;
+                    if (window.avisoSinOdontologo) avisoSinOdontologo(xhr.responseText);
                 }
             };
             xhr.send();
@@ -259,5 +260,6 @@
         });
     </script>
 <script src="${pageContext.request.contextPath}/js/validacion-campos.js"></script>
+<script src="${pageContext.request.contextPath}/js/horarios.js"></script>
 </body>
 </html>

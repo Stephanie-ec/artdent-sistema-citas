@@ -78,8 +78,10 @@
             border-color: #268da9;
             color: var(--artdent-white);
         }
+        @page { size: A4 portrait; margin: 0; }
         @media print {
-            body { background: white !important; margin: 0; }
+            body { background: white !important; margin: 0; padding: 12mm 14mm !important; }
+            .boleta-container { break-inside: avoid; page-break-inside: avoid; }
             .boleta-container { box-shadow: none !important; border: 1px solid #bbb !important; margin: 0 auto; padding: 20px; width: 100%; }
             .no-print { display: none !important; }
         }
