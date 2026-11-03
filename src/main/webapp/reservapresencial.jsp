@@ -155,7 +155,7 @@
                                     <div class="alert border-0 shadow-sm rounded-3 py-3 d-flex align-items-center mb-4" style="background-color: #edf7fa;">
                                         <i class="bi bi-info-circle-fill fs-4 me-3" style="color: var(--artdent-primary);"></i>
                                         <div class="small text-dark">
-                                            <strong>Estado inicial de atención:</strong> Cita confirmada de inmediato (<span class="badge bg-success">Confirmado</span>) con origen <code>Presencial</code> y asignada a la secretaría en turno.
+                                            <strong>Estado inicial de atención:</strong> Cita confirmada de inmediato (<span class="badge bg-success">Confirmado</span>) con origen <code>Presencial</code>. Quedará registrada por <strong>${sessionScope.Nombre} ${sessionScope.Apellido}</strong> (${sessionScope.TipoRol}).
                                         </div>
                                     </div>
 

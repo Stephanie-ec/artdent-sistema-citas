@@ -94,8 +94,8 @@
                 </div>
                 <div class="col-12 col-lg-6">
                     <div class="img-card">
-                        <img src="https://odontologiaespecializadasevilla.com/wp-content/uploads/2018/07/dentista-sevilla.jpg" 
-                             class="img-fluid w-100" alt="Consultorio dental moderno" style="object-fit: cover; max-height: 440px;">
+                        <img src="${pageContext.request.contextPath}/img/fachada.jpg" 
+                             class="img-fluid w-100" alt="Fachada del Centro Odontológico Art Dent" style="object-fit: cover; max-height: 440px;">
                     </div>
                 </div>
             </div>
@@ -141,7 +141,7 @@
                 </div>
                 <div class="col-12 col-lg-6">
                     <div class="img-card">
-                        <img src="https://vital.com.co/wp-content/uploads/2019/02/15-Dise%C3%B1o-De-Sonrisa-Seguro-Y-Confiable.jpg" 
+                        <img src="${pageContext.request.contextPath}/img/servicios/blanqueamiento.png" 
                              class="img-fluid w-100" alt="Diseño de sonrisa confiable" style="object-fit: cover; max-height: 440px;">
                     </div>
                 </div>
