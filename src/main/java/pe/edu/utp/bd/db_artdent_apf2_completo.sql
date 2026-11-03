@@ -244,7 +244,8 @@ INSERT INTO Horario (idHorario, HoraInicio, HoraFinal, DiaSemana) VALUES
   (2, '08:00:00', '18:30:00', 'Martes'),
   (3, '08:00:00', '18:30:00', 'Miércoles'),
   (4, '08:00:00', '18:30:00', 'Jueves'),
-  (5, '08:00:00', '18:30:00', 'Viernes');
+  (5, '08:00:00', '18:30:00', 'Viernes'),
+  (6, '09:00:00', '13:00:00', 'Sábado');
 
 INSERT INTO Servicio (idServicio, TipoServicio, Lema, Descripcion, Respuesta, Costo, img, Activo) VALUES 
   (1,'Limpieza Dental','Elimina el sarro y previene caries y enfermedades de las encías.','Profilaxis dental profesional para prevenir caries, gingivitis y sarro acumulado.','Recomendada cada seis meses o ante presencia de sarro y sangrado de encías.',40.00,'https://img.freepik.com/foto-gratis/proceso-limpieza-dental-profesional-primer-plano_23-2149174154.jpg',1),

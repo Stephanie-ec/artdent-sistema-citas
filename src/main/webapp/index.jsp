@@ -255,16 +255,16 @@
         </div>
         <div class="row justify-content-center align-items-center g-4 text-center">
             <div class="col-6 col-md-3">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/3/3f/Colgate.svg" class="img-fluid p-2" alt="Colgate" style="max-height: 55px; filter: grayscale(20%);">
+                <img onerror="this.style.display='none'" src="https://upload.wikimedia.org/wikipedia/commons/3/3f/Colgate.svg" class="img-fluid p-2" alt="Colgate" style="max-height: 55px; filter: grayscale(20%);">
             </div>
             <div class="col-6 col-md-3">
-                <img src="https://assets.boots.com/content/dam/boots/brands/brand---s/sensodyne/sensodyne_bt/sensodyne_bt_2021-05/2021-05_sensodyne_brand-treatment_horizontal-nav_sensodyne.dam.ts%3D1626850968239.jpg" class="img-fluid p-2" alt="Sensodyne" style="max-height: 55px; filter: grayscale(20%);">
+                <img onerror="this.style.display='none'" src="https://assets.boots.com/content/dam/boots/brands/brand---s/sensodyne/sensodyne_bt/sensodyne_bt_2021-05/2021-05_sensodyne_brand-treatment_horizontal-nav_sensodyne.dam.ts%3D1626850968239.jpg" class="img-fluid p-2" alt="Sensodyne" style="max-height: 55px; filter: grayscale(20%);">
             </div>
             <div class="col-6 col-md-3">
-                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTSVfCmOuGgT9LsJlj-ZbzhIBZdjK6UZrq7Ap87lo-mFoQcHsuCNYDhdGDPmZmFDcPCqQ" class="img-fluid p-2" alt="Nestlé Healthcare" style="max-height: 55px; filter: grayscale(20%);">
+                <img onerror="this.style.display='none'" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTSVfCmOuGgT9LsJlj-ZbzhIBZdjK6UZrq7Ap87lo-mFoQcHsuCNYDhdGDPmZmFDcPCqQ" class="img-fluid p-2" alt="Nestlé Healthcare" style="max-height: 55px; filter: grayscale(20%);">
             </div>
             <div class="col-6 col-md-3">
-                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQByTHpMwmvqMIdQ-GLSxd6rx6fls7MkQ__KA&s" class="img-fluid p-2" alt="Aliado Clínico" style="max-height: 55px; filter: grayscale(20%);">
+                <img onerror="this.style.display='none'" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQByTHpMwmvqMIdQ-GLSxd6rx6fls7MkQ__KA&s" class="img-fluid p-2" alt="Aliado Clínico" style="max-height: 55px; filter: grayscale(20%);">
             </div>
         </div>
     </section>
@@ -338,7 +338,7 @@
             <!-- Doctor 1 -->
             <div class="col-12 col-md-6 col-lg-4">
                 <div class="card doctor-card h-100">
-                    <img src="https://saluddata.com/wp-content/uploads/2024/07/Odontologo-Profesional-p.webp" 
+                    <img onerror="this.onerror=null;this.src='${pageContext.request.contextPath}/img/servicios/generico.png'" src="https://saluddata.com/wp-content/uploads/2024/07/Odontologo-Profesional-p.webp" 
                          class="card-img-top" alt="Dr. Luis Miguel Martínez" style="height: 250px; object-fit: cover;">
                     <div class="card-body text-center p-4">
                         <h5 class="fw-bold text-brand-dark mb-1">Dr. Luis Miguel Martínez</h5>
@@ -353,7 +353,7 @@
             <!-- Doctor 2 -->
             <div class="col-12 col-md-6 col-lg-4">
                 <div class="card doctor-card h-100">
-                    <img src="https://colderechomedico.com/wp-content/uploads/2020/06/Cual-es-la-importancia-del-secreto-profesional-en-odontologia_colderecho.jpg" 
+                    <img onerror="this.onerror=null;this.src='${pageContext.request.contextPath}/img/servicios/generico.png'" src="https://colderechomedico.com/wp-content/uploads/2020/06/Cual-es-la-importancia-del-secreto-profesional-en-odontologia_colderecho.jpg" 
                          class="card-img-top" alt="Dr. Rubén Cuadros" style="height: 250px; object-fit: cover;">
                     <div class="card-body text-center p-4">
                         <h5 class="fw-bold text-brand-dark mb-1">Dr. Rubén Cuadros</h5>
@@ -368,7 +368,7 @@
             <!-- Doctor 3 -->
             <div class="col-12 col-md-6 col-lg-4">
                 <div class="card doctor-card h-100">
-                    <img src="https://img.freepik.com/fotos-premium/retrato-hombre-dentista-pulgares-arriba-sonrisa-cuidado-bucal-especialista-felicidad-profesional-cara-hombre-o-empleado-higiene-dental-sector-salud-apoyo-revision_590464-191475.jpg" 
+                    <img onerror="this.onerror=null;this.src='${pageContext.request.contextPath}/img/servicios/generico.png'" src="https://img.freepik.com/fotos-premium/retrato-hombre-dentista-pulgares-arriba-sonrisa-cuidado-bucal-especialista-felicidad-profesional-cara-hombre-o-empleado-higiene-dental-sector-salud-apoyo-revision_590464-191475.jpg" 
                          class="card-img-top" alt="Dr. Juan Gómez" style="height: 250px; object-fit: cover;">
                     <div class="card-body text-center p-4">
                         <h5 class="fw-bold text-brand-dark mb-1">Dr. Juan Gómez</h5>
