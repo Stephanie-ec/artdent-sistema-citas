@@ -8,7 +8,7 @@
     <title>Panel de Administración | Centro Odontológico ArtDent</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=20261102">
+    <link rel="stylesheet" href="css/style.css?v=20261102b">
     <style>
         .card-stat {
             transition: transform 0.2s ease, box-shadow 0.2s ease;
