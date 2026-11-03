@@ -13,7 +13,7 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Roboto:wght@500;700;900&display=swap" rel="stylesheet">
     <!-- Hoja de Estilos Oficial de Marca Art Dent -->
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css?v=20261102">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css?v=20261102b">
 </head>
 
 <body class="d-flex flex-column min-vh-100 bg-brand-light">
@@ -45,7 +45,7 @@
                 <div class="alert alert-artdent-mint alert-dismissible fade show d-flex align-items-center mb-3" role="alert">
                     <i class="bi bi-check-circle-fill fs-4 me-2 text-brand-accent"></i>
                     <div>
-                        <strong>¡Cita presencial registrada con éxito!</strong> Código generado: <span class="badge bg-brand-primary fs-6 font-monospace">${param.codigo}</span>. Notificación enviada al paciente.
+                        <strong>¡Cita presencial registrada con éxito!</strong> Código generado: <span class="badge bg-brand-primary fs-6 font-monospace">${param.codigo}</span>.
                     </div>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
@@ -75,7 +75,7 @@
                 <div class="alert alert-artdent-mint alert-dismissible fade show d-flex align-items-center mb-3" role="alert">
                     <i class="bi bi-check-circle-fill fs-4 me-2 text-brand-accent"></i>
                     <div>
-                        <strong>¡Reserva web aprobada!</strong> La cita ha pasado a estado <strong>Confirmado</strong> y se notificó al paciente por correo.
+                        <strong>¡Reserva web aprobada!</strong> La cita ha pasado a estado <strong>Confirmado</strong>.
                     </div>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
@@ -85,7 +85,7 @@
                 <div class="alert alert-warning alert-dismissible fade show d-flex align-items-center mb-3" role="alert">
                     <i class="bi bi-x-circle-fill fs-4 me-2 text-warning"></i>
                     <div>
-                        <strong>Reserva rechazada:</strong> Se actualizó el estado a <strong>Rechazado</strong> y el motivo fue notificado por correo electrónico al paciente.
+                        <strong>Reserva rechazada:</strong> Se actualizó el estado a <strong>Rechazado</strong>.
                     </div>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
@@ -95,8 +95,24 @@
                 <div class="alert alert-secondary alert-dismissible fade show d-flex align-items-center mb-3" role="alert">
                     <i class="bi bi-ban fs-4 me-2"></i>
                     <div>
-                        <strong>Cita cancelada:</strong> el estado cambió a <strong>Cancelado</strong> y se notificó al paciente.
+                        <strong>Cita cancelada:</strong> el estado cambió a <strong>Cancelado</strong>.
                     </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </c:if>
+
+            <!-- Resultado real del correo (RF09) -->
+            <c:if test="${param.correo == '1'}">
+                <div class="alert alert-info alert-dismissible fade show d-flex align-items-center mb-3" role="alert">
+                    <i class="bi bi-envelope-check-fill fs-4 me-2"></i>
+                    <div>Se envió el correo de aviso al paciente.</div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </c:if>
+            <c:if test="${param.correo == '0'}">
+                <div class="alert alert-warning alert-dismissible fade show d-flex align-items-center mb-3" role="alert">
+                    <i class="bi bi-envelope-exclamation-fill fs-4 me-2"></i>
+                    <div><strong>El correo no se pudo enviar.</strong> Revise la cuenta de correo del centro (config.properties). El intento quedó registrado en Notificaciones.</div>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             </c:if>
@@ -207,13 +223,13 @@
 
                                             <!-- Acciones -->
                                             <td class="text-center pe-4">
-                                                <div class="d-flex justify-content-center align-items-center flex-wrap gap-1">
+                                                <div class="acciones-fila">
                                                     <c:choose>
                                                         <c:when test="${reserva.estado == 'Cancelado' || reserva.estado == 'Rechazado'}">
                                                             <form action="ReprogramacionController" method="post" class="d-inline">
                                                                 <input type="hidden" name="idReserva" value="${reserva.idReserva}" />
                                                                 <input type="hidden" name="accion" value="deleteReserva" />
-                                                                <button class="btn btn-sm btn-outline-danger rounded-pill" type="submit" title="Eliminar registro">
+                                                                <button class="btn btn-accion btn-outline-danger" type="submit" title="Eliminar registro">
                                                                     <i class="bi bi-trash"></i>
                                                                 </button>
                                                             </form>
@@ -228,20 +244,20 @@
                                                                                 <input type="hidden" name="idReserva" value="${reserva.idReserva}" />
                                                                                 <input type="hidden" name="estado" value="${reserva.estado}" />
                                                                                 <input type="hidden" name="accion" value="updateEstadoConfirmar" />
-                                                                                <button class="btn btn-sm btn-primary rounded-pill px-3" type="submit" title="Aprobar reserva web verificada">
-                                                                                    <i class="bi bi-check2"></i> Aprobar
+                                                                                <button class="btn btn-accion btn-primary" type="submit" title="Aprobar reserva web verificada">
+                                                                                    <i class="bi bi-check-lg"></i>
                                                                                 </button>
                                                                             </form>
                                                                         </c:when>
                                                                         <c:otherwise>
-                                                                            <button class="btn btn-sm btn-secondary rounded-pill px-3" type="button" onclick="alert('No se puede aprobar la reserva: Requiere pago verificado registrado previamente. Por favor, registre el pago en efectivo o espere el pago en línea.')" title="Bloqueado: Requiere Pago">
-                                                                                <i class="bi bi-lock-fill"></i> Aprobar
+                                                                            <button class="btn btn-accion btn-secondary" type="button" onclick="alert('No se puede aprobar la reserva: Requiere pago verificado registrado previamente. Por favor, registre el pago en efectivo o espere el pago en línea.')" title="Bloqueado: Requiere Pago">
+                                                                                <i class="bi bi-lock-fill"></i>
                                                                             </button>
                                                                         </c:otherwise>
                                                                     </c:choose>
 
-                                                                    <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-2" data-bs-toggle="modal" data-bs-target="#modalRechazoReserva${reserva.idReserva}" title="Rechazar reserva con motivo">
-                                                                        <i class="bi bi-x-circle"></i> Rechazar
+                                                                    <button type="button" class="btn btn-accion btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modalRechazoReserva${reserva.idReserva}" title="Rechazar reserva con motivo">
+                                                                        <i class="bi bi-x-lg"></i>
                                                                     </button>
                                                                 </c:when>
 
@@ -250,7 +266,7 @@
                                                                         <input type="hidden" name="idReserva" value="${reserva.idReserva}" />
                                                                         <input type="hidden" name="estado" value="${reserva.estado}" />
                                                                         <input type="hidden" name="accion" value="updateEstadoConfirmar" />
-                                                                        <button class="btn btn-sm btn-primary rounded-pill px-3" type="submit">Confirmar</button>
+                                                                        <button class="btn btn-accion btn-primary" type="submit" title="Confirmar cita"><i class="bi bi-check-lg"></i></button>
                                                                     </form>
                                                                 </c:when>
 
@@ -259,7 +275,7 @@
                                                                         <input type="hidden" name="idReserva" value="${reserva.idReserva}" />
                                                                         <input type="hidden" name="estado" value="${reserva.estado}" />
                                                                         <input type="hidden" name="accion" value="updateEstadoCompletado" />
-                                                                        <button class="btn btn-sm btn-success rounded-pill px-3" type="submit">Completar</button>
+                                                                        <button class="btn btn-accion btn-success" type="submit" title="Completar atención"><i class="bi bi-clipboard2-check"></i></button>
                                                                     </form>
                                                                 </c:when>
                                                             </c:choose>
@@ -268,17 +284,17 @@
                                                             <form action="ReprogramacionController" method="get" class="d-inline">
                                                                 <input type="hidden" name="id" value="${reserva.idReserva}" />
                                                                 <input type="hidden" name="accion" value="VerReproRe" />
-                                                                <button class="btn btn-sm btn-outline-primary rounded-pill ${sessionScope.TipoRol == 'Odontologo' ? 'd-none' : ''}" type="submit" title="Reprogramar fecha u hora">
+                                                                <button class="btn btn-accion btn-outline-primary ${sessionScope.TipoRol == 'Odontologo' ? 'd-none' : ''}" type="submit" title="Reprogramar fecha u hora">
                                                                     <i class="bi bi-calendar2-range"></i>
                                                                 </button>
                                                             </form>
 
                                                             <!-- Cancelar: solo citas vigentes y con confirmación -->
                                                             <c:if test="${reserva.estado == 'En espera' || reserva.estado == 'Confirmado' || reserva.estado == 'Reprogramado'}">
-                                                            <form action="ReprogramacionController" method="post" class="d-inline" onsubmit="return confirm('¿Cancelar esta reserva? Se notificará al paciente.');">
+                                                            <form action="ReprogramacionController" method="post" class="d-inline" onsubmit="return confirm('¿Cancelar esta reserva? Se enviará un correo al paciente.');">
                                                                 <input type="hidden" name="idReserva" value="${reserva.idReserva}" />
                                                                 <input type="hidden" name="accion" value="updateEstadoCancelar" />
-                                                                <button class="btn btn-sm btn-outline-secondary rounded-pill ${sessionScope.TipoRol == 'Odontologo' ? 'd-none' : ''}" type="submit" title="Cancelar reserva">
+                                                                <button class="btn btn-accion btn-outline-secondary ${sessionScope.TipoRol == 'Odontologo' ? 'd-none' : ''}" type="submit" title="Cancelar reserva">
                                                                     <i class="bi bi-ban"></i>
                                                                 </button>
                                                             </form>
@@ -338,13 +354,13 @@
 
                                             <!-- Acciones Cita -->
                                             <td class="text-center pe-4">
-                                                <div class="d-flex justify-content-center align-items-center flex-wrap gap-1">
+                                                <div class="acciones-fila">
                                                     <c:choose>
                                                         <c:when test="${cita.estado == 'Cancelado'}">
                                                             <form action="ReprogramacionController" method="post" class="d-inline">
                                                                 <input type="hidden" name="idCita" value="${cita.idCita}" />
                                                                 <input type="hidden" name="accion" value="deleteCita" />
-                                                                <button class="btn btn-sm btn-outline-danger rounded-pill" type="submit">Eliminar</button>
+                                                                <button class="btn btn-accion btn-outline-danger" type="submit" title="Eliminar registro"><i class="bi bi-trash"></i></button>
                                                             </form>
                                                         </c:when>
                                                         <c:otherwise>
@@ -354,7 +370,7 @@
                                                                         <input type="hidden" name="idCita" value="${cita.idCita}" />
                                                                         <input type="hidden" name="estado" value="${cita.estado}" />
                                                                         <input type="hidden" name="accion" value="updateEstadoConfirmarCita" />
-                                                                        <button class="btn btn-sm btn-primary rounded-pill px-3" type="submit">Confirmar</button>
+                                                                        <button class="btn btn-accion btn-primary" type="submit" title="Confirmar cita"><i class="bi bi-check-lg"></i></button>
                                                                     </form>
                                                                 </c:when>
                                                                 <c:when test="${cita.estado == 'Confirmado' && sessionScope.TipoRol == 'Odontologo'}">
@@ -362,22 +378,22 @@
                                                                         <input type="hidden" name="idCita" value="${cita.idCita}" />
                                                                         <input type="hidden" name="estado" value="${cita.estado}" />
                                                                         <input type="hidden" name="accion" value="updateEstadoCompletadoCita" />
-                                                                        <button class="btn btn-sm btn-success rounded-pill px-3" type="submit">Completar</button>
+                                                                        <button class="btn btn-accion btn-success" type="submit" title="Completar atención"><i class="bi bi-clipboard2-check"></i></button>
                                                                     </form>
                                                                 </c:when>
                                                             </c:choose>
                                                             <form action="ReprogramacionController" method="get" class="d-inline">
                                                                 <input type="hidden" name="id" value="${cita.idCita}" />
                                                                 <input type="hidden" name="accion" value="VerReproCi" />
-                                                                <button class="btn btn-sm btn-outline-primary rounded-pill ${sessionScope.TipoRol == 'Odontologo' ? 'd-none' : ''}" type="submit">
+                                                                <button class="btn btn-accion btn-outline-primary ${sessionScope.TipoRol == 'Odontologo' ? 'd-none' : ''}" type="submit" title="Reprogramar fecha u hora">
                                                                     <i class="bi bi-calendar2-range"></i>
                                                                 </button>
                                                             </form>
                                                             <c:if test="${cita.estado == 'En espera' || cita.estado == 'Confirmado' || cita.estado == 'Reprogramado'}">
-                                                            <form action="ReprogramacionController" method="post" class="d-inline" onsubmit="return confirm('¿Cancelar esta cita? Se notificará al paciente.');">
+                                                            <form action="ReprogramacionController" method="post" class="d-inline" onsubmit="return confirm('¿Cancelar esta cita? Se enviará un correo al paciente.');">
                                                                 <input type="hidden" name="idCita" value="${cita.idCita}" />
                                                                 <input type="hidden" name="accion" value="updateEstadoCanceladoCita" />
-                                                                <button class="btn btn-sm btn-outline-secondary rounded-pill ${sessionScope.TipoRol == 'Odontologo' ? 'd-none' : ''}" type="submit" title="Cancelar cita">
+                                                                <button class="btn btn-accion btn-outline-secondary ${sessionScope.TipoRol == 'Odontologo' ? 'd-none' : ''}" type="submit" title="Cancelar cita">
                                                                     <i class="bi bi-ban"></i>
                                                                 </button>
                                                             </form>
@@ -398,6 +414,15 @@
                             </c:choose>
                         </tbody>
                     </table>
+                </div>
+                <div class="leyenda-acciones px-3 py-2 border-top">
+                    Acciones:
+                    <i class="bi bi-check-lg"></i>Aprobar / confirmar
+                    <i class="bi bi-x-lg"></i>Rechazar
+                    <i class="bi bi-clipboard2-check"></i>Completar
+                    <i class="bi bi-calendar2-range"></i>Reprogramar
+                    <i class="bi bi-ban"></i>Cancelar
+                    <i class="bi bi-trash"></i>Eliminar
                 </div>
             </div>
         </main>

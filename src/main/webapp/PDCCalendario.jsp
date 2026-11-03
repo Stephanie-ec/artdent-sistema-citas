@@ -37,7 +37,7 @@
         <title>Panel de Control - Clínica</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css">
-        <link rel="stylesheet" href="css/style.css?v=20261102">
+        <link rel="stylesheet" href="css/style.css?v=20261102b">
         <style>
             /* Estilos CSS */
             .calendar-wrap {
@@ -230,6 +230,23 @@
                 <% if ("completadoOk".equals(request.getParameter("msg"))) { %>
                     <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
                         <i class="bi bi-check-circle-fill me-2"></i><strong>¡Atención Finalizada!</strong> La cita ha sido marcada como <strong>Completada</strong> con éxito.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                <% } %>
+                <% if ("reprogramadoOk".equals(request.getParameter("msg"))) { %>
+                    <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
+                        <i class="bi bi-calendar-check me-2"></i><strong>Cita reprogramada.</strong> La nueva fecha y hora ya figuran en el calendario.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                <% } %>
+                <% if ("1".equals(request.getParameter("correo"))) { %>
+                    <div class="alert alert-info alert-dismissible fade show mb-3" role="alert">
+                        <i class="bi bi-envelope-check-fill me-2"></i>Se envió el correo de aviso al paciente.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                <% } else if ("0".equals(request.getParameter("correo"))) { %>
+                    <div class="alert alert-warning alert-dismissible fade show mb-3" role="alert">
+                        <i class="bi bi-envelope-exclamation-fill me-2"></i><strong>El correo no se pudo enviar.</strong> Revise la cuenta de correo del centro (config.properties). El intento quedó registrado en Notificaciones.
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                 <% } %>

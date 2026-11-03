@@ -245,7 +245,7 @@ public class CitaController extends HttpServlet {
                         "Gracias por su preferencia.");
             }
 
-            response.sendRedirect("ReservaController?accion=listarCitas&msg=presencialOk&codigo=" + codigoReserva);
+            response.sendRedirect("ReservaController?accion=listarCitas&msg=presencialOk&codigo=" + codigoReserva + NotificacionService.sufijoCorreo());
             return;
         }
 
