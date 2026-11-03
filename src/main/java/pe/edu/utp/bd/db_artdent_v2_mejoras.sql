@@ -1,18 +1,9 @@
--- =====================================================================
--- Art Dent - script v2 (se ejecuta DESPUES de db_artdent_apf2_completo.sql)
--- 1) Tamaños de Lema/Descripcion/Respuesta/img (D-15, O-14)
--- 2) Validaciones en la BD con CHECK (D-07, O-18)
--- 3) Usuario MySQL de la aplicación con privilegios mínimos (O-17)
--- 4) Datos de prueba para la demostración (citas, pagos y boletas)
--- Requiere MySQL 8.0.16 o superior (CHECK se aplica desde esa versión).
--- =====================================================================
+-- script v2 art dent (correr despues de db_artdent_apf2_completo.sql)
+-- cambiar la clave de artdent_app antes de ejecutar
+
 USE db_artdent_apf2;
 
--- ---------------------------------------------------------------------
--- 0) Revisión previa: si alguna consulta devuelve filas, corregir esos
---    datos antes de continuar (de lo contrario el paso 2 fallará).
--- ---------------------------------------------------------------------
--- Usuario de prueba del script original con números en el apellido ("IPv5")
+-- revisar datos antes de agregar los checks
 UPDATE Usuario SET Apellido = 'Ipanaqué Vásquez' WHERE DNI = '75121424' AND Apellido = 'IPv5';
 
 SELECT 'Paciente' AS tabla, idPaciente AS id, Nombre, Apellido, DNI, Telefono FROM Paciente
@@ -29,22 +20,14 @@ SELECT idServicio, CHAR_LENGTH(Lema) AS lema, CHAR_LENGTH(Descripcion) AS descri
  WHERE CHAR_LENGTH(Lema) > 200 OR CHAR_LENGTH(Descripcion) > 600
     OR CHAR_LENGTH(Respuesta) > 600 OR CHAR_LENGTH(img) > 500 OR Costo <= 0;
 
--- ---------------------------------------------------------------------
--- 1) Tamaños definidos (antes TEXT sin límite)
---    Lema: frase corta de la tarjeta en Servicios
---    Descripcion: texto de "Leer más"
---    Respuesta: texto que usa el asistente virtual para recomendar
--- ---------------------------------------------------------------------
+-- tamaños de los textos de servicio
 ALTER TABLE Servicio
   MODIFY Lema        VARCHAR(200) NOT NULL,
   MODIFY Descripcion VARCHAR(600) NOT NULL,
   MODIFY Respuesta   VARCHAR(600) NOT NULL,
   MODIFY img         VARCHAR(500) NOT NULL;
 
--- ---------------------------------------------------------------------
--- 2) Validaciones en la BD (las mismas reglas que Validador.java):
---    DNI 8 dígitos, celular 9XXXXXXXX, nombres sin números, montos > 0
--- ---------------------------------------------------------------------
+-- validaciones
 ALTER TABLE Paciente
   ADD CONSTRAINT chk_Paciente_DNI      CHECK (DNI REGEXP '^[0-9]{8}$'),
   ADD CONSTRAINT chk_Paciente_Telefono CHECK (Telefono REGEXP '^9[0-9]{8}$'),
@@ -62,20 +45,12 @@ ALTER TABLE Pago        ADD CONSTRAINT chk_Pago_Monto      CHECK (Monto > 0);
 ALTER TABLE Cita        ADD CONSTRAINT chk_Cita_Importe    CHECK (Importe IS NULL OR Importe >= 0);
 ALTER TABLE Comprobante ADD CONSTRAINT chk_Comprobante_DNI CHECK (DNICliente REGEXP '^[0-9]{8}$');
 
--- ---------------------------------------------------------------------
--- 3) Usuario de la aplicación con privilegios mínimos
---    Cambiar la clave antes de ejecutar y ponerla en config.properties:
---      db.user=artdent_app
---      db.password=<la misma clave>
---    No puede borrar tablas, crear tablas ni administrar usuarios.
--- ---------------------------------------------------------------------
+-- usuario de la app
 CREATE USER IF NOT EXISTS 'artdent_app'@'localhost' IDENTIFIED BY 'CambiarEstaClave_2026';
 GRANT SELECT, INSERT, UPDATE, DELETE, EXECUTE ON db_artdent_apf2.* TO 'artdent_app'@'localhost';
 FLUSH PRIVILEGES;
 
--- ---------------------------------------------------------------------
--- 4) Datos de prueba (se insertan una sola vez; marcados con [demo])
--- ---------------------------------------------------------------------
+-- datos de prueba
 DROP PROCEDURE IF EXISTS sp_cargar_demo;
 DELIMITER ;;
 CREATE PROCEDURE sp_cargar_demo()
@@ -83,7 +58,6 @@ BEGIN
   DECLARE vOdo2 INT;
   IF NOT EXISTS (SELECT 1 FROM Cita WHERE Descripcion LIKE '[demo]%') THEN
 
-    -- Segundo odontólogo (clave inicial 1234, se convierte a bcrypt en su primer ingreso)
     INSERT IGNORE INTO Usuario (Nombre, Apellido, DNI, Telefono, CorreoElectronico, Direccion, FechaNacimiento, Clave, Rol_idRol)
     VALUES ('Lucía', 'Herrera Campos', '71458236', '956321478', 'lucia.herrera@artdent.com', 'Av. Arequipa 1450', '1992-05-14', '1234', 3);
     SELECT idUsuario INTO vOdo2 FROM Usuario WHERE DNI = '71458236';
@@ -92,7 +66,6 @@ BEGIN
     INSERT IGNORE INTO Usuario_Servicio (idUsuario, idServicio, Disponibilidad)
     SELECT vOdo2, idServicio, 1 FROM Servicio WHERE idServicio IN (1, 4, 5, 7);
 
-    -- Pacientes
     INSERT IGNORE INTO Paciente (Nombre, Apellido, DNI, Telefono, Correo) VALUES
       ('María Fernanda', 'Rojas Quispe',   '45872136', '912345678', 'maria.rojas@gmail.com'),
       ('Luis Alberto',   'Salas Mendoza',  '40123987', '923456789', 'luis.salas@gmail.com'),
@@ -101,8 +74,6 @@ BEGIN
       ('Rosa Elena',     'Huamán Flores',  '41236587', '956789012', 'rosa.huaman@gmail.com'),
       ('Diego Armando',  'Paredes Luna',   '73654128', '967890123', 'diego.paredes@gmail.com');
 
-    -- Citas: (fecha, hora, descripcion, servicio, estado, origen, odontologo, DNI paciente, metodo pago o NULL)
-    -- Estados: 1 En espera, 2 Completado, 3 Confirmado, 4 Reprogramado, 5 Cancelado, 6 Rechazado
     CALL sp_demo_cita('2026-10-12', '09:00:00', '[demo] Limpieza de control',          1, 2, 'Presencial', 4,     '45872136', 2);
     CALL sp_demo_cita('2026-10-14', '10:30:00', '[demo] Dolor al tomar frío',          5, 2, 'Web',        vOdo2, '40123987', 1);
     CALL sp_demo_cita('2026-10-19', '15:00:00', '[demo] Manchas por café',             4, 2, 'Web',        vOdo2, '72569841', 1);
@@ -156,7 +127,6 @@ CALL sp_cargar_demo();
 DROP PROCEDURE IF EXISTS sp_cargar_demo;
 DROP PROCEDURE IF EXISTS sp_demo_cita;
 
--- Verificación rápida
 SELECT e.TipoEstado, COUNT(*) AS citas FROM Cita c JOIN Estado e ON e.idEstado = c.Estado_idEstado GROUP BY e.TipoEstado;
 SELECT CONSTRAINT_NAME, TABLE_NAME FROM information_schema.TABLE_CONSTRAINTS
  WHERE TABLE_SCHEMA = 'db_artdent_apf2' AND CONSTRAINT_TYPE = 'CHECK' ORDER BY TABLE_NAME;
