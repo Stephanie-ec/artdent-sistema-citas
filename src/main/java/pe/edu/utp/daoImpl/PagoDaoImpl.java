@@ -287,4 +287,37 @@ public class PagoDaoImpl implements PagoDao {
         comp.setTipoServicio(rs.getString("TipoServicio"));
         return comp;
     }
+
+    @Override
+    public Map<String, Object> consultarReserva(int idCita, String dni) {
+        String sql = "SELECT c.idCita, c.FechaCita, c.HoraCita, e.TipoEstado, s.TipoServicio, "
+                + "CONCAT(p.Nombre, ' ', p.Apellido) AS Paciente, "
+                + "(SELECT COUNT(*) FROM Pago pg WHERE pg.Cita_idCita = c.idCita) AS Pagos "
+                + "FROM Cita c JOIN Paciente p ON p.idPaciente = c.Paciente_idPaciente "
+                + "JOIN Estado e ON e.idEstado = c.Estado_idEstado "
+                + "JOIN Servicio s ON s.idServicio = c.Servicio_idServicio "
+                + "WHERE c.idCita = ? AND p.DNI = ?";
+        try (Connection conn = Conexion.getConection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, idCita);
+            ps.setString(2, dni);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) {
+                    return null;
+                }
+                Map<String, Object> r = new HashMap<>();
+                r.put("idCita", rs.getInt("idCita"));
+                r.put("fecha", String.valueOf(rs.getDate("FechaCita")));
+                r.put("hora", String.valueOf(rs.getTime("HoraCita")).substring(0, 5));
+                r.put("estado", rs.getString("TipoEstado"));
+                r.put("servicio", rs.getString("TipoServicio"));
+                r.put("paciente", rs.getString("Paciente"));
+                r.put("pagado", rs.getInt("Pagos") > 0);
+                return r;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }

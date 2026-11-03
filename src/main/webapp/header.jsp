@@ -30,6 +30,9 @@
                 <li class="nav-item">
                     <a class="nav-link" href="faq.jsp">FAQ</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="consultareserva.jsp">Mi reserva</a>
+                </li>
             </ul>
 
             <!-- Botón de Usuario / Autenticación -->

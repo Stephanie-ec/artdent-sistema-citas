@@ -79,6 +79,7 @@
             color: var(--artdent-white);
         }
         @page { size: A4 portrait; margin: 0; }
+        * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         @media print {
             body { background: white !important; margin: 0; padding: 12mm 14mm !important; }
             .boleta-container { break-inside: avoid; page-break-inside: avoid; }
@@ -90,6 +91,11 @@
 <body>
 
     <div class="container">
+        <c:if test="${yaPagado}">
+            <div class="alert alert-info no-print mx-auto mt-3" style="max-width: 820px;">
+                <strong>Esta reserva ya estaba pagada.</strong> No se realizó un nuevo cobro; esta es su boleta.
+            </div>
+        </c:if>
         <!-- Barra de Botones no imprimible -->
         <div class="no-print d-flex justify-content-between align-items-center max-w-820 mx-auto my-3" style="max-width: 820px;">
             <a href="javascript:history.back()" class="btn btn-outline-secondary">

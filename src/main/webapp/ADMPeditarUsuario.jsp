@@ -103,7 +103,7 @@
 
                                     <div class="mb-4">
                                         <label for="clave" class="form-label fw-semibold">Nueva Contraseña (Opcional)</label>
-                                        <input type="password" class="form-control" id="clave" name="clave" placeholder="Dejar en blanco para mantener la contraseña actual">
+                                        <input type="password" class="form-control" id="clave" name="clave" minlength="6" maxlength="30" placeholder="Dejar en blanco para mantener la contraseña actual">
                                         <small class="text-muted">Si ingresa una nueva contraseña, se actualizará cifrada con BCrypt.</small>
                                     </div>
 
