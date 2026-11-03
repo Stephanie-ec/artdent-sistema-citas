@@ -96,6 +96,10 @@ public class UsuarioController extends HttpServlet {
         if (errorDni == null) {
             errorDni = pe.edu.utp.utils.Validador.validarDniTelefono(dniTexto, request.getParameter("telefono"));
         }
+        String claveNueva = request.getParameter("clave");
+        if (errorDni == null && (claveNueva == null || claveNueva.length() < 6 || claveNueva.length() > 30)) {
+            errorDni = "La contraseña debe tener entre 6 y 30 caracteres.";
+        }
         if (errorDni == null) {
             errorDni = pe.edu.utp.utils.ReniecService.validarIdentidad(dniTexto, request.getParameter("nombre"), request.getParameter("apellido"));
         }
@@ -131,6 +135,11 @@ public class UsuarioController extends HttpServlet {
         String errorDatos = pe.edu.utp.utils.Validador.validarNombreApellido(request.getParameter("nombre"), request.getParameter("apellido"));
         if (errorDatos == null) {
             errorDatos = pe.edu.utp.utils.Validador.validarDniTelefono(request.getParameter("dni"), request.getParameter("telefono"));
+        }
+        String claveEditada = request.getParameter("clave");
+        if (errorDatos == null && claveEditada != null && !claveEditada.isEmpty()
+                && (claveEditada.length() < 6 || claveEditada.length() > 30)) {
+            errorDatos = "La contraseña debe tener entre 6 y 30 caracteres.";
         }
         if (errorDatos != null) {
             response.sendRedirect("UsuarioController?action=list&error=" + java.net.URLEncoder.encode(errorDatos, "UTF-8"));

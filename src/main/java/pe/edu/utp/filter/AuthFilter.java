@@ -35,7 +35,7 @@ public class AuthFilter implements Filter {
             "", "/", "/index.jsp", "/servicios.jsp", "/DetalleServicio.jsp", "/nosotros.jsp",
             "/faq.jsp", "/reserva.jsp", "/reservapersonal.jsp", "/formularioreserva.jsp",
             "/citareservada.jsp", "/boleta.jsp", "/iniciosesion.jsp", "/iniciosesionerror.jsp",
-            "/error.jsp", "/header.jsp", "/footer.jsp"));
+            "/error.jsp", "/header.jsp", "/footer.jsp", "/consultareserva.jsp"));
 
     /** Servlets públicos (los que validan el rol internamente también se listan aquí). */
     private static final Set<String> SERVLETS_PUBLICOS = new HashSet<>(Arrays.asList(
