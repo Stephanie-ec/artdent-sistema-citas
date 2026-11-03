@@ -157,7 +157,7 @@ public class ReprogramacionController extends HttpServlet {
             String correo = citaDao.getEmailPacienteByCitaId(idCita);
             NotificacionService.notificar(idCita, 4, "Cita Reprogramada", correo,
                     "Estimado paciente, su cita ha sido reprogramada para la fecha: " + nuevaFecha + " a las " + nuevaHora + ".");
-            response.sendRedirect("ReservaController?accion=listarReservasPorDia&msg=reprogramadoOk");
+            response.sendRedirect("ReservaController?accion=listarReservasPorDia&msg=reprogramadoOk" + NotificacionService.sufijoCorreo());
         } else {
             // Si hubo un error en la actualización
             request.getRequestDispatcher("error.jsp").forward(request, response); // Redirige a la página de error
@@ -178,7 +178,7 @@ public class ReprogramacionController extends HttpServlet {
             String correo = reservaDao.getEmailPacienteByReservaId(idReserva);
             NotificacionService.notificar(idReserva, 4, "Reserva Reprogramada", correo,
                     "Estimado paciente, su reserva ha sido reprogramada para la fecha: " + nuevaFecha + " a las " + nuevaHora + ".");
-            response.sendRedirect("ReservaController?accion=listarReservasPorDia&msg=reprogramadoOk");
+            response.sendRedirect("ReservaController?accion=listarReservasPorDia&msg=reprogramadoOk" + NotificacionService.sufijoCorreo());
         } else {
             request.getRequestDispatcher("error.jsp").forward(request, response); // Redirige a la página de error
         }
@@ -226,9 +226,9 @@ public class ReprogramacionController extends HttpServlet {
             String rol = (request.getSession() != null && request.getSession().getAttribute("TipoRol") != null) 
                     ? request.getSession().getAttribute("TipoRol").toString() : "";
             if (rol.equalsIgnoreCase("Odontologo")) {
-                response.sendRedirect("ReservaController?accion=listarReservasPorDia&msg=completadoOk");
+                response.sendRedirect("ReservaController?accion=listarReservasPorDia&msg=completadoOk" + NotificacionService.sufijoCorreo());
             } else {
-                response.sendRedirect("ReservaController?accion=listar&msg=aprobadoOk");
+                response.sendRedirect("ReservaController?accion=listar&msg=aprobadoOk" + NotificacionService.sufijoCorreo());
             }
         } else {
             request.getRequestDispatcher("error.jsp").forward(request, response);
@@ -250,7 +250,7 @@ public class ReprogramacionController extends HttpServlet {
             String correo = reservaDao.getEmailPacienteByReservaId(idReserva);
             NotificacionService.notificar(idReserva, 6, "Reserva Rechazada", correo,
                     "Estimado paciente, lamentamos informarle que su reserva web ha sido rechazada por el siguiente motivo: " + motivo + ".");
-            response.sendRedirect("ReservaController?accion=listar&msg=rechazadoOk");
+            response.sendRedirect("ReservaController?accion=listar&msg=rechazadoOk" + NotificacionService.sufijoCorreo());
         } else {
             request.getRequestDispatcher("error.jsp").forward(request, response);
         }
@@ -282,7 +282,7 @@ public class ReprogramacionController extends HttpServlet {
             String rol = (request.getSession() != null && request.getSession().getAttribute("TipoRol") != null) 
                     ? request.getSession().getAttribute("TipoRol").toString() : "";
             if (rol.equalsIgnoreCase("Odontologo")) {
-                response.sendRedirect("ReservaController?accion=listarReservasPorDia&msg=completadoOk");
+                response.sendRedirect("ReservaController?accion=listarReservasPorDia&msg=completadoOk" + NotificacionService.sufijoCorreo());
             } else {
                 response.sendRedirect("ReservaController?accion=listar");
             }
@@ -300,7 +300,7 @@ public class ReprogramacionController extends HttpServlet {
             String correo = reservaDao.getEmailPacienteByReservaId(idReserva);
             NotificacionService.notificar(idReserva, 5, "Reserva Cancelada", correo,
                     "Estimado paciente, su reserva ha sido cancelada.");
-            response.sendRedirect("ReservaController?accion=listar&msg=canceladoOk");
+            response.sendRedirect("ReservaController?accion=listar&msg=canceladoOk" + NotificacionService.sufijoCorreo());
         } else {
             request.getRequestDispatcher("error.jsp").forward(request, response);
         }
@@ -316,7 +316,7 @@ public class ReprogramacionController extends HttpServlet {
             String correo = CitaDao.getEmailPacienteByCitaId(idCita);
             NotificacionService.notificar(idCita, 5, "Cita Cancelada", correo,
                     "Estimado paciente, su cita ha sido cancelada.");
-            response.sendRedirect("ReservaController?accion=listarCitas&msg=canceladoOk");
+            response.sendRedirect("ReservaController?accion=listarCitas&msg=canceladoOk" + NotificacionService.sufijoCorreo());
         } else {
             request.getRequestDispatcher("error.jsp").forward(request, response);
         }

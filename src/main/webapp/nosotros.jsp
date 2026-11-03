@@ -12,7 +12,7 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Roboto:wght@500;700;900&display=swap" rel="stylesheet">
     <!-- Hoja de Estilos Oficial de Marca Art Dent -->
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css?v=20261102b">
 
     <style>
         .about-hero {
@@ -94,8 +94,8 @@
                 </div>
                 <div class="col-12 col-lg-6">
                     <div class="img-card">
-                        <img src="https://odontologiaespecializadasevilla.com/wp-content/uploads/2018/07/dentista-sevilla.jpg" 
-                             class="img-fluid w-100" alt="Consultorio dental moderno" style="object-fit: cover; max-height: 440px;">
+                        <img src="${pageContext.request.contextPath}/img/fachada.jpg" 
+                             class="img-fluid w-100" alt="Fachada del Centro Odontológico Art Dent" style="object-fit: cover; max-height: 440px;">
                     </div>
                 </div>
             </div>
@@ -141,7 +141,7 @@
                 </div>
                 <div class="col-12 col-lg-6">
                     <div class="img-card">
-                        <img src="https://vital.com.co/wp-content/uploads/2019/02/15-Dise%C3%B1o-De-Sonrisa-Seguro-Y-Confiable.jpg" 
+                        <img src="${pageContext.request.contextPath}/img/servicios/blanqueamiento.png" 
                              class="img-fluid w-100" alt="Diseño de sonrisa confiable" style="object-fit: cover; max-height: 440px;">
                     </div>
                 </div>

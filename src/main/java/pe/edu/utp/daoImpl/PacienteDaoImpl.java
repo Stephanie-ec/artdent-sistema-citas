@@ -118,7 +118,7 @@ public class PacienteDaoImpl implements PacienteDao {
              PreparedStatement ps = cx.prepareStatement(SQL)) {
             ps.setString(1, p.getNombre());
             ps.setString(2, p.getApellido());
-            ps.setInt(3, p.getDni());
+            ps.setString(3, String.format("%08d", p.getDni()));
             ps.setInt(4, p.getTelefono());
             ps.setString(5, p.getCorreo());
             return ps.executeUpdate() > 0;

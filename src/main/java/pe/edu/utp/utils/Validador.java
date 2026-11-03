@@ -14,6 +14,10 @@ public final class Validador {
         if (vacio(nombre) || vacio(apellido)) {
             return "Ingrese el nombre y el apellido del paciente.";
         }
+        String errorNombre = validarNombreApellido(nombre, apellido);
+        if (errorNombre != null) {
+            return errorNombre;
+        }
         if (dni == null || !dni.trim().matches("\\d{8}")) {
             return "El DNI debe tener exactamente 8 dígitos numéricos.";
         }
@@ -25,6 +29,30 @@ public final class Validador {
         }
         if (vacio(fecha) || vacio(hora)) {
             return "Seleccione la fecha y la hora de la cita.";
+        }
+        return null;
+    }
+
+    /** Nombres y apellidos: solo letras (con tildes y ñ), espacios, apóstrofo y guion. */
+    private static final String PATRON_NOMBRE = "^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ][A-Za-zÁÉÍÓÚÜÑáéíóúüñ' -]{1,49}$";
+
+    public static String validarNombreApellido(String nombre, String apellido) {
+        if (vacio(nombre) || !nombre.trim().matches(PATRON_NOMBRE)) {
+            return "El nombre solo admite letras (sin números ni símbolos).";
+        }
+        if (vacio(apellido) || !apellido.trim().matches(PATRON_NOMBRE)) {
+            return "El apellido solo admite letras (sin números ni símbolos).";
+        }
+        return null;
+    }
+
+    /** DNI de 8 dígitos y celular de 9 dígitos que empieza con 9. */
+    public static String validarDniTelefono(String dni, String telefono) {
+        if (dni != null && !dni.trim().matches("\\d{8}")) {
+            return "El DNI debe tener exactamente 8 dígitos numéricos.";
+        }
+        if (telefono == null || !telefono.trim().matches("9\\d{8}")) {
+            return "El celular debe tener 9 dígitos y empezar con 9.";
         }
         return null;
     }
