@@ -85,6 +85,19 @@ public class PacienteController extends HttpServlet {
             action = request.getParameter("accion");
         }
 
+        if ("update".equalsIgnoreCase(action) || "create".equalsIgnoreCase(action)) {
+            String errorDatos = pe.edu.utp.utils.Validador.validarNombreApellido(request.getParameter("nombre"), request.getParameter("apellido"));
+            if (errorDatos == null) {
+                errorDatos = pe.edu.utp.utils.Validador.validarDniTelefono(
+                        "create".equalsIgnoreCase(action) ? String.valueOf(request.getParameter("dni")) : null,
+                        request.getParameter("telefono"));
+            }
+            if (errorDatos != null) {
+                response.sendRedirect("PacienteController?action=list&msg=error&detalle=" + java.net.URLEncoder.encode(errorDatos, "UTF-8"));
+                return;
+            }
+        }
+
         if ("update".equalsIgnoreCase(action)) {
             int idPaciente = Integer.parseInt(request.getParameter("idPaciente"));
             String nombre = request.getParameter("nombre");

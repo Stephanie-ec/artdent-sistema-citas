@@ -12,11 +12,16 @@ USE db_artdent_apf2;
 -- 0) Revisión previa: si alguna consulta devuelve filas, corregir esos
 --    datos antes de continuar (de lo contrario el paso 2 fallará).
 -- ---------------------------------------------------------------------
-SELECT 'Paciente' AS tabla, idPaciente AS id, DNI, Telefono FROM Paciente
+-- Usuario de prueba del script original con números en el apellido ("IPv5")
+UPDATE Usuario SET Apellido = 'Ipanaqué Vásquez' WHERE DNI = '75121424' AND Apellido = 'IPv5';
+
+SELECT 'Paciente' AS tabla, idPaciente AS id, Nombre, Apellido, DNI, Telefono FROM Paciente
  WHERE DNI NOT REGEXP '^[0-9]{8}$' OR Telefono NOT REGEXP '^9[0-9]{8}$'
+    OR Nombre REGEXP '[0-9]' OR Apellido REGEXP '[0-9]'
 UNION ALL
-SELECT 'Usuario', idUsuario, DNI, Telefono FROM Usuario
- WHERE DNI NOT REGEXP '^[0-9]{8}$' OR Telefono NOT REGEXP '^9[0-9]{8}$';
+SELECT 'Usuario', idUsuario, Nombre, Apellido, DNI, Telefono FROM Usuario
+ WHERE DNI NOT REGEXP '^[0-9]{8}$' OR Telefono NOT REGEXP '^9[0-9]{8}$'
+    OR Nombre REGEXP '[0-9]' OR Apellido REGEXP '[0-9]';
 
 SELECT idServicio, CHAR_LENGTH(Lema) AS lema, CHAR_LENGTH(Descripcion) AS descripcion,
        CHAR_LENGTH(Respuesta) AS respuesta, CHAR_LENGTH(img) AS img, Costo
@@ -37,17 +42,20 @@ ALTER TABLE Servicio
   MODIFY img         VARCHAR(500) NOT NULL;
 
 -- ---------------------------------------------------------------------
--- 2) Validaciones en la BD (las mismas reglas que Validador.java)
+-- 2) Validaciones en la BD (las mismas reglas que Validador.java):
+--    DNI 8 dígitos, celular 9XXXXXXXX, nombres sin números, montos > 0
 -- ---------------------------------------------------------------------
 ALTER TABLE Paciente
   ADD CONSTRAINT chk_Paciente_DNI      CHECK (DNI REGEXP '^[0-9]{8}$'),
   ADD CONSTRAINT chk_Paciente_Telefono CHECK (Telefono REGEXP '^9[0-9]{8}$'),
-  ADD CONSTRAINT chk_Paciente_Correo   CHECK (Correo LIKE '%_@_%._%');
+  ADD CONSTRAINT chk_Paciente_Correo   CHECK (Correo LIKE '%_@_%._%'),
+  ADD CONSTRAINT chk_Paciente_Nombre   CHECK (Nombre NOT REGEXP '[0-9]' AND Apellido NOT REGEXP '[0-9]');
 
 ALTER TABLE Usuario
   ADD CONSTRAINT chk_Usuario_DNI      CHECK (DNI REGEXP '^[0-9]{8}$'),
   ADD CONSTRAINT chk_Usuario_Telefono CHECK (Telefono REGEXP '^9[0-9]{8}$'),
-  ADD CONSTRAINT chk_Usuario_Intentos CHECK (IntentosFallidos BETWEEN 0 AND 10);
+  ADD CONSTRAINT chk_Usuario_Intentos CHECK (IntentosFallidos BETWEEN 0 AND 10),
+  ADD CONSTRAINT chk_Usuario_Nombre   CHECK (Nombre NOT REGEXP '[0-9]' AND Apellido NOT REGEXP '[0-9]');
 
 ALTER TABLE Servicio    ADD CONSTRAINT chk_Servicio_Costo  CHECK (Costo > 0);
 ALTER TABLE Pago        ADD CONSTRAINT chk_Pago_Monto      CHECK (Monto > 0);

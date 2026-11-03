@@ -92,8 +92,13 @@ public class UsuarioController extends HttpServlet {
     private void addUsuario(HttpServletRequest request, HttpServletResponse response) throws IOException {
         // CR-06: la cuenta solo se crea si el DNI existe en RENIEC (cuando la consulta está activada)
         String dniTexto = request.getParameter("dni") != null ? request.getParameter("dni").trim() : "";
-        String errorDni = !dniTexto.matches("\\d{8}") ? "El DNI debe tener exactamente 8 dígitos numéricos."
-                : pe.edu.utp.utils.ReniecService.validarIdentidad(dniTexto, request.getParameter("nombre"), request.getParameter("apellido"));
+        String errorDni = pe.edu.utp.utils.Validador.validarNombreApellido(request.getParameter("nombre"), request.getParameter("apellido"));
+        if (errorDni == null) {
+            errorDni = pe.edu.utp.utils.Validador.validarDniTelefono(dniTexto, request.getParameter("telefono"));
+        }
+        if (errorDni == null) {
+            errorDni = pe.edu.utp.utils.ReniecService.validarIdentidad(dniTexto, request.getParameter("nombre"), request.getParameter("apellido"));
+        }
         if (errorDni != null) {
             response.sendRedirect("UsuarioController?action=list&error=" + java.net.URLEncoder.encode(errorDni, "UTF-8"));
             return;
@@ -123,6 +128,14 @@ public class UsuarioController extends HttpServlet {
     }
 
     private void updateUsuario(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String errorDatos = pe.edu.utp.utils.Validador.validarNombreApellido(request.getParameter("nombre"), request.getParameter("apellido"));
+        if (errorDatos == null) {
+            errorDatos = pe.edu.utp.utils.Validador.validarDniTelefono(request.getParameter("dni"), request.getParameter("telefono"));
+        }
+        if (errorDatos != null) {
+            response.sendRedirect("UsuarioController?action=list&error=" + java.net.URLEncoder.encode(errorDatos, "UTF-8"));
+            return;
+        }
         int id = Integer.parseInt(request.getParameter("id"));
         String nombre = request.getParameter("nombre");
         String apellido = request.getParameter("apellido");

@@ -13,7 +13,7 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Roboto:wght@500;700;900&display=swap" rel="stylesheet">
     <!-- Hoja de Estilos Oficial de Marca Art Dent -->
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css?v=20261102">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css?v=20261102b">
 </head>
 
 <body class="d-flex flex-column min-vh-100 bg-brand-light">
@@ -61,6 +61,18 @@
                 <div class="alert alert-artdent-mint alert-dismissible fade show d-flex align-items-center mb-3" role="alert">
                     <i class="bi bi-check-circle-fill fs-4 me-2 text-brand-accent"></i>
                     <div><strong>¡Éxito!</strong> Los datos del paciente han sido actualizados correctamente.</div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </c:if>
+            <c:if test="${param.msg == 'error'}">
+                <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center mb-3" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill fs-4 me-2"></i>
+                    <div><strong>No se guardaron los cambios.</strong>
+                        <c:choose>
+                            <c:when test="${not empty param.detalle}"><c:out value="${param.detalle}"/></c:when>
+                            <c:otherwise>Verifique que el DNI no esté registrado y que los datos sean válidos.</c:otherwise>
+                        </c:choose>
+                    </div>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             </c:if>
@@ -259,5 +271,6 @@
             modal.show();
         }
     </script>
+<script src="${pageContext.request.contextPath}/js/validacion-campos.js"></script>
 </body>
 </html>
