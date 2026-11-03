@@ -59,8 +59,9 @@
                     Horario de Atención
                 </h5>
                 <p class="small text-white-50 mb-3">
-                    Lunes a Sábado: 8:00 AM - 8:00 PM<br>
-                    Domingos: Previa Cita
+                    Lunes a Viernes: 8:00 AM - 6:30 PM<br>
+                    Sábado: 9:00 AM - 1:00 PM<br>
+                    Domingo: cerrado
                 </p>
                 <div class="d-flex gap-3 justify-content-lg-end">
                     <a href="https://www.facebook.com/artdentsac" target="_blank" rel="noopener" 
