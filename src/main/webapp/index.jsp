@@ -61,6 +61,13 @@
         /* tarjetas informativas: sin efecto de botón al pasar el mouse */
         .doctor-card { cursor: default; box-shadow: 0 4px 14px rgba(33, 37, 41, 0.06); }
 
+        /* medios de pago: misma tarjeta para todos */
+        .pago-tile { background: #fff; border: 1px solid var(--artdent-border); border-radius: 14px; padding: 14px 10px 10px;
+                     height: 100%; display: flex; flex-direction: column; align-items: center; gap: 8px;
+                     box-shadow: 0 4px 14px rgba(33, 37, 41, 0.06); }
+        .pago-logo { height: 44px; display: flex; align-items: center; justify-content: center; }
+        .pago-logo img { max-height: 40px; max-width: 110px; object-fit: contain; }
+        .pago-tile span { font-size: 0.8rem; font-weight: 600; color: var(--artdent-dark, #212529); text-align: center; }
         .sede-card {
             border-radius: 16px;
             overflow: hidden;
@@ -398,24 +405,37 @@
     <section class="container my-5 py-4 border-top">
         <div class="text-center mb-4 pt-3">
             <h4 class="fw-bold text-brand-dark">Medios de Pago Aceptados</h4>
-            <p class="text-muted small">Tarjeta de débito o crédito en línea y efectivo en ventanilla</p>
+            <p class="text-muted small">Tarjeta de débito o crédito, Yape, Plin y efectivo en ventanilla</p>
         </div>
-        <div class="row justify-content-center align-items-center g-4 text-center">
-            <div class="col-4 col-md-2">
-                <img src="${pageContext.request.contextPath}/img/visa.svg" class="img-fluid" alt="Visa" style="max-height: 40px;">
-            </div>
-            <div class="col-4 col-md-2">
-                <img src="${pageContext.request.contextPath}/img/mastercard.svg" class="img-fluid" alt="MasterCard" style="max-height: 44px;">
-            </div>
-            <div class="col-6 col-md-2">
-                <div class="p-2 border rounded-pill bg-light small fw-bold text-brand-dark">
-                    <i class="bi bi-phone text-brand-primary me-1"></i> Yape / Plin
-                    <span class="d-block fw-normal text-muted" style="font-size: 0.7rem;">próximamente</span>
+        <div class="row justify-content-center g-3">
+            <div class="col-6 col-sm-4 col-md-2">
+                <div class="pago-tile">
+                    <div class="pago-logo"><img src="${pageContext.request.contextPath}/img/visa.svg" alt="Visa"></div>
+                    <span>Visa débito / crédito</span>
                 </div>
             </div>
-            <div class="col-6 col-md-3">
-                <div class="p-2 border rounded-pill bg-light small fw-bold text-brand-dark">
-                    <i class="bi bi-cash-stack text-brand-accent me-1"></i> Efectivo en Ventanilla
+            <div class="col-6 col-sm-4 col-md-2">
+                <div class="pago-tile">
+                    <div class="pago-logo"><img src="${pageContext.request.contextPath}/img/mastercard.svg" alt="Mastercard"></div>
+                    <span>Mastercard</span>
+                </div>
+            </div>
+            <div class="col-6 col-sm-4 col-md-2">
+                <div class="pago-tile">
+                    <div class="pago-logo"><img src="${pageContext.request.contextPath}/img/pagos/yape.png" alt="Yape" onerror="this.outerHTML='<i class=&quot;bi bi-phone-fill&quot; style=&quot;font-size:2rem;color:#742284&quot;></i>'"></div>
+                    <span>Yape</span>
+                </div>
+            </div>
+            <div class="col-6 col-sm-4 col-md-2">
+                <div class="pago-tile">
+                    <div class="pago-logo"><img src="${pageContext.request.contextPath}/img/pagos/plin.png" alt="Plin" onerror="this.outerHTML='<i class=&quot;bi bi-phone-vibrate-fill&quot; style=&quot;font-size:2rem;color:#00B4C5&quot;></i>'"></div>
+                    <span>Plin</span>
+                </div>
+            </div>
+            <div class="col-6 col-sm-4 col-md-2">
+                <div class="pago-tile">
+                    <div class="pago-logo"><i class="bi bi-cash-coin" style="font-size:2.1rem;color:#2e9e6b"></i></div>
+                    <span>Efectivo en ventanilla</span>
                 </div>
             </div>
         </div>

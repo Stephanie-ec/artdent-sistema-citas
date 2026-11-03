@@ -75,6 +75,14 @@ public class PagoController extends HttpServlet {
             if (nombreCliente != null) nombreCliente = nombreCliente.trim();
             if (dniCliente != null) dniCliente = dniCliente.trim();
 
+            // Datos del titular obligatorios y con formato válido (la pasarela no acepta campos vacíos)
+            if (nombreCliente == null || !nombreCliente.matches("^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ' -]{3,60}$")
+                    || dniCliente == null || !dniCliente.matches("\\d{8}")) {
+                request.setAttribute("error", "Datos del titular no válidos: ingrese su nombre y un DNI de 8 dígitos.");
+                request.getRequestDispatcher("error.jsp").forward(request, response);
+                return;
+            }
+
             String timeStamp = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
             String codTransaccion = "EFEC-" + timeStamp;
 
@@ -123,6 +131,14 @@ public class PagoController extends HttpServlet {
 
             if (nombreCliente != null) nombreCliente = nombreCliente.trim();
             if (dniCliente != null) dniCliente = dniCliente.trim();
+
+            // Datos del titular obligatorios y con formato válido (la pasarela no acepta campos vacíos)
+            if (nombreCliente == null || !nombreCliente.matches("^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ' -]{3,60}$")
+                    || dniCliente == null || !dniCliente.matches("\\d{8}")) {
+                request.setAttribute("error", "Datos del titular no válidos: ingrese su nombre y un DNI de 8 dígitos.");
+                request.getRequestDispatcher("error.jsp").forward(request, response);
+                return;
+            }
 
             String timeStamp = new SimpleDateFormat("yyyyMMdd-").format(new Date());
             String codTransaccion = "TXN-" + timeStamp + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
