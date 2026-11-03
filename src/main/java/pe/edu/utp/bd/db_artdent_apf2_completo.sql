@@ -1279,7 +1279,7 @@ DELIMITER ;;
 CREATE PROCEDURE sp_cargar_demo()
 BEGIN
   DECLARE vOdo2 INT;
-  IF NOT EXISTS (SELECT 1 FROM Cita WHERE Descripcion LIKE '[demo]%') THEN
+  IF NOT EXISTS (SELECT 1 FROM Paciente WHERE DNI = '45872136') THEN
 
     INSERT IGNORE INTO Usuario (Nombre, Apellido, DNI, Telefono, CorreoElectronico, Direccion, FechaNacimiento, Clave, Rol_idRol)
     VALUES ('Lucía', 'Herrera Campos', '71458236', '956321478', 'lucia.herrera@artdent.com', 'Av. Arequipa 1450', '1992-05-14', '1234', 3);
@@ -1306,18 +1306,18 @@ BEGIN
       ('Rosa Elena',     'Huamán Flores',  '41236587', '956789012', 'rosa.huaman@gmail.com'),
       ('Diego Armando',  'Paredes Luna',   '73654128', '967890123', 'diego.paredes@gmail.com');
 
-    CALL sp_demo_cita('2026-10-12', '09:00:00', '[demo] Limpieza de control',          1, 2, 'Presencial', 4,     '45872136', 2);
-    CALL sp_demo_cita('2026-10-14', '10:30:00', '[demo] Dolor al tomar frío',          5, 2, 'Web',        vOdo2, '40123987', 1);
-    CALL sp_demo_cita('2026-10-19', '15:00:00', '[demo] Manchas por café',             4, 2, 'Web',        vOdo2, '72569841', 1);
-    CALL sp_demo_cita('2026-10-22', '11:00:00', '[demo] Muela del juicio',             3, 2, 'Presencial', 4,     '46985231', 2);
-    CALL sp_demo_cita('2026-10-27', '16:30:00', '[demo] Dolor intenso en molar',       7, 2, 'Web',        vOdo2, '41236587', 1);
-    CALL sp_demo_cita('2026-10-29', '09:30:00', '[demo] Evaluación de brackets',       2, 5, 'Web',        4,     '73654128', NULL);
-    CALL sp_demo_cita('2026-11-04', '10:00:00', '[demo] Control de ortodoncia',        2, 3, 'Web',        4,     '45872136', 1);
-    CALL sp_demo_cita('2026-11-05', '12:00:00', '[demo] Sensibilidad dental',          5, 3, 'Presencial', vOdo2, '72569841', 2);
-    CALL sp_demo_cita('2026-11-06', '17:00:00', '[demo] Reprogramada por el paciente', 1, 4, 'Web',        vOdo2, '40123987', 1);
-    CALL sp_demo_cita('2026-11-10', '08:30:00', '[demo] Pieza perdida',                6, 1, 'Web',        4,     '46985231', NULL);
-    CALL sp_demo_cita('2026-11-11', '14:00:00', '[demo] Primera consulta',             1, 1, 'Web',        vOdo2, '41236587', NULL);
-    CALL sp_demo_cita('2026-11-12', '11:30:00', '[demo] Datos no confirmados',         4, 6, 'Web',        vOdo2, '73654128', NULL);
+    CALL sp_demo_cita('2026-10-12', '09:00:00', 'Limpieza de control',          1, 2, 'Presencial', 4,     '45872136', 2);
+    CALL sp_demo_cita('2026-10-14', '10:30:00', 'Dolor al tomar frío',          5, 2, 'Web',        vOdo2, '40123987', 1);
+    CALL sp_demo_cita('2026-10-19', '15:00:00', 'Manchas por café',             4, 2, 'Web',        vOdo2, '72569841', 1);
+    CALL sp_demo_cita('2026-10-22', '11:00:00', 'Muela del juicio',             3, 2, 'Presencial', 4,     '46985231', 2);
+    CALL sp_demo_cita('2026-10-27', '16:30:00', 'Dolor intenso en molar',       7, 2, 'Web',        vOdo2, '41236587', 1);
+    CALL sp_demo_cita('2026-10-29', '09:30:00', 'Evaluación de brackets',       2, 5, 'Web',        4,     '73654128', NULL);
+    CALL sp_demo_cita('2026-11-04', '10:00:00', 'Control de ortodoncia',        2, 3, 'Web',        4,     '45872136', 1);
+    CALL sp_demo_cita('2026-11-05', '12:00:00', 'Sensibilidad dental',          5, 3, 'Presencial', vOdo2, '72569841', 2);
+    CALL sp_demo_cita('2026-11-06', '17:00:00', 'Reprogramada por el paciente', 1, 4, 'Web',        vOdo2, '40123987', 1);
+    CALL sp_demo_cita('2026-11-10', '08:30:00', 'Pieza perdida',                6, 1, 'Web',        4,     '46985231', NULL);
+    CALL sp_demo_cita('2026-11-11', '14:00:00', 'Primera consulta',             1, 1, 'Web',        vOdo2, '41236587', NULL);
+    CALL sp_demo_cita('2026-11-12', '11:30:00', 'Datos no confirmados',         4, 6, 'Web',        vOdo2, '73654128', NULL);
   END IF;
 END;;
 
