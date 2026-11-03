@@ -9,7 +9,17 @@ import pe.edu.utp.daoImpl.CitaDaoImpl;
  */
 public final class NotificacionService {
 
+    /** Resultado del último envío en este hilo, para informarlo en la pantalla. */
+    private static final ThreadLocal<Boolean> ULTIMO_ENVIO = new ThreadLocal<>();
+
     private NotificacionService() {
+    }
+
+    /** Parámetro para la URL de retorno: &correo=1 si se envió, &correo=0 si falló. */
+    public static String sufijoCorreo() {
+        Boolean ok = ULTIMO_ENVIO.get();
+        ULTIMO_ENVIO.remove();
+        return ok == null ? "" : (ok ? "&correo=1" : "&correo=0");
     }
 
     /**
@@ -28,6 +38,7 @@ public final class NotificacionService {
         }
         CitaDao citaDao = new CitaDaoImpl();
         citaDao.registrarNotificacion(asunto, idEstado, idCita, enviado);
+        ULTIMO_ENVIO.set(enviado);
         return enviado;
     }
 }

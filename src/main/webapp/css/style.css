@@ -673,3 +673,26 @@ code, .code-ref, .badge-code {
         0%, 80%, 100% { transform: scale(0); }
         40% { transform: scale(1.0); }
     }
+
+/* Acciones de las tablas del panel: botones del mismo tamaño en una sola fila */
+.acciones-fila {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: nowrap;
+}
+.acciones-fila form { margin: 0; display: inline-flex; }
+.btn-accion {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    font-size: 1rem;
+    line-height: 1;
+}
+.leyenda-acciones { font-size: 0.8rem; color: #6b7280; }
+.leyenda-acciones i { margin: 0 2px 0 10px; }

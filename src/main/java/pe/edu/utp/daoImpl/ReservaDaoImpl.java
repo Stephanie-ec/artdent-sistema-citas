@@ -51,7 +51,7 @@ public class ReservaDaoImpl implements ReservaDao {
             ps = cx.prepareStatement(SQL_1);
             ps.setString(1, p.getNombre());
             ps.setString(2, p.getApellido());
-            ps.setInt(3, p.getDni());
+            ps.setString(3, String.format("%08d", p.getDni()));
             ps.setInt(4, p.getTelefono());
             ps.setString(5, p.getCorreo());
             x = ps.executeUpdate();  // Ejecutar y guardar paciente

@@ -41,7 +41,7 @@ public class CitaDaoImpl implements CitaDao {
             ps = cx.prepareStatement("{CALL sp_registrarusuario(?, ?, ?, ?, ?)}");
             ps.setString(1, p.getNombre());
             ps.setString(2, p.getApellido());
-            ps.setInt(3, p.getDni());
+            ps.setString(3, String.format("%08d", p.getDni()));
             ps.setInt(4, p.getTelefono());
             ps.setString(5, p.getCorreo());
             ps.executeUpdate();
@@ -768,7 +768,7 @@ public class CitaDaoImpl implements CitaDao {
                 psReg = conn.prepareStatement("{CALL sp_registrarusuario(?, ?, ?, ?, ?)}");
                 psReg.setString(1, p.getNombre());
                 psReg.setString(2, p.getApellido());
-                psReg.setInt(3, p.getDni());
+                psReg.setString(3, String.format("%08d", p.getDni()));
                 psReg.setInt(4, p.getTelefono());
                 psReg.setString(5, p.getCorreo());
                 psReg.executeUpdate();
@@ -796,7 +796,7 @@ public class CitaDaoImpl implements CitaDao {
                 try (PreparedStatement psId = conn.prepareStatement(
                         "SELECT idCita FROM Cita WHERE Paciente_idPaciente = " +
                         "(SELECT idPaciente FROM Paciente WHERE DNI = ?) ORDER BY idCita DESC LIMIT 1")) {
-                    psId.setInt(1, p.getDni());
+                    psId.setString(1, String.format("%08d", p.getDni()));
                     try (ResultSet rsId = psId.executeQuery()) {
                         if (rsId.next()) {
                             resultado = rsId.getInt("idCita");
@@ -840,7 +840,7 @@ public class CitaDaoImpl implements CitaDao {
                 psReg = conn.prepareStatement("{CALL sp_registrarusuario(?, ?, ?, ?, ?)}");
                 psReg.setString(1, p.getNombre());
                 psReg.setString(2, p.getApellido());
-                psReg.setInt(3, p.getDni());
+                psReg.setString(3, String.format("%08d", p.getDni()));
                 psReg.setInt(4, p.getTelefono());
                 psReg.setString(5, p.getCorreo());
                 psReg.executeUpdate();

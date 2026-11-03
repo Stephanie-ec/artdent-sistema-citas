@@ -13,7 +13,7 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Roboto:wght@500;700;900&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
     <!-- Hoja de Estilos Oficial de Marca Art Dent -->
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css?v=20261102b">
 
     <style>
         .voucher-card {

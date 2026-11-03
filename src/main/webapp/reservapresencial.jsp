@@ -9,7 +9,7 @@
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-        <link rel="stylesheet" href="css/style.css">
+        <link rel="stylesheet" href="css/style.css?v=20261102b">
     </head>
     <body class="d-flex flex-column min-vh-100 bg-light">
         <%
@@ -123,14 +123,10 @@
 
                                         <div class="col-md-6">
                                             <label for="medico" class="form-label fw-semibold">Odontólogo Tratante <span class="text-danger">*</span></label>
-                                            <select class="form-select" id="medico" name="medico" required>
-                                                <option value="" disabled selected>Seleccione el odontólogo...</option>
-                                                <c:forEach var="doc" items="${odontologos}">
-                                                    <option value="${doc.idUsuario}">
-                                                        Dr(a). ${doc.nombre} ${doc.apellido}
-                                                    </option>
-                                                </c:forEach>
+                                            <select class="form-select" id="medico" name="medico" required disabled>
+                                                <option value="" disabled selected>Primero elija servicio, fecha y hora</option>
                                             </select>
+                                            <small class="text-muted" id="medicoAyuda">Solo aparecen los odontólogos que atienden ese servicio y están libres en ese horario.</small>
                                         </div>
 
                                         <div class="col-md-4">
@@ -212,5 +208,44 @@
                 .catch(() => pintar('text-muted', 'No se pudo verificar ahora. Complete los datos manualmente.'));
         }
         </script>
-    </body>
+    <script>
+        // Igual que la reserva web: el odontólogo se elige después del servicio, la fecha y la hora
+        (function () {
+            const servicio = document.getElementById('idServicio');
+            const fecha = document.getElementById('fecha');
+            const hora = document.getElementById('hora');
+            const medico = document.getElementById('medico');
+            const ayuda = document.getElementById('medicoAyuda');
+            function cargarOdontologos() {
+                if (!servicio.value || !fecha.value || !hora.value) {
+                    medico.disabled = true;
+                    medico.innerHTML = '<option value="" disabled selected>Primero elija servicio, fecha y hora</option>';
+                    return;
+                }
+                medico.disabled = true;
+                medico.innerHTML = '<option value="" disabled selected>Buscando odontólogos disponibles...</option>';
+                fetch('ServicioController?action=cargarDoctores&motivo=' + encodeURIComponent(servicio.value)
+                        + '&fecha=' + encodeURIComponent(fecha.value) + '&hora=' + encodeURIComponent(hora.value))
+                    .then(r => r.text())
+                    .then(html => {
+                        if (html.indexOf('<option') === -1) {
+                            medico.innerHTML = '<option value="" disabled selected>Sin odontólogo disponible: elija otra fecha u hora</option>';
+                            ayuda.className = 'small text-danger';
+                        } else {
+                            medico.innerHTML = '<option value="" disabled selected>Seleccione el odontólogo...</option>' + html;
+                            medico.disabled = false;
+                            ayuda.className = 'small text-muted';
+                        }
+                    })
+                    .catch(() => {
+                        medico.innerHTML = '<option value="" disabled selected>No se pudo consultar la disponibilidad</option>';
+                    });
+            }
+            servicio.addEventListener('change', cargarOdontologos);
+            fecha.addEventListener('change', cargarOdontologos);
+            hora.addEventListener('change', cargarOdontologos);
+        })();
+    </script>
+    <script src="${pageContext.request.contextPath}/js/validacion-campos.js"></script>
+</body>
 </html>

@@ -235,6 +235,7 @@ public class UsuarioDaoImpl implements UsuarioDao {
                 + "WHERE us.idServicio = ? "
                 + "AND us.Disponibilidad = 1 "
                 + "AND LOWER(h.diaSemana) = ? "
+                + "AND h.HoraInicio <= ? AND h.HoraFinal >= ? "   // dentro de su horario de atención
                 + "AND c.idCita IS NULL";
 
         try (Connection cx = Conexion.getConection(); PreparedStatement ps = cx.prepareStatement(sql)) {
@@ -245,6 +246,8 @@ public class UsuarioDaoImpl implements UsuarioDao {
             ps.setTime(4, java.sql.Time.valueOf(horaObj));
             ps.setInt(5, idServicio);
             ps.setString(6, diaSemanaTexto);
+            ps.setTime(7, java.sql.Time.valueOf(horaObj));
+            ps.setTime(8, java.sql.Time.valueOf(horaFin));
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -320,7 +323,7 @@ public class UsuarioDaoImpl implements UsuarioDao {
              PreparedStatement stmt = conn.prepareStatement(SQL)) {
             stmt.setString(1, usuario.getNombre());
             stmt.setString(2, usuario.getApellido());
-            stmt.setInt(3, usuario.getDni());
+            stmt.setString(3, String.format("%08d", usuario.getDni()));
             stmt.setString(4, usuario.getTelefono());
             stmt.setString(5, usuario.getCorreoElectronico());
             stmt.setString(6, usuario.getDireccion());
@@ -387,7 +390,7 @@ public class UsuarioDaoImpl implements UsuarioDao {
             stmt.setInt(1, usuario.getIdUsuario());
             stmt.setString(2, usuario.getNombre());
             stmt.setString(3, usuario.getApellido());
-            stmt.setInt(4, usuario.getDni());
+            stmt.setString(4, String.format("%08d", usuario.getDni()));
             stmt.setString(5, usuario.getTelefono());
             stmt.setString(6, usuario.getCorreoElectronico());
             stmt.setString(7, usuario.getDireccion());
