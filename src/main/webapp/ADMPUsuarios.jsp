@@ -173,7 +173,7 @@
                         </div>
                         <div class="mb-4">
                             <label for="clave" class="form-label fw-semibold">Contraseña Inicial <span class="text-danger">*</span></label>
-                            <input type="password" class="form-control" id="clave" name="clave" placeholder="Contraseña segura" required>
+                            <input type="password" class="form-control" id="clave" name="clave" placeholder="Entre 6 y 30 caracteres" minlength="6" maxlength="30" required>
                             <small class="text-muted">Se almacenará encriptada con algoritmo seguro BCrypt.</small>
                         </div>
                         <div class="d-flex justify-content-end gap-2">

@@ -37,6 +37,7 @@
         }
 
         @page { size: A4 portrait; margin: 0; }
+        * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         @media print {
             .no-print { display: none !important; }
             html, body { background: #fff !important; }
@@ -80,7 +81,7 @@
                                 ${not empty sessionScope.reservaCodigo ? sessionScope.reservaCodigo : (not empty param.codigo ? param.codigo : 'ART-RES-00007')}
                             </span>
                             <small class="d-block text-muted mt-2">
-                                Guarda o captura este código para identificarte en la recepción del centro odontológico.
+                                Guarda este código: con él y tu DNI puedes ver tu reserva y descargar tu boleta en <strong>Mi reserva</strong>.
                             </small>
                         </div>
 
@@ -250,7 +251,7 @@
                                 <div class="modal-footer bg-light p-3 border-0">
                                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
                                     <button type="submit" class="btn btn-success fw-bold px-4">
-                                        <i class="bi bi-check-lg me-1"></i> Procesar Pago Seguro
+                                        Procesar pago
                                     </button>
                                 </div>
                             </form>

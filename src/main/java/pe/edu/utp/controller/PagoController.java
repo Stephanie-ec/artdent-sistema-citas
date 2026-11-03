@@ -30,6 +30,8 @@ public class PagoController extends HttpServlet {
 
         if ("verBoleta".equalsIgnoreCase(action)) {
             verBoleta(request, response);
+        } else if ("consultar".equalsIgnoreCase(action)) {
+            consultarReserva(request, response);
         } else {
             response.sendRedirect("index.jsp");
         }
@@ -124,6 +126,12 @@ public class PagoController extends HttpServlet {
                 request.getRequestDispatcher("error.jsp").forward(request, response);
                 return;
             }
+            // Si la reserva ya se pagó (por ejemplo, volvió atrás en el navegador), se muestra su boleta
+            if (pagoDao.tienePago(idCita)) {
+                permitirCita(request, idCita);
+                response.sendRedirect("PagoController?action=verBoleta&idCita=" + idCita + "&yaPagado=1");
+                return;
+            }
             double monto = costo;
             String nombreCliente = request.getParameter("nombreCliente");
             String dniCliente = request.getParameter("dniCliente");
@@ -157,11 +165,12 @@ public class PagoController extends HttpServlet {
             boolean exito = pagoDao.registrarPagoYComprobante(pago, comp);
 
             if (exito) {
+                permitirCita(request, idCita);
                 // Redirigir a vista de boleta electrónica generada
                 response.sendRedirect("PagoController?action=verBoleta&idPago=" + pago.getIdPago() 
                         + "&codigoReserva=" + (codigoReserva != null ? codigoReserva : ""));
             } else {
-                request.setAttribute("error", "La reserva ya cuenta con un pago registrado previamente o ocurrió un problema con la pasarela.");
+                request.setAttribute("error", "No se pudo registrar el pago. Intente nuevamente o consulte su reserva con su código y DNI.");
                 request.getRequestDispatcher("error.jsp").forward(request, response);
             }
         } catch (Exception e) {
@@ -187,8 +196,15 @@ public class PagoController extends HttpServlet {
                 comp = pagoDao.obtenerComprobantePorId(Integer.parseInt(idCompStr));
             }
 
+            // Ley 29733: un visitante solo ve boletas de sus propias reservas (pagadas o consultadas con código y DNI)
+            if (comp != null && request.getSession().getAttribute("TipoRol") == null
+                    && !citaPermitida(request, comp.getIdCita())) {
+                response.sendRedirect("consultareserva.jsp?error=permiso");
+                return;
+            }
             if (comp != null) {
                 request.setAttribute("comprobante", comp);
+                request.setAttribute("yaPagado", "1".equals(request.getParameter("yaPagado")));
                 request.setAttribute("codigoReserva", request.getParameter("codigoReserva"));
                 request.getRequestDispatcher("boleta.jsp").forward(request, response);
             } else {
@@ -201,4 +217,54 @@ public class PagoController extends HttpServlet {
             request.getRequestDispatcher("error.jsp").forward(request, response);
         }
     }
+
+    /** Busca una reserva con su código (ART-RES-00018 o 18) y el DNI del paciente. */
+    private void consultarReserva(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String codigo = request.getParameter("codigo") == null ? "" : request.getParameter("codigo").trim().toUpperCase();
+        String dni = request.getParameter("dni") == null ? "" : request.getParameter("dni").trim();
+        String numero = codigo.replaceAll("[^0-9]", "");
+        if (numero.isEmpty() || !dni.matches("\\d{8}")) {
+            response.sendRedirect("consultareserva.jsp?error=datos");
+            return;
+        }
+        int idCita;
+        try {
+            idCita = Integer.parseInt(numero);
+        } catch (NumberFormatException e) {
+            response.sendRedirect("consultareserva.jsp?error=datos");
+            return;
+        }
+        java.util.Map<String, Object> r = pagoDao.consultarReserva(idCita, dni);
+        if (r == null) {
+            response.sendRedirect("consultareserva.jsp?error=noexiste");
+            return;
+        }
+        permitirCita(request, idCita);
+        if (Boolean.TRUE.equals(r.get("pagado"))) {
+            response.sendRedirect("PagoController?action=verBoleta&idCita=" + idCita);
+            return;
+        }
+        request.setAttribute("reserva", r);
+        request.setAttribute("codigo", String.format("ART-RES-%05d", idCita));
+        request.getRequestDispatcher("consultareserva.jsp").forward(request, response);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static void permitirCita(HttpServletRequest request, int idCita) {
+        javax.servlet.http.HttpSession s = request.getSession();
+        java.util.Set<Integer> ids = (java.util.Set<Integer>) s.getAttribute("citasPropias");
+        if (ids == null) {
+            ids = new java.util.HashSet<>();
+            s.setAttribute("citasPropias", ids);
+        }
+        ids.add(idCita);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static boolean citaPermitida(HttpServletRequest request, int idCita) {
+        Object ids = request.getSession().getAttribute("citasPropias");
+        return ids instanceof java.util.Set && ((java.util.Set<Integer>) ids).contains(idCita);
+    }
+
 }

@@ -15,4 +15,7 @@ public interface PagoDao {
 
     /** Costo vigente del servicio de la cita; null si la cita no existe. */
     Double obtenerCostoServicioPorCita(int idCita);
+
+    /** Datos de una cita solo si el DNI coincide con el del paciente; null si no coincide. */
+    Map<String, Object> consultarReserva(int idCita, String dni);
 }
