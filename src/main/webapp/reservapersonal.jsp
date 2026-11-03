@@ -79,13 +79,9 @@
                                         <span class="input-group-text"><i class="bi bi-card-text"></i></span>
                                         <input type="text" class="form-control" id="dni" name="dni" 
                                                placeholder="8 dígitos" maxlength="8" 
-                                               value="${param.dni}" required 
-                                               onkeyup="if (event.keyCode === 13) buscarPaciente();">
-                                        <button class="btn btn-outline-primary" type="button" onclick="buscarPaciente();" title="Verificar DNI">
-                                            <i class="bi bi-search"></i>
-                                        </button>
+                                               value="${param.dni}" required>
                                     </div>
-                                    <small id="dniFeedback" class="small d-block mt-1 text-muted">Escribe tu DNI y pulsa la lupa para verificarlo.</small>
+                                    <small class="small d-block mt-1 text-muted">Tu DNI identifica tu reserva en recepción.</small>
                                 </div>
 
                                 <div class="col-12 col-md-6">
@@ -145,7 +141,7 @@
 
                                 <div class="col-12 col-md-3">
                                     <label for="hora" class="form-label fw-semibold">Hora <span class="text-danger">*</span></label>
-                                    <input type="time" class="form-control" id="hora" name="hora" onchange="ajustarHora();verificarCampos();" min="08:00" max="20:00" required>
+                                    <select class="form-select" id="hora" name="hora" onchange="verificarCampos();" required><option value="" selected disabled>Elija primero la fecha</option></select>
                                 </div>
 
                                 <!-- Selector de Especialista Dinámico -->
@@ -240,6 +236,7 @@
                     var doctoresSelect = document.getElementById('medico');
                     doctoresSelect.innerHTML = '<option value="" selected disabled>Seleccionar Especialista...</option>';
                     doctoresSelect.innerHTML += xhr.responseText;
+                    if (window.avisoSinOdontologo) avisoSinOdontologo(xhr.responseText);
                 }
             };
             xhr.send();
@@ -323,5 +320,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="${pageContext.request.contextPath}/js/validacion-campos.js"></script>
+<script src="${pageContext.request.contextPath}/js/horarios.js"></script>
 </body>
 </html>

@@ -36,10 +36,16 @@
             border-radius: 12px;
         }
 
+        @page { size: A4 portrait; margin: 0; }
         @media print {
             .no-print { display: none !important; }
-            .voucher-card { border: 1px solid #333 !important; box-shadow: none !important; }
-            body { background: #fff !important; }
+            html, body { background: #fff !important; }
+            body { padding: 12mm 14mm !important; }
+            main, .container, .row, [class*="col-"] { margin: 0 !important; padding: 0 !important; max-width: 100% !important; width: 100% !important; flex: 0 0 100% !important; }
+            .voucher-card { border: 1px solid #333 !important; box-shadow: none !important; zoom: 0.86; break-inside: avoid; page-break-inside: avoid; }
+            *, *::before, *::after { min-height: 0 !important; }
+            html, body, main { height: auto !important; }
+            .modal, .modal-backdrop { display: none !important; }
         }
     </style>
 </head>
@@ -179,7 +185,7 @@
                 <div class="modal fade no-print" id="modalPagarEnLinea" tabindex="-1" aria-labelledby="modalPagarEnLineaLabel" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
-                            <form action="PagoController" method="post">
+                            <form action="PagoController" method="post" id="formPago" novalidate onsubmit="return validarPago();">
                                 <input type="hidden" name="action" value="pagarEnLinea" />
                                 <input type="hidden" name="idCita" value="${not empty sessionScope.reservaIdCita ? sessionScope.reservaIdCita : (not empty param.idCita ? param.idCita : '0')}" />
                                 <input type="hidden" name="monto" value="${not empty sessionScope.reservaPrecio ? sessionScope.reservaPrecio : (not empty param.precio ? param.precio : '100.00')}" />
@@ -204,37 +210,41 @@
 
                                     <div class="mb-3">
                                         <label class="form-label small fw-bold text-muted">Nombre del Titular / Paciente</label>
-                                        <input type="text" class="form-control" name="nombreCliente" 
-                                               value="${not empty sessionScope.reservaNombre ? sessionScope.reservaNombre : (not empty param.nombre ? param.nombre : 'Paciente')}" required />
+                                        <input type="text" class="form-control" name="nombreCliente" id="pNombre" placeholder="Como figura en la tarjeta" maxlength="60" required />
+                                        <div class="invalid-feedback">Ingrese el nombre del titular (solo letras).</div>
                                     </div>
 
                                     <div class="mb-3">
                                         <label class="form-label small fw-bold text-muted">DNI del Titular</label>
-                                        <input type="text" class="form-control font-monospace" name="dniCliente" maxlength="8"
-                                               value="${not empty sessionScope.reservaDni ? sessionScope.reservaDni : (not empty param.dni ? param.dni : '12345678')}" required />
+                                        <input type="text" class="form-control font-monospace" name="dniCliente" id="pDni" maxlength="8" inputmode="numeric" placeholder="8 dígitos" required />
+                                        <div class="invalid-feedback">El DNI debe tener 8 dígitos.</div>
                                     </div>
 
                                     <div class="mb-3">
                                         <label class="form-label small fw-bold text-muted">Número de Tarjeta</label>
                                         <div class="input-group">
                                             <span class="input-group-text"><i class="bi bi-credit-card"></i></span>
-                                            <input type="text" class="form-control font-monospace" placeholder="4557 8901 2345 6789" value="4557 8901 2345 6789" required />
+                                            <input type="text" class="form-control font-monospace" id="pTarjeta" placeholder="0000 0000 0000 0000" maxlength="19" inputmode="numeric" autocomplete="off" required />
+                                            <div class="invalid-feedback">Número de tarjeta no válido (16 dígitos).</div>
                                         </div>
                                     </div>
 
                                     <div class="row g-2 mb-3">
                                         <div class="col-6">
                                             <label class="form-label small fw-bold text-muted">Expiración</label>
-                                            <input type="text" class="form-control font-monospace text-center" placeholder="MM/AA" value="12/28" required />
+                                            <input type="text" class="form-control font-monospace text-center" id="pExp" placeholder="MM/AA" maxlength="5" inputmode="numeric" autocomplete="off" required />
+                                            <div class="invalid-feedback">Fecha vencida o no válida.</div>
                                         </div>
                                         <div class="col-6">
                                             <label class="form-label small fw-bold text-muted">CVV</label>
-                                            <input type="password" class="form-control font-monospace text-center" placeholder="123" maxlength="4" value="789" required />
+                                            <input type="password" class="form-control font-monospace text-center" id="pCvv" placeholder="•••" maxlength="4" inputmode="numeric" autocomplete="off" required />
+                                            <div class="invalid-feedback">3 o 4 dígitos.</div>
                                         </div>
                                     </div>
 
                                     <div class="alert alert-artdent-mint py-2 px-3 small mb-0 text-center">
-                                        Al procesar el pago se emitirá tu <strong>Boleta Electrónica Oficial (B001)</strong>.
+                                        Al procesar el pago se emitirá tu <strong>Boleta Electrónica Oficial (B001)</strong>.<br>
+                                        <span class="text-muted">Pasarela de prueba: no se realiza ningún cargo. Los datos de la tarjeta no se guardan.</span>
                                     </div>
                                 </div>
                                 <div class="modal-footer bg-light p-3 border-0">
@@ -258,5 +268,48 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Pasarela simulada: se valida que los datos tengan formato real antes de procesar (no se guardan)
+        (function () {
+            const t = document.getElementById('pTarjeta'), e = document.getElementById('pExp');
+            const soloNum = el => el && el.addEventListener('input', () => el.value = el.value.replace(/\D/g, ''));
+            soloNum(document.getElementById('pDni')); soloNum(document.getElementById('pCvv'));
+            if (t) t.addEventListener('input', () => { t.value = t.value.replace(/\D/g, '').slice(0, 16).replace(/(\d{4})(?=\d)/g, '$1 '); });
+            if (e) e.addEventListener('input', () => { let v = e.value.replace(/\D/g, '').slice(0, 4); if (v.length > 2) v = v.slice(0, 2) + '/' + v.slice(2); e.value = v; });
+            const n = document.getElementById('pNombre');
+            if (n) n.addEventListener('input', () => n.value = n.value.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ' -]/g, ''));
+        })();
+        function luhn(num) {
+            let suma = 0, doble = false;
+            for (let i = num.length - 1; i >= 0; i--) {
+                let d = +num[i];
+                if (doble) { d *= 2; if (d > 9) d -= 9; }
+                suma += d; doble = !doble;
+            }
+            return suma % 10 === 0;
+        }
+        function validarPago() {
+            const marca = (id, ok) => { const el = document.getElementById(id); el.classList.toggle('is-invalid', !ok); return ok; };
+            const nombre = document.getElementById('pNombre').value.trim();
+            const dni = document.getElementById('pDni').value.trim();
+            const tarjeta = document.getElementById('pTarjeta').value.replace(/\s/g, '');
+            const exp = document.getElementById('pExp').value.trim();
+            const cvv = document.getElementById('pCvv').value.trim();
+            let expOk = /^(0[1-9]|1[0-2])\/\d{2}$/.test(exp);
+            if (expOk) {
+                const mes = +exp.slice(0, 2), anio = 2000 + +exp.slice(3);
+                const hoy = new Date();
+                expOk = anio > hoy.getFullYear() || (anio === hoy.getFullYear() && mes >= hoy.getMonth() + 1);
+            }
+            const ok = [
+                marca('pNombre', nombre.length >= 3),
+                marca('pDni', /^\d{8}$/.test(dni)),
+                marca('pTarjeta', /^\d{16}$/.test(tarjeta) && luhn(tarjeta)),
+                marca('pExp', expOk),
+                marca('pCvv', /^\d{3,4}$/.test(cvv))
+            ].every(Boolean);
+            return ok;
+        }
+    </script>
 </body>
 </html>
