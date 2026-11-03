@@ -186,6 +186,11 @@ public class ReservaController extends HttpServlet {
         String errorValidacion = pe.edu.utp.utils.Validador.validarDatosPaciente(request.getParameter("dni"), request.getParameter("nombre"),
                 request.getParameter("apellido"), request.getParameter("telefono"), correoForm,
                 request.getParameter("fecha"), request.getParameter("hora"));
+        if (errorValidacion == null) {
+            // CR-06: el DNI debe existir en RENIEC y coincidir con el nombre (si la consulta está activada)
+            errorValidacion = pe.edu.utp.utils.ReniecService.validarIdentidad(request.getParameter("dni").trim(),
+                    request.getParameter("nombre"), request.getParameter("apellido"));
+        }
         if (errorValidacion != null) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             request.setAttribute("error", errorValidacion);

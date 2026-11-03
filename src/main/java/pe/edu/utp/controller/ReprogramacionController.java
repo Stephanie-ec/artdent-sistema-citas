@@ -157,7 +157,7 @@ public class ReprogramacionController extends HttpServlet {
             String correo = citaDao.getEmailPacienteByCitaId(idCita);
             NotificacionService.notificar(idCita, 4, "Cita Reprogramada", correo,
                     "Estimado paciente, su cita ha sido reprogramada para la fecha: " + nuevaFecha + " a las " + nuevaHora + ".");
-            request.getRequestDispatcher("PDCCalendario.jsp").forward(request, response); // Redirige a la página principal
+            response.sendRedirect("ReservaController?accion=listarReservasPorDia&msg=reprogramadoOk");
         } else {
             // Si hubo un error en la actualización
             request.getRequestDispatcher("error.jsp").forward(request, response); // Redirige a la página de error
@@ -178,7 +178,7 @@ public class ReprogramacionController extends HttpServlet {
             String correo = reservaDao.getEmailPacienteByReservaId(idReserva);
             NotificacionService.notificar(idReserva, 4, "Reserva Reprogramada", correo,
                     "Estimado paciente, su reserva ha sido reprogramada para la fecha: " + nuevaFecha + " a las " + nuevaHora + ".");
-            request.getRequestDispatcher("PDCCalendario.jsp").forward(request, response); // Redirige a la página principal
+            response.sendRedirect("ReservaController?accion=listarReservasPorDia&msg=reprogramadoOk");
         } else {
             request.getRequestDispatcher("error.jsp").forward(request, response); // Redirige a la página de error
         }
@@ -300,7 +300,7 @@ public class ReprogramacionController extends HttpServlet {
             String correo = reservaDao.getEmailPacienteByReservaId(idReserva);
             NotificacionService.notificar(idReserva, 5, "Reserva Cancelada", correo,
                     "Estimado paciente, su reserva ha sido cancelada.");
-            request.getRequestDispatcher("PDCCalendario.jsp").forward(request, response);
+            response.sendRedirect("ReservaController?accion=listar&msg=canceladoOk");
         } else {
             request.getRequestDispatcher("error.jsp").forward(request, response);
         }
@@ -316,7 +316,7 @@ public class ReprogramacionController extends HttpServlet {
             String correo = CitaDao.getEmailPacienteByCitaId(idCita);
             NotificacionService.notificar(idCita, 5, "Cita Cancelada", correo,
                     "Estimado paciente, su cita ha sido cancelada.");
-            request.getRequestDispatcher("PDCCalendario.jsp").forward(request, response);
+            response.sendRedirect("ReservaController?accion=listarCitas&msg=canceladoOk");
         } else {
             request.getRequestDispatcher("error.jsp").forward(request, response);
         }
@@ -328,7 +328,7 @@ public class ReprogramacionController extends HttpServlet {
         ReservaDao reservaDao = new ReservaDaoImpl();
         int resultado = reservaDao.deleteReserva(idReserva);
         if (resultado > 0) {
-            request.getRequestDispatcher("PDCCalendario.jsp").forward(request, response);
+            response.sendRedirect("ReservaController?accion=listar");
         } else {
             request.getRequestDispatcher("error.jsp").forward(request, response);
         }
@@ -340,7 +340,7 @@ public class ReprogramacionController extends HttpServlet {
         CitaDao CitaDao = new CitaDaoImpl();
         int resultado = CitaDao.DeleteCita(idCita);
         if (resultado > 0) {
-            request.getRequestDispatcher("PDCCalendario.jsp").forward(request, response);
+            response.sendRedirect("ReservaController?accion=listarCitas");
         } else {
             System.out.println("Error al eliminar la reserva");
             request.getRequestDispatcher("error.jsp").forward(request, response);

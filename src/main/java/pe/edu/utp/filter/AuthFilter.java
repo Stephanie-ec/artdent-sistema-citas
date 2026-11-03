@@ -39,7 +39,8 @@ public class AuthFilter implements Filter {
 
     /** Servlets públicos (los que validan el rol internamente también se listan aquí). */
     private static final Set<String> SERVLETS_PUBLICOS = new HashSet<>(Arrays.asList(
-            "/InicioSesionController", "/CerrarSesionController", "/api/chatbot", "/CitaController"));
+            "/InicioSesionController", "/CerrarSesionController", "/api/chatbot", "/CitaController",
+            "/ConsultaDniController"));
 
     /** Acciones públicas de ServicioController (catálogo y formulario de reserva). */
     private static final Set<String> ACCIONES_SERVICIO_PUBLICAS = new HashSet<>(Arrays.asList(

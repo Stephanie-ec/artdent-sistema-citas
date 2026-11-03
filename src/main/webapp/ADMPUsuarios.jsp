@@ -29,6 +29,11 @@
 
             <!-- Main Content -->
             <main class="col-md-9 ms-sm-auto col-lg-10 p-4">
+                <c:if test="${not empty param.error}">
+                    <div class="alert alert-danger d-flex align-items-center mb-3" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i><c:out value="${param.error}"/>
+                    </div>
+                </c:if>
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-3 mb-4 border-bottom">
                     <div>
                         <h2 class="h3 fw-bold mb-1" style="color: var(--artdent-primary);">
