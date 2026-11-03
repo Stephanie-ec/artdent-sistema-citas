@@ -58,11 +58,8 @@
             background: #fff;
         }
 
-        .doctor-card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 12px 24px rgba(48, 164, 198, 0.15);
-            border-color: var(--artdent-primary);
-        }
+        /* tarjetas informativas: sin efecto de botón al pasar el mouse */
+        .doctor-card { cursor: default; box-shadow: 0 4px 14px rgba(33, 37, 41, 0.06); }
 
         .sede-card {
             border-radius: 16px;
@@ -294,7 +291,7 @@
                         <p class="text-muted mb-3"><i class="bi bi-telephone-fill me-1"></i> Central: <strong>(01) 361-3634</strong></p>
                         <div class="bg-light p-3 rounded-3 small">
                             <strong class="text-brand-dark d-block mb-1"><i class="bi bi-clock me-1"></i> Horarios de Atención:</strong>
-                            <span class="d-block text-muted">Lunes a Sábado: 8:00 AM - 7:00 PM</span>
+                            <span class="d-block text-muted">Lunes a Viernes: 8:00 AM - 6:30 PM · Sábado: 9:00 AM - 1:00 PM</span>
                             <span class="d-block text-danger fw-semibold">Domingo: Cerrado</span>
                         </div>
                     </div>
@@ -318,7 +315,7 @@
                         <p class="text-muted mb-3"><i class="bi bi-telephone-fill me-1"></i> Central: <strong>(01) 361-3634</strong></p>
                         <div class="bg-light p-3 rounded-3 small">
                             <strong class="text-brand-dark d-block mb-1"><i class="bi bi-clock me-1"></i> Horarios de Atención:</strong>
-                            <span class="d-block text-muted">Lunes a Sábado: 8:00 AM - 7:00 PM</span>
+                            <span class="d-block text-muted">Lunes a Viernes: 8:00 AM - 6:30 PM · Sábado: 9:00 AM - 1:00 PM</span>
                             <span class="d-block text-danger fw-semibold">Domingo: Cerrado</span>
                         </div>
                     </div>
@@ -336,10 +333,10 @@
 
         <div class="row g-4 justify-content-center">
             <!-- Doctor 1 -->
-            <div class="col-12 col-md-6 col-lg-4">
+            <div class="col-12 col-md-6 col-lg-3">
                 <div class="card doctor-card h-100">
                     <img onerror="this.onerror=null;this.src='${pageContext.request.contextPath}/img/servicios/generico.png'" src="https://saluddata.com/wp-content/uploads/2024/07/Odontologo-Profesional-p.webp" 
-                         class="card-img-top" alt="Dr. Luis Miguel Martínez" style="height: 250px; object-fit: cover;">
+                         class="card-img-top" alt="Dr. Luis Miguel Martínez" style="height: 220px; object-fit: cover;">
                     <div class="card-body text-center p-4">
                         <h5 class="fw-bold text-brand-dark mb-1">Dr. Luis Miguel Martínez</h5>
                         <span class="badge bg-mint text-dark mb-3">Especialista en Endodoncia</span>
@@ -351,10 +348,10 @@
             </div>
 
             <!-- Doctor 2 -->
-            <div class="col-12 col-md-6 col-lg-4">
+            <div class="col-12 col-md-6 col-lg-3">
                 <div class="card doctor-card h-100">
                     <img onerror="this.onerror=null;this.src='${pageContext.request.contextPath}/img/servicios/generico.png'" src="https://colderechomedico.com/wp-content/uploads/2020/06/Cual-es-la-importancia-del-secreto-profesional-en-odontologia_colderecho.jpg" 
-                         class="card-img-top" alt="Dr. Rubén Cuadros" style="height: 250px; object-fit: cover;">
+                         class="card-img-top" alt="Dr. Rubén Cuadros" style="height: 220px; object-fit: cover;">
                     <div class="card-body text-center p-4">
                         <h5 class="fw-bold text-brand-dark mb-1">Dr. Rubén Cuadros</h5>
                         <span class="badge bg-brand-primary text-white mb-3">Odontología Integral y Cirugía</span>
@@ -366,15 +363,30 @@
             </div>
 
             <!-- Doctor 3 -->
-            <div class="col-12 col-md-6 col-lg-4">
+            <div class="col-12 col-md-6 col-lg-3">
                 <div class="card doctor-card h-100">
                     <img onerror="this.onerror=null;this.src='${pageContext.request.contextPath}/img/servicios/generico.png'" src="https://img.freepik.com/fotos-premium/retrato-hombre-dentista-pulgares-arriba-sonrisa-cuidado-bucal-especialista-felicidad-profesional-cara-hombre-o-empleado-higiene-dental-sector-salud-apoyo-revision_590464-191475.jpg" 
-                         class="card-img-top" alt="Dr. Juan Gómez" style="height: 250px; object-fit: cover;">
+                         class="card-img-top" alt="Dr. Juan Gómez" style="height: 220px; object-fit: cover;">
                     <div class="card-body text-center p-4">
                         <h5 class="fw-bold text-brand-dark mb-1">Dr. Juan Gómez</h5>
                         <span class="badge bg-mint text-dark mb-3">Estética y Rehabilitación</span>
                         <p class="text-muted small mb-0">
                             Enfocado en devolver la función masticatoria y la armonía estética a través de prótesis fijas, carillas y blanqueamiento dental.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Doctora 4 -->
+            <div class="col-12 col-md-6 col-lg-3">
+                <div class="card doctor-card h-100">
+                    <img src="${pageContext.request.contextPath}/img/equipo/lucia.jpg" 
+                         class="card-img-top" alt="Dra. Lucía Herrera" style="height: 220px; object-fit: cover;">
+                    <div class="card-body text-center p-4">
+                        <h5 class="fw-bold text-brand-dark mb-1">Dra. Lucía Herrera</h5>
+                        <span class="badge bg-brand-primary text-white mb-3">Prevención y Estética</span>
+                        <p class="text-muted small mb-0">
+                            Limpieza, blanqueamiento, tratamiento de caries y endodoncia. Atiende también los sábados por la mañana.
                         </p>
                     </div>
                 </div>
@@ -386,7 +398,7 @@
     <section class="container my-5 py-4 border-top">
         <div class="text-center mb-4 pt-3">
             <h4 class="fw-bold text-brand-dark">Medios de Pago Aceptados</h4>
-            <p class="text-muted small">Flexibilidad en ventanilla física y pasarela de pago digital segura</p>
+            <p class="text-muted small">Tarjeta de débito o crédito en línea y efectivo en ventanilla</p>
         </div>
         <div class="row justify-content-center align-items-center g-4 text-center">
             <div class="col-4 col-md-2">
@@ -395,8 +407,11 @@
             <div class="col-4 col-md-2">
                 <img src="${pageContext.request.contextPath}/img/mastercard.svg" class="img-fluid" alt="MasterCard" style="max-height: 44px;">
             </div>
-            <div class="col-4 col-md-2">
-                <img src="${pageContext.request.contextPath}/img/paypal.svg" class="img-fluid" alt="PayPal" style="max-height: 40px;">
+            <div class="col-6 col-md-2">
+                <div class="p-2 border rounded-pill bg-light small fw-bold text-brand-dark">
+                    <i class="bi bi-phone text-brand-primary me-1"></i> Yape / Plin
+                    <span class="d-block fw-normal text-muted" style="font-size: 0.7rem;">próximamente</span>
+                </div>
             </div>
             <div class="col-6 col-md-3">
                 <div class="p-2 border rounded-pill bg-light small fw-bold text-brand-dark">
