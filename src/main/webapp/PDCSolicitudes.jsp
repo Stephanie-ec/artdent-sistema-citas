@@ -112,7 +112,7 @@
             <c:if test="${param.correo == '0'}">
                 <div class="alert alert-warning alert-dismissible fade show d-flex align-items-center mb-3" role="alert">
                     <i class="bi bi-envelope-exclamation-fill fs-4 me-2"></i>
-                    <div><strong>El correo no se pudo enviar.</strong> Revise la cuenta de correo del centro (config.properties). El intento quedó registrado en Notificaciones.</div>
+                    <div><strong>El correo no se pudo enviar.</strong> La cita se actualizó correctamente; el aviso al paciente quedó registrado en Notificaciones para reenviarlo.</div>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             </c:if>

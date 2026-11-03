@@ -246,7 +246,7 @@
                     </div>
                 <% } else if ("0".equals(request.getParameter("correo"))) { %>
                     <div class="alert alert-warning alert-dismissible fade show mb-3" role="alert">
-                        <i class="bi bi-envelope-exclamation-fill me-2"></i><strong>El correo no se pudo enviar.</strong> Revise la cuenta de correo del centro (config.properties). El intento quedó registrado en Notificaciones.
+                        <i class="bi bi-envelope-exclamation-fill me-2"></i><strong>El correo no se pudo enviar.</strong> La cita se actualizó correctamente; el aviso al paciente quedó registrado en Notificaciones para reenviarlo.
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                 <% } %>
