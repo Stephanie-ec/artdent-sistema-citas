@@ -1289,6 +1289,15 @@ BEGIN
     INSERT IGNORE INTO Usuario_Servicio (idUsuario, idServicio, Disponibilidad)
     SELECT vOdo2, idServicio, 1 FROM Servicio WHERE idServicio IN (1, 4, 5, 7);
 
+    INSERT IGNORE INTO Usuario (Nombre, Apellido, DNI, Telefono, CorreoElectronico, Direccion, FechaNacimiento, Clave, Rol_idRol) VALUES
+      ('Luis Miguel', 'Martínez', '44518273', '951237846', 'luis.martinez@artdent.com', 'Jr. Chiclayo 268', '1985-03-22', '1234', 3),
+      ('Juan', 'Gómez', '46738291', '962381457', 'juan.gomez@artdent.com', 'Av. Las Palmeras 328', '1988-11-09', '1234', 3);
+    INSERT IGNORE INTO Usuario_Horario (Usuario_idUsuario, Horario_idHorario)
+    SELECT u.idUsuario, h.idHorario FROM Usuario u JOIN Horario h ON h.idHorario <= 5 WHERE u.DNI IN ('44518273', '46738291');
+    INSERT IGNORE INTO Usuario_Servicio (idUsuario, idServicio, Disponibilidad)
+    SELECT u.idUsuario, s.idServicio, 1 FROM Usuario u JOIN Servicio s
+      ON (u.DNI = '44518273' AND s.idServicio IN (5, 7)) OR (u.DNI = '46738291' AND s.idServicio IN (4, 6));
+
     INSERT IGNORE INTO Paciente (Nombre, Apellido, DNI, Telefono, Correo) VALUES
       ('María Fernanda', 'Rojas Quispe',   '45872136', '912345678', 'maria.rojas@gmail.com'),
       ('Luis Alberto',   'Salas Mendoza',  '40123987', '923456789', 'luis.salas@gmail.com'),
