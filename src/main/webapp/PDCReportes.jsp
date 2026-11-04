@@ -25,7 +25,7 @@
         <!-- Contenido de la Página -->
         <div class="d-flex flex-grow-1">
             <!-- Sidebar -->
-            <%@include file="Sidebar.jsp" %>
+            <%@include file="ADMPSlidebar.jsp" %>
 
             <!-- Contenido Principal -->
             <main class="container-fluid p-4 d-flex flex-column flex-grow-1">
