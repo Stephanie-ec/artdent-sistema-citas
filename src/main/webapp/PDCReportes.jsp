@@ -71,7 +71,7 @@
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
                                     <div class="text-white-50 small text-uppercase fw-bold">Total Gestionadas</div>
-                                    <h3 class="mb-0 fw-bold mt-1">${kpiTotal != null ? kpiTotal : 0}</h3>
+                                    <h3 class="mb-0 fw-bold mt-1 text-white">${kpiTotal != null ? kpiTotal : 0}</h3>
                                 </div>
                                 <div class="p-3 rounded-circle bg-white bg-opacity-25 fs-3 d-flex align-items-center justify-content-center" style="width: 54px; height: 54px;">
                                     <i class="bi bi-calendar-event-fill"></i>
