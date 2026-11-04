@@ -63,7 +63,9 @@
                         <% if ("Administrador".equalsIgnoreCase(tiporolHeader)) { %>
                             <li><a class="dropdown-item" href="DashboardController?action=dashboard"><i class="bi bi-speedometer2 me-2 text-brand-accent"></i>Panel Administrador</a></li>
                         <% } %>
-                        <li><a class="dropdown-item" href="ReservaController?accion=formcita"><i class="bi bi-calendar-plus me-2 text-brand-primary"></i>Crear reserva</a></li>
+                        <% if ("Administrador".equalsIgnoreCase(tiporolHeader) || "Secretaria".equalsIgnoreCase(tiporolHeader)) { %>
+                            <li><a class="dropdown-item" href="CitaController?accion=formPresencial"><i class="bi bi-calendar-plus me-2 text-brand-primary"></i>Cita Presencial</a></li>
+                        <% } %>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item text-danger" href="CerrarSesionController"><i class="bi bi-power me-2"></i>Cerrar sesión</a></li>
                     </ul>

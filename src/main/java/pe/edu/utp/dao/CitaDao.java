@@ -17,6 +17,12 @@ public interface CitaDao {
 
     int verificarExistencia(int Dni);
 
+    /** Nombre y apellido registrados para el DNI ({nombre, apellido}) o null si no existe. */
+    String[] obtenerNombrePaciente(int dni);
+
+    /** Actualiza teléfono y correo del paciente (datos de contacto más recientes). */
+    void actualizarContactoPaciente(int idPaciente, int telefono, String correo);
+
     int updateCita(int idCita, String nuevaFecha, String nuevaHora);
 
     Cita readCita(int id);

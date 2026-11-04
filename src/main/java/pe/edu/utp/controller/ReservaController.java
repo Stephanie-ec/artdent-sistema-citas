@@ -90,6 +90,8 @@ public class ReservaController extends HttpServlet {
     private void listarReservas(HttpServletRequest request, HttpServletResponse response) throws SQLException, ServletException, IOException {
         int idUsuario = (int) request.getSession().getAttribute("idUsuario"); // Obtener ID del usuario desde la sesión
         List<VerReserva> VerReserva = reservaDao.listarReservas(idUsuario);  // Método que debes implementar en tu ReservaDao
+        // Lo más reciente primero, para que la última reserva se vea arriba
+        VerReserva.sort((a, b) -> Integer.compare(b.getIdReserva(), a.getIdReserva()));
         request.setAttribute("VerReserva", VerReserva);  // Enviamos la lista de reservas a la JSP
         request.setAttribute("tipoLista", "reserva"); // Agregar tipo de lista
         request.getRequestDispatcher("PDCSolicitudes.jsp").forward(request, response);
@@ -99,6 +101,7 @@ public class ReservaController extends HttpServlet {
     private void listarCitas(HttpServletRequest request, HttpServletResponse response) throws SQLException, ServletException, IOException {
         int idUsuario = (int) request.getSession().getAttribute("idUsuario"); // Obtener ID del usuario desde la sesión
         List<VerCita> VerCita = citaDao.listarCitas(idUsuario);  // Método que debes implementar en tu ReservaDao
+        VerCita.sort((a, b) -> Integer.compare(b.getIdCita(), a.getIdCita()));
         request.setAttribute("VerCita", VerCita);  // Enviamos la lista de citas a la JSP
         request.setAttribute("tipoLista", "cita"); // Agregar tipo de lista
         request.getRequestDispatcher("PDCSolicitudes.jsp").forward(request, response);
@@ -352,7 +355,8 @@ public class ReservaController extends HttpServlet {
         List<Servicio> servicios = servicioDAO.listarServicios();
 
         request.setAttribute("servicios", servicios);
-        request.getRequestDispatcher("reservacita.jsp").forward(request, response);
+        // Se usa el formulario oficial de reserva (CitaController), que guarda y valida correctamente
+        response.sendRedirect("ServicioController?action=formreservaa");
     }
 
     @Override
