@@ -180,7 +180,8 @@ public class UsuarioController extends HttpServlet {
             int id = Integer.parseInt(idStr);
             odontologoSeleccionado = usuarioDAO.obtenerUsuarioPorId(id);
         } else if (!odontologos.isEmpty()) {
-            odontologoSeleccionado = odontologos.get(0);
+            // Se carga el registro completo (DNI y correo), no solo el nombre de la lista
+            odontologoSeleccionado = usuarioDAO.obtenerUsuarioPorId(odontologos.get(0).getIdUsuario());
         }
 
         if (odontologoSeleccionado != null) {
