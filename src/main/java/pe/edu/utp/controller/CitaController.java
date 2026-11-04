@@ -206,6 +206,23 @@ public class CitaController extends HttpServlet {
         String origen = request.getParameter("origen");
         boolean esPresencial = "registrarPresencial".equalsIgnoreCase(accion) || "Presencial".equalsIgnoreCase(origen);
 
+        // El DNI identifica a una sola persona: si ya está registrado con otro nombre, no se mezcla la cita
+        if (x > 0) {
+            String[] registrado = citaDao.obtenerNombrePaciente(dni);
+            if (registrado != null && !(mismoTexto(registrado[0], nombre) && mismoTexto(registrado[1], apellido))) {
+                String msg = esPresencial
+                        ? "El DNI " + String.format("%08d", dni) + " ya está registrado a nombre de " + registrado[0] + " "
+                          + registrado[1] + ". Use la lupa para cargar sus datos o verifique el DNI."
+                        : "El DNI ingresado ya está registrado con otros nombres. Verifique su DNI o acérquese a la clínica.";
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                request.setAttribute("error", msg);
+                request.getRequestDispatcher("error.jsp").forward(request, response);
+                return;
+            }
+            // Misma persona: se guardan su celular y correo más recientes
+            citaDao.actualizarContactoPaciente(x, telefono, correo);
+        }
+
         if (esPresencial) {
             // RF03: Cita presencial registrada por Secretaría / Administrador
             Object rolObj = request.getSession().getAttribute("TipoRol");
@@ -232,6 +249,11 @@ public class CitaController extends HttpServlet {
             // Cita con estado 3 ('Confirmado') y origen Presencial
             Cita cita = new Cita(0, fecha, hora, idServicio, x, 3, idOdontologo);
             int idCitaGenerada = citaDao.createCitaPresencial(paciente, cita, precio_servicio, descripcion, idSecretaria);
+            if (idCitaGenerada <= 0) {
+                request.setAttribute("error", "No se pudo registrar la cita. Verifique los datos e intente nuevamente.");
+                request.getRequestDispatcher("error.jsp").forward(request, response);
+                return;
+            }
             String codigoReserva = (idCitaGenerada > 0) ? String.format("ART-RES-%05d", idCitaGenerada) : "ART-RES-00001";
 
             // RF03 / RF09: Registrar notificación de cita presencial
@@ -254,6 +276,12 @@ public class CitaController extends HttpServlet {
 
         // RF01 / RF02: Se registra la reserva web y se obtiene el ID generado
         int idCitaGenerada = citaDao.createReservaWeb(paciente, cita, precio_servicio, descripcion);
+        if (idCitaGenerada <= 0) {
+            // No se muestra un voucher si la reserva no quedó guardada
+            request.setAttribute("error", "No se pudo registrar la reserva. Verifique los datos e intente nuevamente.");
+            request.getRequestDispatcher("error.jsp").forward(request, response);
+            return;
+        }
         String codigoReserva = (idCitaGenerada > 0) ? String.format("ART-RES-%05d", idCitaGenerada) : "ART-RES-00001";
 
         // Obtener nombre del servicio y del odontólogo para el voucher
@@ -293,6 +321,17 @@ public class CitaController extends HttpServlet {
      *
      * @return a String containing servlet description
      */
+    /** Compara nombres sin distinguir mayúsculas, tildes ni espacios extra. */
+    private static boolean mismoTexto(String a, String b) {
+        return normalizar(a).equals(normalizar(b));
+    }
+
+    private static String normalizar(String s) {
+        if (s == null) return "";
+        String n = java.text.Normalizer.normalize(s.trim().toLowerCase(java.util.Locale.ROOT), java.text.Normalizer.Form.NFD);
+        return n.replaceAll("\\p{M}", "").replaceAll("\\s+", " ");
+    }
+
     @Override
     public String getServletInfo() {
         return "Short description";
