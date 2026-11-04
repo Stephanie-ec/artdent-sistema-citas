@@ -751,6 +751,35 @@ public class CitaDaoImpl implements CitaDao {
     }
 
     @Override
+    public String[] obtenerNombrePaciente(int dni) {
+        String sql = "SELECT Nombre, Apellido FROM Paciente WHERE DNI = ?";
+        try (Connection conn = Conexion.getConection(); PreparedStatement st = conn.prepareStatement(sql)) {
+            st.setString(1, String.format("%08d", dni));
+            try (ResultSet r = st.executeQuery()) {
+                if (r.next()) {
+                    return new String[]{r.getString("Nombre"), r.getString("Apellido")};
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public void actualizarContactoPaciente(int idPaciente, int telefono, String correo) {
+        String sql = "UPDATE Paciente SET Telefono = ?, Correo = ? WHERE idPaciente = ?";
+        try (Connection conn = Conexion.getConection(); PreparedStatement st = conn.prepareStatement(sql)) {
+            st.setString(1, String.valueOf(telefono));
+            st.setString(2, correo);
+            st.setInt(3, idPaciente);
+            st.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
     public int createReservaWeb(Paciente p, Cita c, double importe, String descripcion) {
         Connection conn = null;
         PreparedStatement psReg = null;
@@ -774,6 +803,12 @@ public class CitaDaoImpl implements CitaDao {
                 psReg.executeUpdate();
                 psReg.close();
                 psReg = null;
+
+                // Se usa el id real del paciente recién registrado (no el último id de la tabla)
+                pacienteId = verificarExistencia(p.getDni());
+                if (pacienteId == 0) {
+                    return 0;
+                }
             }
 
             // Crear reserva web con sp_crearreserva (sin pago forzoso en RF01)
