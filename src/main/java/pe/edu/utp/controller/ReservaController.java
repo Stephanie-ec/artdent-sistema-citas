@@ -104,6 +104,32 @@ public class ReservaController extends HttpServlet {
         request.getRequestDispatcher("PDCSolicitudes.jsp").forward(request, response);
     }
 
+    private static final int DURACION_CITA_MIN = 45;
+
+    private static boolean esCancelada(String estado) {
+        return estado != null && estado.equalsIgnoreCase("Cancelado");
+    }
+
+    /** true si la hora dada se cruza (citas de 45 min) con alguna de las horas activas. */
+    private static boolean seCruza(String hora, List<String> horasActivas) {
+        int inicio = minutos(hora);
+        if (inicio < 0) return false;
+        for (String h : horasActivas) {
+            int otra = minutos(h);
+            if (otra >= 0 && Math.abs(inicio - otra) < DURACION_CITA_MIN) return true;
+        }
+        return false;
+    }
+
+    private static int minutos(String hora) {
+        try {
+            String[] p = hora.trim().split(":");
+            return Integer.parseInt(p[0]) * 60 + Integer.parseInt(p[1]);
+        } catch (Exception e) {
+            return -1;
+        }
+    }
+
     private void listarReservasPorSemana(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, ServletException, IOException {
         Integer semanaActual = (Integer) request.getSession().getAttribute("semanaActual");
@@ -148,6 +174,17 @@ public class ReservaController extends HttpServlet {
                 }
                 reservas = reservasFiltradas;
             }
+
+            // Una cita cancelada se oculta si otra cita del mismo día se cruza con su horario
+            List<String> horasActivas = new ArrayList<>();
+            for (VerCita c : citas) {
+                if (!esCancelada(c.getEstado())) horasActivas.add(c.getHoraReserva());
+            }
+            for (VerReserva r : reservas) {
+                if (!esCancelada(r.getEstado())) horasActivas.add(r.getHoraReserva());
+            }
+            citas.removeIf(c -> esCancelada(c.getEstado()) && seCruza(c.getHoraReserva(), horasActivas));
+            reservas.removeIf(r -> esCancelada(r.getEstado()) && seCruza(r.getHoraReserva(), horasActivas));
 
             citasPorDia.put(dia, citas);
             reservasPorDia.put(dia, reservas);
