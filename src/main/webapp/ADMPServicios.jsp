@@ -39,6 +39,13 @@
                     </button>
                 </div>
 
+                <c:if test="${not empty param.error}">
+                    <div class="alert alert-warning alert-dismissible fade show d-flex align-items-center shadow-sm" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        <div><strong>No se guardó el servicio.</strong> <c:out value="${param.error}"/></div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                    </div>
+                </c:if>
                 <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
                     <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between">
                         <span class="fw-bold text-dark">Servicios Clínicos Registrados</span>
@@ -132,11 +139,11 @@
                         <div class="row g-3 mb-3">
                             <div class="col-md-6">
                                 <label for="tipoServicio" class="form-label fw-semibold">Nombre del Servicio <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="tipoServicio" name="tipoServicio" placeholder="Ej: Profilaxis Dental Avanzada" required>
+                                <input type="text" class="form-control" id="tipoServicio" name="tipoServicio" pattern="[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]{3,100}" title="Solo letras y espacios" placeholder="Ej: Profilaxis Dental Avanzada" required>
                             </div>
                             <div class="col-md-6">
                                 <label for="lema" class="form-label fw-semibold">Lema / Subtítulo Corto <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="lema" name="lema" placeholder="Ej: Sonrisa radiante y sana" required>
+                                <input type="text" class="form-control" id="lema" name="lema" pattern="[^0-9]{3,200}" title="Sin números" placeholder="Ej: Sonrisa radiante y sana" required>
                             </div>
                         </div>
                         <div class="mb-3">

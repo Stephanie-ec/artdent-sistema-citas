@@ -153,7 +153,14 @@ private void cargarServicio(HttpServletRequest request, HttpServletResponse resp
         BigDecimal costo = new BigDecimal(request.getParameter("costo"));
         String img = request.getParameter("img");
 
-        Servicio newServicio = new Servicio(0, tipoServicio, lema, descripcion, respuesta, costo, img);
+        String error = pe.edu.utp.utils.Validador.validarServicio(tipoServicio, lema, descripcion, respuesta);
+        if (error != null) {
+            response.sendRedirect("ServicioController?action=list&error="
+                    + java.net.URLEncoder.encode(error, "UTF-8"));
+            return;
+        }
+
+        Servicio newServicio = new Servicio(0, tipoServicio.trim(), lema.trim(), descripcion.trim(), respuesta.trim(), costo, img);
         servicioDao.insertarServicio(newServicio);
         response.sendRedirect("ServicioController?action=list");
     }
@@ -168,7 +175,14 @@ private void cargarServicio(HttpServletRequest request, HttpServletResponse resp
         BigDecimal costo = new BigDecimal(request.getParameter("costo"));
         String img = request.getParameter("img");
 
-        Servicio servicio = new Servicio(id, tipoServicio, lema, descripcion, respuesta, costo, img);
+        String error = pe.edu.utp.utils.Validador.validarServicio(tipoServicio, lema, descripcion, respuesta);
+        if (error != null) {
+            response.sendRedirect("ServicioController?action=edit&id=" + id + "&error="
+                    + java.net.URLEncoder.encode(error, "UTF-8"));
+            return;
+        }
+
+        Servicio servicio = new Servicio(id, tipoServicio.trim(), lema.trim(), descripcion.trim(), respuesta.trim(), costo, img);
         servicioDao.actualizarServicio(servicio);
         response.sendRedirect("ServicioController?action=list");
     }

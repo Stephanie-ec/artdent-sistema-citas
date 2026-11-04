@@ -57,6 +57,34 @@ public final class Validador {
         return null;
     }
 
+    /** Nombre del servicio: solo letras y espacios. */
+    private static final String PATRON_NOMBRE_SERVICIO = "^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ][A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]{2,99}$";
+    /** Lema, descripción y respuesta: letras, espacios y signos de puntuación, sin números. */
+    private static final String PATRON_TEXTO_SERVICIO = "^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ .,;:¡!¿?()\"'/\\r\\n-]+$";
+
+    public static String validarServicio(String nombre, String lema, String descripcion, String respuesta) {
+        if (vacio(nombre) || !nombre.trim().matches(PATRON_NOMBRE_SERVICIO)) {
+            return "El nombre del servicio solo admite letras y espacios (sin números ni símbolos).";
+        }
+        String error = validarTextoServicio(lema, "El lema", 200);
+        if (error == null) error = validarTextoServicio(descripcion, "La descripción", 600);
+        if (error == null) error = validarTextoServicio(respuesta, "La respuesta del asistente", 600);
+        return error;
+    }
+
+    private static String validarTextoServicio(String texto, String campo, int max) {
+        if (vacio(texto) || texto.trim().length() < 3) {
+            return campo + " es obligatorio (mínimo 3 letras).";
+        }
+        if (texto.trim().length() > max) {
+            return campo + " admite como máximo " + max + " caracteres.";
+        }
+        if (!texto.trim().matches(PATRON_TEXTO_SERVICIO)) {
+            return campo + " solo admite letras y signos de puntuación (sin números).";
+        }
+        return null;
+    }
+
     private static boolean vacio(String s) {
         return s == null || s.trim().isEmpty();
     }

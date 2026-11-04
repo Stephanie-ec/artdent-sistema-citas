@@ -759,6 +759,8 @@ BEGIN
            WHEN 'Confirmado' THEN '#30a4c6'
            WHEN 'Completado' THEN '#9fcc3a'
            WHEN 'Reprogramado' THEN '#212529'
+           WHEN 'En espera' THEN '#e0982a'
+           WHEN 'Cancelado' THEN '#868e96'
            ELSE '#b4ddc2'
          END AS color
   FROM Cita c
@@ -767,7 +769,7 @@ BEGIN
   INNER JOIN Servicio s ON c.Servicio_idServicio = s.idServicio
   INNER JOIN Usuario od ON c.Odontologo_idUsuario = od.idUsuario
   WHERE c.Origen = 'Presencial'
-    AND c.Estado_idEstado IN (2, 3, 4) 
+    AND c.Estado_idEstado IN (1, 2, 3, 4, 5) 
     AND c.FechaCita BETWEEN fechaInicio AND fechaFin
     AND DAYOFWEEK(c.FechaCita) = CASE diasemana
           WHEN 'Domingo' THEN 1
@@ -832,6 +834,8 @@ BEGIN
            WHEN 'Confirmado' THEN '#30a4c6'
            WHEN 'Completado' THEN '#9fcc3a'
            WHEN 'Reprogramado' THEN '#212529'
+           WHEN 'En espera' THEN '#e0982a'
+           WHEN 'Cancelado' THEN '#868e96'
            ELSE '#b4ddc2'
          END AS color
   FROM Cita c
@@ -840,7 +844,7 @@ BEGIN
   INNER JOIN Servicio s ON c.Servicio_idServicio = s.idServicio
   INNER JOIN Usuario od ON c.Odontologo_idUsuario = od.idUsuario
   WHERE c.Origen = 'Presencial'
-    AND c.Estado_idEstado IN (2, 3, 4) 
+    AND c.Estado_idEstado IN (1, 2, 3, 4, 5) 
     AND c.FechaCita BETWEEN fechaInicio AND fechaFin
     AND DAYOFWEEK(c.FechaCita) = CASE diasemana
           WHEN 'Domingo' THEN 1
@@ -1145,6 +1149,8 @@ BEGIN
            WHEN 'Confirmado' THEN '#30a4c6'
            WHEN 'Completado' THEN '#9fcc3a'
            WHEN 'Reprogramado' THEN '#212529'
+           WHEN 'En espera' THEN '#e0982a'
+           WHEN 'Cancelado' THEN '#868e96'
            ELSE '#b4ddc2'
          END AS color
   FROM Cita c
@@ -1153,7 +1159,7 @@ BEGIN
   INNER JOIN Servicio s ON c.Servicio_idServicio = s.idServicio
   INNER JOIN Usuario od ON c.Odontologo_idUsuario = od.idUsuario
   WHERE c.Origen = 'Web'
-    AND c.Estado_idEstado IN (2, 3, 4) 
+    AND c.Estado_idEstado IN (1, 2, 3, 4, 5) 
     AND c.FechaCita BETWEEN fechaInicio AND fechaFin
     AND DAYOFWEEK(c.FechaCita) = CASE diasemana
           WHEN 'Domingo' THEN 1
@@ -1218,6 +1224,8 @@ BEGIN
            WHEN 'Confirmado' THEN '#30a4c6'
            WHEN 'Completado' THEN '#9fcc3a'
            WHEN 'Reprogramado' THEN '#212529'
+           WHEN 'En espera' THEN '#e0982a'
+           WHEN 'Cancelado' THEN '#868e96'
            ELSE '#b4ddc2'
          END AS color
   FROM Cita c
@@ -1226,7 +1234,7 @@ BEGIN
   INNER JOIN Servicio s ON c.Servicio_idServicio = s.idServicio
   INNER JOIN Usuario od ON c.Odontologo_idUsuario = od.idUsuario
   WHERE c.Origen = 'Web'
-    AND c.Estado_idEstado IN (2, 3, 4) 
+    AND c.Estado_idEstado IN (1, 2, 3, 4, 5) 
     AND c.FechaCita BETWEEN fechaInicio AND fechaFin
     AND DAYOFWEEK(c.FechaCita) = CASE diasemana
           WHEN 'Domingo' THEN 1
