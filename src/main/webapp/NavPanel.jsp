@@ -69,7 +69,9 @@
                         <li><a class="dropdown-item" href="DashboardController?action=dashboard"><i class="bi bi-speedometer2 me-2 text-brand-accent"></i>Panel Administrador</a></li>
                         <li><a class="dropdown-item" href="ReservaController?accion=listarReservasPorDia"><i class="bi bi-calendar-event me-2 text-brand-primary"></i>Panel de Citas</a></li>
                     <% } %>
-                    <li><a class="dropdown-item" href="ReservaController?accion=formcita"><i class="bi bi-calendar-plus me-2 text-brand-primary"></i>Nueva Reserva</a></li>
+                    <% if ("Administrador".equalsIgnoreCase(tiporolNav) || "Secretaria".equalsIgnoreCase(tiporolNav)) { %>
+                        <li><a class="dropdown-item" href="CitaController?accion=formPresencial"><i class="bi bi-calendar-plus me-2 text-brand-primary"></i>Cita Presencial</a></li>
+                    <% } %>
                     <li><hr class="dropdown-divider"></li>
                     <li><a class="dropdown-item text-danger" href="CerrarSesionController"><i class="bi bi-power me-2"></i>Cerrar Sesión</a></li>
                 </ul>
