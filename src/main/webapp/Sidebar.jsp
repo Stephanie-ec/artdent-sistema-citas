@@ -70,6 +70,15 @@
             </a>
             <% } %>
         </li>
+
+        <% if (userRol.equalsIgnoreCase("Administrador")) { %>
+        <li class="nav-item mt-2 pt-2 border-top" style="border-color: rgba(255,255,255,0.12) !important;">
+            <a class="nav-link text-white d-flex align-items-center" href="DashboardController?action=dashboard">
+                <i class="bi bi-arrow-left-circle me-2 text-brand-accent"></i>
+                <span>Volver al Panel Administrador</span>
+            </a>
+        </li>
+        <% } %>
     </ul>
 
     <!-- Pie del Sidebar: Salir -->
