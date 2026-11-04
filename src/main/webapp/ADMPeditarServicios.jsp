@@ -39,6 +39,13 @@
                     </a>
                 </div>
 
+                <c:if test="${not empty param.error}">
+                    <div class="alert alert-warning alert-dismissible fade show d-flex align-items-center shadow-sm" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        <div><strong>No se guardó el servicio.</strong> <c:out value="${param.error}"/></div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                    </div>
+                </c:if>
                 <div class="row justify-content-center">
                     <div class="col-12 col-xl-9">
                         <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
@@ -57,11 +64,11 @@
                                     <div class="row g-3 mb-3">
                                         <div class="col-md-6">
                                             <label for="tipoServicio" class="form-label fw-semibold">Nombre del Servicio <span class="text-danger">*</span></label>
-                                            <input type="text" class="form-control" id="tipoServicio" name="tipoServicio" value="${servicio.tipoServicio}" required>
+                                            <input type="text" class="form-control" id="tipoServicio" name="tipoServicio" pattern="[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]{3,100}" title="Solo letras y espacios" value="${servicio.tipoServicio}" required>
                                         </div>
                                         <div class="col-md-6">
                                             <label for="lema" class="form-label fw-semibold">Lema / Subtítulo Corto <span class="text-danger">*</span></label>
-                                            <input type="text" class="form-control" id="lema" name="lema" value="${servicio.lema}" required>
+                                            <input type="text" class="form-control" id="lema" name="lema" pattern="[^0-9]{3,200}" title="Sin números" value="${servicio.lema}" required>
                                         </div>
                                     </div>
 

@@ -263,6 +263,16 @@
                     </div>
                 </div>
 
+                <!-- Leyenda de estados del calendario -->
+                <div class="d-flex flex-wrap align-items-center gap-3 mb-3 small">
+                    <span class="fw-semibold text-muted">Estados:</span>
+                    <span class="d-inline-flex align-items-center gap-1"><span class="rounded-1" style="width:14px;height:14px;background:#e0982a;display:inline-block;"></span>En espera</span>
+                    <span class="d-inline-flex align-items-center gap-1"><span class="rounded-1" style="width:14px;height:14px;background:#30a4c6;display:inline-block;"></span>Confirmado</span>
+                    <span class="d-inline-flex align-items-center gap-1"><span class="rounded-1" style="width:14px;height:14px;background:#212529;display:inline-block;"></span>Reprogramado</span>
+                    <span class="d-inline-flex align-items-center gap-1"><span class="rounded-1" style="width:14px;height:14px;background:#9fcc3a;display:inline-block;"></span>Completado</span>
+                    <span class="d-inline-flex align-items-center gap-1"><span class="rounded-1" style="width:14px;height:14px;background:#868e96;display:inline-block;"></span>Cancelado</span>
+                </div>
+
                 <div class="calendar-wrap">
                     <div class="calendar">
                         <div class="hours">

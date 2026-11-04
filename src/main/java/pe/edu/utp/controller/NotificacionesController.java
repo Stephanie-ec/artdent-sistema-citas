@@ -61,7 +61,12 @@ public class NotificacionesController extends HttpServlet {
     // Método para listar todas las reservas
     private void listarNotificacionesReservas(HttpServletRequest request, HttpServletResponse response) throws SQLException, ServletException, IOException {
         int idUsuario = (int) request.getSession().getAttribute("idUsuario"); // Obtener ID del usuario desde la sesión
-        List<VerReserva> VerReserva = reservaDao.listarTodasReservas(idUsuario);  // Método que debes implementar en tu ReservaDao
+        // El odontólogo ve solo sus reservas; la secretaria y el administrador ven todas
+        String rolNotif = (String) request.getSession().getAttribute("TipoRol");
+        boolean esOdontologo = rolNotif != null && rolNotif.equalsIgnoreCase("Odontologo");
+        List<VerReserva> VerReserva = esOdontologo
+                ? reservaDao.listarTodasReservas(idUsuario)
+                : reservaDao.listarTodasReservasAd();
 
         Collections.reverse(VerReserva);
         request.setAttribute("VerReserva", VerReserva);  // Enviamos la lista de reservas a la JSP
@@ -71,7 +76,11 @@ public class NotificacionesController extends HttpServlet {
     // Método para listar todas las reservas
     private void listarNotificacionesCitas(HttpServletRequest request, HttpServletResponse response) throws SQLException, ServletException, IOException {
         int idUsuario = (int) request.getSession().getAttribute("idUsuario"); // Obtener ID del usuario desde la sesión
-        List<VerCita> VerCita = citaDao.listarTodasCitas(idUsuario);  // Método que debes implementar en tu ReservaDao
+        String rolNotif = (String) request.getSession().getAttribute("TipoRol");
+        boolean esOdontologo = rolNotif != null && rolNotif.equalsIgnoreCase("Odontologo");
+        List<VerCita> VerCita = esOdontologo
+                ? citaDao.listarTodasCitas(idUsuario)
+                : citaDao.listarTodasCitasAd();
         Collections.reverse(VerCita);
         request.setAttribute("VerCita", VerCita);  // Enviamos la lista de reservas a la JSP
         request.setAttribute("tipoLista", "cita");  // Enviamos la lista de reservas a la JSP
