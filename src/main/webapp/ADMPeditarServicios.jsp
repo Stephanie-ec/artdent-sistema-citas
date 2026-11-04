@@ -109,5 +109,15 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Descripción y respuesta: mismo aviso en pantalla que el nombre y el lema (sin números)
+        document.querySelectorAll('textarea[name="descripcion"], textarea[name="respuesta"]').forEach(function (t) {
+            var revisar = function () {
+                t.setCustomValidity(/[0-9]/.test(t.value) ? 'Sin números: solo letras y signos de puntuación' : '');
+            };
+            t.addEventListener('input', revisar);
+            revisar();
+        });
+    </script>
 </body>
 </html>
