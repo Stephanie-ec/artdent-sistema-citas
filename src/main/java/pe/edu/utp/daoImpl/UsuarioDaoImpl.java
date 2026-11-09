@@ -242,13 +242,14 @@ public class UsuarioDaoImpl implements UsuarioDao {
 
         try (Connection cx = Conexion.getConection(); PreparedStatement ps = cx.prepareStatement(sql)) {
             // Asignación de parámetros
-            ps.setDate(1, java.sql.Date.valueOf(fechaConv));
-            ps.setTime(2, java.sql.Time.valueOf(horaFin));
-            ps.setTime(3, java.sql.Time.valueOf(horaObj));
+            // Fecha y horas como texto: así no dependen de la zona horaria del servidor de Java
+            ps.setString(1, fechaConv.toString());
+            ps.setString(2, horaFin.toString());
+            ps.setString(3, horaObj.toString());
             ps.setInt(4, idServicio);
             ps.setString(5, diaSemanaTexto);
-            ps.setTime(6, java.sql.Time.valueOf(horaObj));
-            ps.setTime(7, java.sql.Time.valueOf(horaFin));
+            ps.setString(6, horaObj.toString());
+            ps.setString(7, horaFin.toString());
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
