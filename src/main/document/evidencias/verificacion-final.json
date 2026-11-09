@@ -1,0 +1,131 @@
+{
+  "fecha": "2026-11-07",
+  "zona": "America/Lima",
+  "comando": "mvn -B clean verify -Pintegration (URL explicita de BD _test)",
+  "build": "SUCCESS",
+  "unitarias": [
+    {
+      "clase": "pe.edu.utp.controller.ChatbotSeguroTest",
+      "pruebas": 4,
+      "fallos": 0,
+      "errores": 0,
+      "omitidas": 0
+    },
+    {
+      "clase": "pe.edu.utp.controller.CitaFechaTest",
+      "pruebas": 4,
+      "fallos": 0,
+      "errores": 0,
+      "omitidas": 0
+    },
+    {
+      "clase": "pe.edu.utp.controller.EstadoManipuladoTest",
+      "pruebas": 2,
+      "fallos": 0,
+      "errores": 0,
+      "omitidas": 0
+    },
+    {
+      "clase": "pe.edu.utp.controller.PortalReservaTest",
+      "pruebas": 3,
+      "fallos": 0,
+      "errores": 0,
+      "omitidas": 0
+    },
+    {
+      "clase": "pe.edu.utp.controller.ReservaLegadaTest",
+      "pruebas": 1,
+      "fallos": 0,
+      "errores": 0,
+      "omitidas": 0
+    },
+    {
+      "clase": "pe.edu.utp.controller.UsuarioGestionTest",
+      "pruebas": 5,
+      "fallos": 0,
+      "errores": 0,
+      "omitidas": 0
+    },
+    {
+      "clase": "pe.edu.utp.filter.AuthFilterTest",
+      "pruebas": 6,
+      "fallos": 0,
+      "errores": 0,
+      "omitidas": 0
+    },
+    {
+      "clase": "pe.edu.utp.utils.ValidadorFechaTest",
+      "pruebas": 14,
+      "fallos": 0,
+      "errores": 0,
+      "omitidas": 0
+    }
+  ],
+  "integracion": [
+    {
+      "clase": "pe.edu.utp.controller.DashboardIT",
+      "pruebas": 1,
+      "fallos": 0,
+      "errores": 0,
+      "omitidas": 0
+    },
+    {
+      "clase": "pe.edu.utp.integration.AgendaIT",
+      "pruebas": 7,
+      "fallos": 0,
+      "errores": 0,
+      "omitidas": 0
+    },
+    {
+      "clase": "pe.edu.utp.integration.BajaLogicaIT",
+      "pruebas": 1,
+      "fallos": 0,
+      "errores": 0,
+      "omitidas": 0
+    },
+    {
+      "clase": "pe.edu.utp.integration.EstadosIT",
+      "pruebas": 6,
+      "fallos": 0,
+      "errores": 0,
+      "omitidas": 0
+    },
+    {
+      "clase": "pe.edu.utp.integration.IngresosIT",
+      "pruebas": 1,
+      "fallos": 0,
+      "errores": 0,
+      "omitidas": 0
+    },
+    {
+      "clase": "pe.edu.utp.integration.MigracionIT",
+      "pruebas": 1,
+      "fallos": 0,
+      "errores": 0,
+      "omitidas": 0
+    },
+    {
+      "clase": "pe.edu.utp.integration.PagosIT",
+      "pruebas": 6,
+      "fallos": 0,
+      "errores": 0,
+      "omitidas": 0
+    }
+  ],
+  "javascript": {
+    "comando": "node --test scripts/test-ui-segura.cjs",
+    "fallos": 0,
+    "tipo": "Scripts reales con dobles DOM",
+    "pruebas": 5
+  },
+  "jsp": {
+    "resultado": "correcto",
+    "herramienta": "jetty-jspc-maven-plugin:9.4.51.v20230217",
+    "compilados": 35
+  },
+  "http_real": "pendiente: Jetty no pudo iniciar por error de loopback",
+  "navegador": "pendiente",
+  "mysql": "8.0.44 portatil",
+  "bd": "db_artdent_apf2_test",
+  "sql_rutinas_coincidentes": 41
+}
