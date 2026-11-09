@@ -51,7 +51,12 @@ public class DashboardController extends HttpServlet {
         List<Cita> citasRecientes = citaDao.listarCitasRecientes();
         List<Reserva> reservasRecientes = reservaDao.listarReservasRecientes();
         int totalCitasReservas = citaDao.obtenerTotalCitasReservas(); // Implementar en el DAO
-    double totalIngresos = reservaDao.obtenerTotalIngresos();
+        java.math.BigDecimal totalIngresos;
+        try { totalIngresos=new pe.edu.utp.daoImpl.IngresosDao().total(); }
+        catch(java.sql.SQLException e) {
+            response.setStatus(500);request.setAttribute("error","No se pudieron consultar los pagos registrados.");
+            request.getRequestDispatcher("error.jsp").forward(request,response);return;
+        }
     
         request.setAttribute("totalCitasReservas", totalCitasReservas);
     request.setAttribute("totalIngresos", totalIngresos);

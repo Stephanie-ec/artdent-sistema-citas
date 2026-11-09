@@ -91,7 +91,7 @@
                                                     </tr>
                                                     <tr>
                                                         <th class="ps-4 text-muted py-2" style="background-color: #f8fafc;">Motivo Original</th>
-                                                        <td>${VerReserva[0].descripcion}</td>
+                                                        <td><c:out value="${VerReserva[0].descripcion}"/></td>
                                                     </tr>
                                                 </tbody>
                                             </table>
@@ -108,12 +108,12 @@
                                         <input type="hidden" name="idReserva" value="${VerReserva[0].idReserva}"> 
                                         <div class="col-md-5">
                                             <label for="new-date" class="form-label fw-semibold">Nueva Fecha <span class="text-danger">*</span></label>
-                                            <input type="date" class="form-control" id="new-date" name="new-date" required>
+                                            <input type="date" class="form-control" id="new-date" name="new-date" min="<%= java.time.LocalDate.now(java.time.ZoneId.of("America/Lima")) %>" required>
                                         </div>
 
                                         <div class="col-md-4">
                                             <label for="new-time" class="form-label fw-semibold">Nueva Hora <span class="text-danger">*</span></label>
-                                            <input type="time" class="form-control" id="new-time" name="new-time" required>
+                                            <input type="time" class="form-control" id="new-time" name="new-time" min="08:00" max="17:45" step="60" required>
                                         </div>
 
                                         <div class="col-md-3">
@@ -171,12 +171,12 @@
                                         <input type="hidden" name="idCita" value="${VerCita[0].idCita}"> 
                                         <div class="col-md-5">
                                             <label for="new-date" class="form-label fw-semibold">Nueva Fecha <span class="text-danger">*</span></label>
-                                            <input type="date" class="form-control" id="new-date" name="new-date" required>
+                                            <input type="date" class="form-control" id="new-date" name="new-date" min="<%= java.time.LocalDate.now(java.time.ZoneId.of("America/Lima")) %>" required>
                                         </div>
 
                                         <div class="col-md-4">
                                             <label for="new-time" class="form-label fw-semibold">Nueva Hora <span class="text-danger">*</span></label>
-                                            <input type="time" class="form-control" id="new-time" name="new-time" required>
+                                            <input type="time" class="form-control" id="new-time" name="new-time" min="08:00" max="17:45" step="60" required>
                                         </div>
 
                                         <div class="col-md-3">
@@ -194,5 +194,6 @@
         </div>
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    </body>
+    <script src="${pageContext.request.contextPath}/js/reprogramacion.js"></script>
+</body>
 </html>

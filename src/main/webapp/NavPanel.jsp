@@ -33,7 +33,7 @@
     <div class="container-fluid d-flex justify-content-between align-items-center">
         <!-- Brand & Logotipo -->
         <a class="navbar-brand d-flex align-items-center gap-2" href="index.jsp">
-            <img src="https://logomaker.designfreelogoonline.com/media/productdesigner/logo/resized/0001036_dental_logo_maker_dentist_Logo-02.png" 
+            <img src="${pageContext.request.contextPath}/img/logo-artdent.png" 
                  alt="Art Dent Logo" width="46" height="46">
             <span class="d-none d-sm-inline fw-bold text-brand-dark fs-5">Art <span class="text-brand-primary">Dent</span></span>
         </a>
@@ -95,3 +95,5 @@
     }
 </script>
 <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+<script src="${pageContext.request.contextPath}/js/session-guard.js" defer></script>

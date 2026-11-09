@@ -1,5 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -62,9 +63,12 @@
                 <c:if test="${not empty servicio.costo}">
                     <div class="mt-3">
                         <span class="badge bg-white text-brand-dark fs-5 px-4 py-2 rounded-pill shadow">
-                            Inversión referencial: <strong class="text-brand-primary">S/. ${servicio.costo}</strong>
+                            Inversión referencial: <strong class="text-brand-primary">S/ <fmt:formatNumber value="${servicio.costo}" pattern="#,##0.00"/></strong>
                         </span>
                     </div>
+                </c:if>
+                <c:if test="${servicio.idServicio == 8}">
+                    <p class="small text-white-50 mt-2 mb-0">Precio por pieza. Total referencial = inversión × número de carillas indicadas.</p>
                 </c:if>
             </div>
         </section>

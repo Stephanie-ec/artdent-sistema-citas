@@ -1,5 +1,7 @@
 # Guía de Usuario y Documentación Funcional: RF09 - Notificaciones Automatizadas al Paciente
 
+> **Estado del proyecto (7/11/2026):** el correo externo/Gmail se retiró por decisión del usuario. RF09 se cumple con el **registro interno de notificaciones** (`Notificacion`/`CorreoPendiente`); `mail.enabled=false` y no se envían correos reales.
+
 ---
 
 ## 1. Ficha del Requerimiento
@@ -10,8 +12,8 @@
 | **Nombre del Requerimiento** | Notificaciones |
 | **Prioridad** | **Media** |
 | **Módulo** | Módulo de Comunicaciones, Alertas y Auditoría Clínica |
-| **Roles Involucrados** | **Sistema** (Emisión desatendida automática), **Paciente** (Receptor de notificaciones por correo electrónico), **Secretaria / Odontólogo** (Disparadores de eventos clínicos) |
-| **Cambio en APF2** | **Modificado:** Reemplaza la notificación interna por un **envío automático por correo electrónico directamente al paciente** cuando su reserva es aprobada o rechazada, y cuando su cita es registrada, reprogramada o cancelada (observación docente). Cada envío queda **estrictamente registrado con fines de trazabilidad y auditoría en la tabla `Notificacion`**. |
+| **Roles Involucrados** | **Sistema** (Emisión desatendida automática), **Paciente** (Consulta sus notificaciones internas), **Secretaria / Odontólogo** (Disparadores de eventos clínicos) |
+| **Cambio en APF2** | **Modificado:** registra una notificación interna cuando la reserva es aprobada o rechazada, o cuando la cita es registrada, reprogramada o cancelada. El envío externo por Gmail/SMTP quedó **fuera de alcance**; cada evento queda auditado en `Notificacion`. |
 
 ---
 
@@ -20,7 +22,7 @@
 Este requerimiento garantiza que el paciente se mantenga informado en tiempo real sobre cualquier novedad relativa a su cita o reserva, y que el centro odontológico cuente con un registro auditado de cada mensaje transmitido:
 
 1. **Notificación Externa Directa (Correo Electrónico):**
-   * El sistema se comunica de manera proactiva con el paciente a través de su correo electrónico consignado al momento de solicitar la cita.
+   * El sistema registra la novedad para que el paciente la consulte en «Mi reserva»; no se envía correo externo mientras `mail.enabled=false`.
    * Elimina la incertidumbre del paciente, notificándole al instante cuando la clínica toma una decisión sobre su cita.
 2. **Eventos que Disparan el Envío Automático:**
    * **Cita Presencial Registrada (RF03):** Confirma la fecha, hora y odontólogo asignado con el código oficial de atención.
@@ -56,7 +58,7 @@ Este requerimiento garantiza que el paciente se mantenga informado en tiempo rea
 ### Flujo: Verificación de Notificaciones desde la Perspectiva del Paciente y de la Clínica
 
 1. **Recepción por el Paciente:**
-   * El paciente revisa su bandeja de entrada (o spam) del correo electrónico registrado.
+   * El paciente revisa el estado de su reserva en «Mi reserva»; el correo externo está deshabilitado.
    * Recibe un mensaje formal con el remitente del Centro Odontológico ArtDent con el detalle de la acción tomada, recordándole asistir 10 minutos antes con su DNI.
 2. **Auditoría por la Clínica (Personal Administrativo):**
    * En caso de discrepancia o reclamo de un paciente que argumente no haber sido informado de un cambio o rechazo, el personal puede ingresar al panel y consultar el historial de auditoría de notificaciones en el sistema.
@@ -67,7 +69,7 @@ Este requerimiento garantiza que el paciente se mantenga informado en tiempo rea
 ## 5. Arquitectura Técnica y Seguridad
 
 1. **Servicio Centralizado de Correo (`EmailService`):**
-   * Implementado en `pe.edu.utp.utils.EmailService` mediante JavaMail API (soporta servidor SMTP seguro con TLS/SSL o simulación controlada en entorno de pruebas/desarrollo).
+   * `pe.edu.utp.utils.EmailService` conserva el soporte JavaMail para una futura reactivación, pero permanece deshabilitado por `mail.enabled=false`; no hay credenciales Gmail configuradas.
 2. **Persistencia en DAO (`CitaDao.registrarNotificacion`):**
    * Sentencia SQL parametrizada ejecutada en `CitaDaoImpl`:
      ```sql

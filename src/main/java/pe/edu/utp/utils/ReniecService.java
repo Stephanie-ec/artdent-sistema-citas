@@ -15,8 +15,8 @@ import javax.json.JsonValue;
  * CR-06: consulta de identidad por DNI en RENIEC mediante un proveedor externo.
  *
  * La URL y el token se leen de config.properties (reniec.api.url y reniec.api.token),
- * por lo que el proveedor se puede cambiar sin tocar el código. Si no hay token
- * configurado, la consulta queda desactivada y el sistema sigue funcionando.
+ * por lo que el proveedor se puede cambiar sin tocar el código. Solo reniec.mode=demo
+ * permite registrar sin consultar al proveedor. Por defecto la verificación es obligatoria.
  */
 public final class ReniecService {
 
@@ -45,6 +45,7 @@ public final class ReniecService {
     }
 
     public static Resultado consultar(String dni) {
+        if("demo".equalsIgnoreCase(ConfigLoader.getProperty("reniec.mode")))return new Resultado(Estado.NO_CONFIGURADO,null,null);
         if (!configurado()) {
             return new Resultado(Estado.NO_CONFIGURADO, null, null);
         }
@@ -102,20 +103,20 @@ public final class ReniecService {
     }
 
     /**
-     * Valida que el DNI exista y que el nombre y el primer apellido coincidan con RENIEC.
-     * Devuelve null si es válido o si la consulta no está disponible (no bloquea la atención).
+     * Valida que el DNI exista y que nombres y apellidos completos coincidan con RENIEC.
+     * Devuelve null si coincide o si se seleccionó explícitamente el modo demo.
      */
     public static String validarIdentidad(String dni, String nombre, String apellido) {
-        Resultado r = consultar(dni);
+        return validarResultado(consultar(dni),nombre,apellido);
+    }
+    static String validarResultado(Resultado r,String nombre,String apellido) {
         if (r.estado == Estado.NO_EXISTE) {
             return "El DNI ingresado no figura en RENIEC. Verifique el número.";
         }
-        if (r.estado != Estado.ENCONTRADO) {
-            return null;
-        }
-        String primerNombre = primeraPalabra(nombre);
-        String primerApellido = primeraPalabra(apellido);
-        if (!normalizar(r.nombres).contains(primerNombre) || !normalizar(r.apellidos).startsWith(primerApellido)) {
+        if (r.estado != Estado.ENCONTRADO) return "demo".equalsIgnoreCase(ConfigLoader.getProperty("reniec.mode"))
+                ? null : "No se pudo verificar su identidad en RENIEC. Intente nuevamente; no se guardaron los datos.";
+        if (normalizar(nombre).isEmpty() || normalizar(apellido).isEmpty() || !normalizar(r.nombres).equals(normalizar(nombre))
+                || !normalizar(r.apellidos).equals(normalizar(apellido))) {
             return "El nombre o el apellido no coinciden con el DNI registrado en RENIEC.";
         }
         return null;
@@ -130,18 +131,12 @@ public final class ReniecService {
         return "";
     }
 
-    private static String primeraPalabra(String s) {
-        String n = normalizar(s);
-        int i = n.indexOf(' ');
-        return i > 0 ? n.substring(0, i) : n;
-    }
-
     private static String normalizar(String s) {
         if (s == null) {
             return "";
         }
         String sinTildes = Normalizer.normalize(s, Normalizer.Form.NFD).replaceAll("\\p{M}", "");
-        return sinTildes.trim().toUpperCase().replaceAll("\\s+", " ");
+        return sinTildes.trim().toUpperCase(java.util.Locale.ROOT).replaceAll("\\s+", " ");
     }
 
     private static String capitalizar(String s) {

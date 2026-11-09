@@ -117,6 +117,10 @@ public class PacienteController extends HttpServlet {
         }
 
         if ("create".equalsIgnoreCase(action)) {
+            String errorIdentidad=pe.edu.utp.utils.ReniecService.validarIdentidad(request.getParameter("dni"),request.getParameter("nombre"),request.getParameter("apellido"));
+            if(errorIdentidad!=null) {
+                response.sendRedirect("PacienteController?action=list&msg=error&detalle="+java.net.URLEncoder.encode(errorIdentidad,"UTF-8"));return;
+            }
             String dniStr = request.getParameter("dni");
             int dni = (dniStr != null && !dniStr.trim().isEmpty()) ? Integer.parseInt(dniStr.trim()) : 0;
             String nombre = request.getParameter("nombre");

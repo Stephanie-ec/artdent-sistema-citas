@@ -48,6 +48,7 @@
                     </div>
                 </c:if>
 
+                <c:if test="${param.msg == 'configureDisponibilidad'}"><div class="alert alert-info" role="status">Odontólogo registrado. Asigne sus servicios y horarios para habilitar sus reservas.</div></c:if>
                 <!-- Selector de Odontólogo -->
                 <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
                     <div class="card-body p-4">

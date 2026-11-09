@@ -226,13 +226,13 @@
                                                 <div class="acciones-fila">
                                                     <c:choose>
                                                         <c:when test="${reserva.estado == 'Cancelado' || reserva.estado == 'Rechazado'}">
-                                                            <form action="ReprogramacionController" method="post" class="d-inline">
+                                                            <c:if test="${not reserva.tienePago}"><form action="ReprogramacionController" method="post" class="d-inline">
                                                                 <input type="hidden" name="idReserva" value="${reserva.idReserva}" />
                                                                 <input type="hidden" name="accion" value="deleteReserva" />
                                                                 <button class="btn btn-accion btn-outline-danger" type="submit" title="Eliminar registro">
                                                                     <i class="bi bi-trash"></i>
                                                                 </button>
-                                                            </form>
+                                                            </form></c:if>
                                                         </c:when>
 
                                                         <c:otherwise>
@@ -250,7 +250,7 @@
                                                                             </form>
                                                                         </c:when>
                                                                         <c:otherwise>
-                                                                            <button class="btn btn-accion btn-secondary" type="button" onclick="alert('No se puede aprobar la reserva: Requiere pago verificado registrado previamente. Por favor, registre el pago en efectivo o espere el pago en línea.')" title="Bloqueado: Requiere Pago">
+                                                                            <button class="btn btn-accion btn-secondary" type="button" onclick="alert('No se puede aprobar la reserva: Requiere pago verificado registrado previamente. Por favor, registre el pago en efectivo o espere la verificación del comprobante Yape/Plin.')" title="Bloqueado: Requiere Pago">
                                                                                 <i class="bi bi-lock-fill"></i>
                                                                             </button>
                                                                         </c:otherwise>
@@ -261,20 +261,11 @@
                                                                     </button>
                                                                 </c:when>
 
-                                                                <c:when test="${reserva.estado == 'Reprogramado'}">
-                                                                    <form action="ReprogramacionController" method="post" class="d-inline">
-                                                                        <input type="hidden" name="idReserva" value="${reserva.idReserva}" />
-                                                                        <input type="hidden" name="estado" value="${reserva.estado}" />
-                                                                        <input type="hidden" name="accion" value="updateEstadoConfirmar" />
-                                                                        <button class="btn btn-accion btn-primary" type="submit" title="Confirmar cita"><i class="bi bi-check-lg"></i></button>
-                                                                    </form>
-                                                                </c:when>
 
-                                                                <c:when test="${reserva.estado == 'Confirmado' && sessionScope.TipoRol == 'Odontologo'}">
-                                                                    <form action="ReprogramacionController" method="post" class="d-inline">
-                                                                        <input type="hidden" name="idReserva" value="${reserva.idReserva}" />
-                                                                        <input type="hidden" name="estado" value="${reserva.estado}" />
-                                                                        <input type="hidden" name="accion" value="updateEstadoCompletado" />
+
+                                                                <c:when test="${(reserva.estado == 'Confirmado' || reserva.estado == 'Reprogramado') && (sessionScope.TipoRol == 'Odontologo' || sessionScope.TipoRol == 'Administrador')}">
+                                                                    <form action="AtencionController" method="get" class="d-inline">
+                                                                        <input type="hidden" name="cita" value="${reserva.idReserva}" />
                                                                         <button class="btn btn-accion btn-success" type="submit" title="Completar atención"><i class="bi bi-clipboard2-check"></i></button>
                                                                     </form>
                                                                 </c:when>
@@ -357,15 +348,15 @@
                                                 <div class="acciones-fila">
                                                     <c:choose>
                                                         <c:when test="${cita.estado == 'Cancelado'}">
-                                                            <form action="ReprogramacionController" method="post" class="d-inline">
+                                                            <c:if test="${not cita.tienePago}"><form action="ReprogramacionController" method="post" class="d-inline">
                                                                 <input type="hidden" name="idCita" value="${cita.idCita}" />
                                                                 <input type="hidden" name="accion" value="deleteCita" />
                                                                 <button class="btn btn-accion btn-outline-danger" type="submit" title="Eliminar registro"><i class="bi bi-trash"></i></button>
-                                                            </form>
+                                                            </form></c:if>
                                                         </c:when>
                                                         <c:otherwise>
                                                             <c:choose>
-                                                                <c:when test="${cita.estado == 'En espera' || cita.estado == 'Reprogramado'}">
+                                                                <c:when test="${cita.estado == 'En espera' && sessionScope.TipoRol != 'Odontologo'}">
                                                                     <form action="ReprogramacionController" method="post" class="d-inline">
                                                                         <input type="hidden" name="idCita" value="${cita.idCita}" />
                                                                         <input type="hidden" name="estado" value="${cita.estado}" />
@@ -373,11 +364,9 @@
                                                                         <button class="btn btn-accion btn-primary" type="submit" title="Confirmar cita"><i class="bi bi-check-lg"></i></button>
                                                                     </form>
                                                                 </c:when>
-                                                                <c:when test="${cita.estado == 'Confirmado' && sessionScope.TipoRol == 'Odontologo'}">
-                                                                    <form action="ReprogramacionController" method="post" class="d-inline">
-                                                                        <input type="hidden" name="idCita" value="${cita.idCita}" />
-                                                                        <input type="hidden" name="estado" value="${cita.estado}" />
-                                                                        <input type="hidden" name="accion" value="updateEstadoCompletadoCita" />
+                                                                <c:when test="${(cita.estado == 'Confirmado' || cita.estado == 'Reprogramado') && (sessionScope.TipoRol == 'Odontologo' || sessionScope.TipoRol == 'Administrador')}">
+                                                                    <form action="AtencionController" method="get" class="d-inline">
+                                                                        <input type="hidden" name="cita" value="${cita.idCita}" />
                                                                         <button class="btn btn-accion btn-success" type="submit" title="Completar atención"><i class="bi bi-clipboard2-check"></i></button>
                                                                     </form>
                                                                 </c:when>
@@ -461,7 +450,7 @@
                                     <label class="form-label small fw-bold text-muted">Monto del Servicio (S/)</label>
                                     <div class="input-group">
                                         <span class="input-group-text">S/</span>
-                                        <input type="number" step="0.01" class="form-control font-monospace fw-bold" name="monto" value="${reserva.importe > 0 ? reserva.importe : '100.00'}" required />
+                                        <input type="number" step="0.01" class="form-control font-monospace fw-bold" name="monto" value="${reserva.importe}" readonly required />
                                     </div>
                                 </div>
                             </div>
@@ -551,7 +540,7 @@
                                     <label class="form-label small fw-bold text-muted">Monto del Servicio (S/)</label>
                                     <div class="input-group">
                                         <span class="input-group-text">S/</span>
-                                        <input type="number" step="0.01" class="form-control font-monospace fw-bold" name="monto" value="${cita.costo > 0 ? cita.costo : '100.00'}" required />
+                                        <input type="number" step="0.01" class="form-control font-monospace fw-bold" name="monto" value="${cita.costo}" readonly required />
                                     </div>
                                 </div>
                             </div>

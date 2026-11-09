@@ -117,7 +117,7 @@
             <div class="row align-items-center mb-4">
                 <div class="col-md-7">
                     <div class="d-flex align-items-center mb-2">
-                        <img src="https://logomaker.designfreelogoonline.com/media/productdesigner/logo/resized/0001036_dental_logo_maker_dentist_Logo-02.png" 
+                        <img src="${pageContext.request.contextPath}/img/logo-artdent.png" 
                              alt="Logo ArtDent" style="width: 58px; height: 58px;" class="me-3">
                         <div>
                             <h4 class="fw-bold mb-0" style="color: var(--artdent-primary);">CENTRO ODONTOLÓGICO ART DENT</h4>

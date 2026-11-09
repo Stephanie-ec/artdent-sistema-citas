@@ -12,9 +12,24 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <jetty.http.port>8080</jetty.http.port>
     </properties>
     
     <dependencies>
+
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>4.11.0</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13.2</version>
+            <scope>test</scope>
+        </dependency>
 
         <dependency>
             <groupId>com.zaxxer</groupId>
@@ -105,7 +120,13 @@
     </dependencies>
 
     <build>
+        <resources><resource><directory>src/main/resources</directory><excludes>
+            <exclude>config.properties</exclude>
+        </excludes></resource></resources>
         <plugins>
+            <plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-surefire-plugin</artifactId><version>3.2.5</version>
+                <configuration><systemPropertyVariables><artdent.reniec.mode>demo</artdent.reniec.mode><artdent.gemini.enabled>false</artdent.gemini.enabled></systemPropertyVariables></configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -121,6 +142,7 @@
                 <version>3.3.1</version>
                 <configuration>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
+                    <packagingExcludes>WEB-INF/classes/config.properties</packagingExcludes>
                 </configuration>
             </plugin>
             <plugin>
@@ -156,8 +178,23 @@
                     <webApp>
                         <contextPath>/ArtDent</contextPath>
                     </webApp>
+                    <httpConnector>
+                        <host>127.0.0.1</host>
+                        <port>${jetty.http.port}</port>
+                    </httpConnector>
                 </configuration>
             </plugin>
         </plugins>
     </build>
+    <profiles>
+        <profile>
+            <id>integration</id>
+            <build><plugins><plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>3.2.5</version>
+                <executions><execution><goals><goal>integration-test</goal><goal>verify</goal></goals></execution></executions>
+            </plugin></plugins></build>
+        </profile>
+    </profiles>
 </project>

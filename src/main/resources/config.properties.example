@@ -1,17 +1,25 @@
 # Configuración de Base de Datos
-db.url=jdbc:mysql://localhost:3306/db_artdent?serverTimezone=America/Lima&useUnicode=true&characterEncoding=UTF-8
+db.url=jdbc:mysql://localhost:3306/db_artdent_apf2?serverTimezone=America/Lima&useUnicode=true&characterEncoding=UTF-8
 db.user=root
 db.password=tu_password_aqui
 
-# Configuración de Correo Electrónico (Gmail SMTP)
-mail.sender=tu_correo@gmail.com
-mail.password=tu_token_o_clave_de_aplicacion
-mail.smtp.host=smtp.gmail.com
-mail.smtp.port=587
+# Correo externo deshabilitado por decisión del proyecto (sin Gmail).
+# Las notificaciones internas se guardan en la tabla CorreoPendiente/Notificacion.
+mail.enabled=false
 
-# Configuración de Gemini AI
-gemini.api.key=TU_API_KEY_AQUI
+# Habilitar IA solo con una clave y un modelo admitido por la cuenta Gemini.
+gemini.enabled=false
+gemini.api.key=
+gemini.model=
 
 # Verificación de DNI en RENIEC (CR-06). Token del proveedor; si se deja vacío, la verificación se desactiva.
 reniec.api.url=https://api.decolecta.com/v1/reniec/dni?numero={dni}
 reniec.api.token=
+reniec.mode=demo
+# Producción: reniec.mode=required. La indisponibilidad impide registrar identidades.
+
+# Yape/Plin manual: complete los datos del negocio antes de usar la demo.
+pagos.titular=
+pagos.numero=
+# Ruta absoluta privada, fuera de src/main/webapp, target y del servidor web.
+pagos.adjuntos.dir=

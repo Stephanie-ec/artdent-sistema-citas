@@ -122,39 +122,10 @@ public class CitaDaoImpl implements CitaDao {
 
     @Override
     public int verificarExistencia(int dni) {
-        // Obtener conexión
-        cx = Conexion.getConection();
-        if (cx == null) {
-            System.out.println("No se pudo establecer conexión con la base de datos.");
-            return 0;  // Retorna 0 si no hay conexión
-        }
-        String sql = "SELECT idPaciente FROM Paciente WHERE DNI = ?";
-        int idPaciente;
-
-        try {
-            ps = cx.prepareStatement(sql);
-            ps.setInt(1, dni);
-            rs = ps.executeQuery();
-
-            if (rs.next()) {
-                return idPaciente = rs.getInt("idPaciente");  // Devuelve el idPaciente si existe
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (ps != null) {
-                    ps.close();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        return 0;  // Devuelve el idPaciente si existe, o 0 si no se encontró
+        try (Connection conn=Conexion.getConection(); PreparedStatement st=conn.prepareStatement("SELECT idPaciente FROM Paciente WHERE DNI=?")) {
+            st.setString(1,String.format("%08d",dni));
+            try(ResultSet rs=st.executeQuery()) { return rs.next()?rs.getInt(1):0; }
+        } catch(SQLException e) { throw new IllegalStateException("No se pudo consultar el paciente",e); }
     }
 
     @Override
@@ -253,7 +224,9 @@ public class CitaDaoImpl implements CitaDao {
         System.out.println("Total de reservas recuperadas: " + lista.size());
         try {
             Map<Integer, Comprobante> mapComp = new PagoDaoImpl().obtenerMapaComprobantesPorCita();
+            java.util.Set<Integer> pagadas = new PagoDaoImpl().citasPagadas();
             for (VerCita re : lista) {
+                re.setTienePago(pagadas.contains(re.getIdCita()));
                 if (mapComp.containsKey(re.getIdCita())) {
                     Comprobante c = mapComp.get(re.getIdCita());
                     re.setTienePago(true);
@@ -781,158 +754,58 @@ public class CitaDaoImpl implements CitaDao {
 
     @Override
     public int createReservaWeb(Paciente p, Cita c, double importe, String descripcion) {
-        Connection conn = null;
-        PreparedStatement psReg = null;
-        PreparedStatement psRes = null;
-        int resultado = 0;
-        try {
-            conn = Conexion.getConection();
-            if (conn == null) {
-                return 0;
-            }
-
-            int pacienteId = verificarExistencia(p.getDni());
-            if (pacienteId == 0) {
-                // Registrar nuevo paciente
-                psReg = conn.prepareStatement("{CALL sp_registrarusuario(?, ?, ?, ?, ?)}");
-                psReg.setString(1, p.getNombre());
-                psReg.setString(2, p.getApellido());
-                psReg.setString(3, String.format("%08d", p.getDni()));
-                psReg.setInt(4, p.getTelefono());
-                psReg.setString(5, p.getCorreo());
-                psReg.executeUpdate();
-                psReg.close();
-                psReg = null;
-
-                // Se usa el id real del paciente recién registrado (no el último id de la tabla)
-                pacienteId = verificarExistencia(p.getDni());
-                if (pacienteId == 0) {
-                    return 0;
-                }
-            }
-
-            // Crear reserva web con sp_crearreserva (sin pago forzoso en RF01)
-            psRes = conn.prepareStatement("{CALL sp_crearreserva(?, ?, ?, ?, ?, ?, ?, ?)}");
-            psRes.setString(1, c.getDiaReserva());
-            psRes.setString(2, c.getHoraReserva());
-            psRes.setString(3, (descripcion != null && !descripcion.trim().isEmpty()) ? descripcion : "Reserva Web - En espera");
-            psRes.setDouble(4, importe);
-            psRes.setInt(5, pacienteId); // Pasamos pacienteId si ya existía
-            psRes.setInt(6, 1); // Estado 1: 'En espera'
-            psRes.setInt(7, c.getId_Servicio());
-            psRes.setInt(8, c.getOdontologo_idUsuario());
-
-            int resExec = psRes.executeUpdate();
-            psRes.close();
-            psRes = null;
-
-            if (resExec > 0) {
-                // RF02: Obtener el ID generado de la cita para el código de reserva
-                try (PreparedStatement psId = conn.prepareStatement(
-                        "SELECT idCita FROM Cita WHERE Paciente_idPaciente = " +
-                        "(SELECT idPaciente FROM Paciente WHERE DNI = ?) ORDER BY idCita DESC LIMIT 1")) {
-                    psId.setString(1, String.format("%08d", p.getDni()));
-                    try (ResultSet rsId = psId.executeQuery()) {
-                        if (rsId.next()) {
-                            resultado = rsId.getInt("idCita");
-                        } else {
-                            resultado = 1;
-                        }
-                    }
-                }
-            }
-        } catch (SQLException e) {
-            System.err.println("Error en createReservaWeb: " + e.getMessage());
-            e.printStackTrace();
-        } finally {
-            try {
-                if (psReg != null) psReg.close();
-                if (psRes != null) psRes.close();
-                if (conn != null) conn.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-        return resultado;
+        return registrarCita(p,c,importe,descripcion,0,false);
     }
 
     @Override
     public int createCitaPresencial(Paciente p, Cita c, double importe, String descripcion, int idSecretaria) {
-        Connection conn = null;
-        PreparedStatement psReg = null;
-        PreparedStatement psCita = null;
-        ResultSet rsKey = null;
-        int idCitaGenerada = 0;
-        try {
-            conn = Conexion.getConection();
-            if (conn == null) {
-                return 0;
+        return registrarCita(p,c,importe,descripcion,idSecretaria,true);
+    }
+
+    private int registrarCita(Paciente p, Cita cita, double importe, String descripcion, int actor, boolean presencial) {
+        try (Connection conn = Conexion.getConection()) {
+            int pacienteId;
+            // La clave unica de DNI resuelve dos altas simultaneas sin buscar MAX(id).
+            try (PreparedStatement st = conn.prepareStatement(
+                    "INSERT INTO Paciente(Nombre,Apellido,DNI,Telefono,Correo) VALUES(?,?,?,?,?) "
+                    + "ON DUPLICATE KEY UPDATE idPaciente=LAST_INSERT_ID(idPaciente)")) {
+                st.setString(1,p.getNombre()); st.setString(2,p.getApellido());
+                st.setString(3,String.format("%08d",p.getDni())); st.setInt(4,p.getTelefono()); st.setString(5,p.getCorreo());
+                st.executeUpdate();
             }
-
-            int pacienteId = verificarExistencia(p.getDni());
-            if (pacienteId == 0) {
-                // Registrar nuevo paciente si no existe
-                psReg = conn.prepareStatement("{CALL sp_registrarusuario(?, ?, ?, ?, ?)}");
-                psReg.setString(1, p.getNombre());
-                psReg.setString(2, p.getApellido());
-                psReg.setString(3, String.format("%08d", p.getDni()));
-                psReg.setInt(4, p.getTelefono());
-                psReg.setString(5, p.getCorreo());
-                psReg.executeUpdate();
-                psReg.close();
-                psReg = null;
-
-                pacienteId = verificarExistencia(p.getDni());
-            }
-
-            // Insertar en tabla Cita con Origen = 'Presencial' y Estado = 3 ('Confirmado')
-            String sql = "INSERT INTO Cita (FechaCita, HoraCita, Descripcion, Importe, Origen, Usuario_idUsuario, Paciente_idPaciente, Servicio_idServicio, Estado_idEstado, Odontologo_idUsuario) "
-                       + "VALUES (?, ?, ?, ?, 'Presencial', ?, ?, ?, 3, ?)";
-            psCita = conn.prepareStatement(sql, java.sql.Statement.RETURN_GENERATED_KEYS);
-            psCita.setString(1, c.getDiaReserva());
-            psCita.setString(2, c.getHoraReserva());
-            psCita.setString(3, (descripcion != null && !descripcion.trim().isEmpty()) ? descripcion : "Cita Presencial - Registrada por Secretaría");
-            psCita.setDouble(4, importe);
-            if (idSecretaria > 0) {
-                psCita.setInt(5, idSecretaria);
-            } else {
-                psCita.setNull(5, java.sql.Types.INTEGER);
-            }
-            psCita.setInt(6, pacienteId);
-            psCita.setInt(7, c.getId_Servicio());
-            psCita.setInt(8, c.getOdontologo_idUsuario());
-
-            int resExec = psCita.executeUpdate();
-            if (resExec > 0) {
-                rsKey = psCita.getGeneratedKeys();
-                if (rsKey != null && rsKey.next()) {
-                    idCitaGenerada = rsKey.getInt(1);
-                } else {
-                    // Fallback
-                    try (PreparedStatement psFallback = conn.prepareStatement("SELECT MAX(idCita) AS maxId FROM Cita WHERE Paciente_idPaciente = ?")) {
-                        psFallback.setInt(1, pacienteId);
-                        try (ResultSet rsFb = psFallback.executeQuery()) {
-                            if (rsFb.next()) {
-                                idCitaGenerada = rsFb.getInt("maxId");
-                            }
-                        }
+            try (PreparedStatement st=conn.prepareStatement("SELECT idPaciente,Nombre,Apellido FROM Paciente WHERE DNI=?")) {
+                st.setString(1,String.format("%08d",p.getDni()));
+                try (ResultSet rs=st.executeQuery()) {
+                    if (!rs.next()) return 0;
+                    pacienteId=rs.getInt(1);
+                    if (!normalizarNombre(rs.getString(2)).equals(normalizarNombre(p.getNombre()))
+                            || !normalizarNombre(rs.getString(3)).equals(normalizarNombre(p.getApellido()))) {
+                        throw new pe.edu.utp.utils.ReservaNoDisponibleException("El DNI ya esta registrado con otros nombres.",null);
                     }
                 }
             }
-        } catch (SQLException e) {
-            System.err.println("Error en createCitaPresencial: " + e.getMessage());
-            e.printStackTrace();
-        } finally {
-            try {
-                if (rsKey != null) rsKey.close();
-                if (psReg != null) psReg.close();
-                if (psCita != null) psCita.close();
-                if (conn != null) conn.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
+            try (java.sql.CallableStatement st=conn.prepareCall("{call sp_artdent_crearCita(?,?,?,?,?,?,?,?,?,?)}")) {
+                st.setString(1,cita.getDiaReserva()); st.setString(2,cita.getHoraReserva());
+                st.setString(3,descripcion==null || descripcion.trim().isEmpty() ? (presencial?"Cita Presencial":"Reserva Web") : descripcion);
+                st.setDouble(4,importe); st.setString(5,presencial?"Presencial":"Web");
+                if(actor>0)st.setInt(6,actor); else st.setNull(6,java.sql.Types.INTEGER);
+                st.setInt(7,pacienteId); st.setInt(8,cita.getId_Servicio()); st.setInt(9,presencial?3:1);
+                st.setInt(10,cita.getOdontologo_idUsuario()); st.execute();
             }
+            // LAST_INSERT_ID pertenece a esta conexion; no depende del paciente ni de otras reservas.
+            try (PreparedStatement st=conn.prepareStatement("SELECT LAST_INSERT_ID()"); ResultSet rs=st.executeQuery()) {
+                return rs.next()?rs.getInt(1):0;
+            }
+        } catch (SQLException e) {
+            if ("45000".equals(e.getSQLState())) throw new pe.edu.utp.utils.ReservaNoDisponibleException(e.getMessage(),e);
+            java.util.logging.Logger.getLogger(CitaDaoImpl.class.getName()).log(java.util.logging.Level.SEVERE,"No se pudo registrar la cita",e);
+            return 0;
         }
-        return idCitaGenerada;
+    }
+
+    private static String normalizarNombre(String valor) {
+        return java.text.Normalizer.normalize(valor.trim().toLowerCase(java.util.Locale.ROOT),java.text.Normalizer.Form.NFD)
+                .replaceAll("\\p{M}","").replaceAll("\\s+"," ");
     }
 
     @Override

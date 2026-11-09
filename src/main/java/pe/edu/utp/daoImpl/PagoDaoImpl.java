@@ -13,115 +13,74 @@ import pe.edu.utp.entity.Comprobante;
 import pe.edu.utp.entity.Pago;
 
 public class PagoDaoImpl implements PagoDao {
+    @Override public java.util.Set<Integer> citasPagadas() {
+        java.util.Set<Integer> ids=new java.util.HashSet<>();
+        try(Connection c=Conexion.getConection();PreparedStatement s=c.prepareStatement("SELECT Cita_idCita FROM Pago");ResultSet r=s.executeQuery()) {
+            while(r.next())ids.add(r.getInt(1));return ids;
+        }catch(SQLException e){throw new IllegalStateException("No se pudo consultar los pagos",e);}
+    }
 
     @Override
     public boolean registrarPagoYComprobante(Pago pago, Comprobante comprobante) {
-        Connection conn = null;
-        PreparedStatement psPago = null;
-        PreparedStatement psComp = null;
-        ResultSet rsKeys = null;
-        ResultSet rsNum = null;
-        Statement stNum = null;
-
-        try {
-            conn = Conexion.getConection();
-            if (conn == null) {
-                return false;
-            }
+        try(Connection conn=Conexion.getConection()) {
             conn.setAutoCommit(false);
-
-            // 1. Verificar si ya existe pago para esta cita
-            String checkSQL = "SELECT idPago FROM Pago WHERE Cita_idCita = ?";
-            try (PreparedStatement psCheck = conn.prepareStatement(checkSQL)) {
-                psCheck.setInt(1, pago.getCita_idCita());
-                try (ResultSet rsCheck = psCheck.executeQuery()) {
-                    if (rsCheck.next()) {
-                        conn.rollback();
-                        return false; // Ya tiene pago registrado
-                    }
-                }
-            }
-
-            // 2. Insertar Pago
-            String sqlPago = "INSERT INTO Pago (Monto, CodigoTransaccion, MetodoPago_idMetodo, Cita_idCita) VALUES (?, ?, ?, ?)";
-            psPago = conn.prepareStatement(sqlPago, Statement.RETURN_GENERATED_KEYS);
-            psPago.setDouble(1, pago.getMonto());
-            psPago.setString(2, pago.getCodigoTransaccion());
-            psPago.setInt(3, pago.getMetodoPago_idMetodo());
-            psPago.setInt(4, pago.getCita_idCita());
-            psPago.executeUpdate();
-
-            rsKeys = psPago.getGeneratedKeys();
-            int idPagoGenerado = 0;
-            if (rsKeys.next()) {
-                idPagoGenerado = rsKeys.getInt(1);
-            } else {
-                conn.rollback();
-                return false;
-            }
-
-            // 3. Obtener siguiente número correlativo de Boleta para serie B001
-            String serie = (comprobante.getSerie() != null && !comprobante.getSerie().trim().isEmpty()) 
-                    ? comprobante.getSerie().trim() : "B001";
-            
-            stNum = conn.createStatement();
-            String sqlCorrelativo = "SELECT IFNULL(MAX(CAST(Numero AS UNSIGNED)), 0) + 1 AS Siguiente FROM Comprobante WHERE Serie = '" + serie + "'";
-            rsNum = stNum.executeQuery(sqlCorrelativo);
-            int sigNumero = 1;
-            if (rsNum.next()) {
-                sigNumero = rsNum.getInt("Siguiente");
-            }
-            String numeroFormateado = String.format("%08d", sigNumero);
-
-            // 4. Insertar Comprobante
-            String sqlComp = "INSERT INTO Comprobante (Serie, Numero, NombreCliente, DNICliente, Pago_idPago) VALUES (?, ?, ?, ?, ?)";
-            psComp = conn.prepareStatement(sqlComp, Statement.RETURN_GENERATED_KEYS);
-            psComp.setString(1, serie);
-            psComp.setString(2, numeroFormateado);
-            psComp.setString(3, comprobante.getNombreCliente());
-            psComp.setString(4, comprobante.getDniCliente());
-            psComp.setInt(5, idPagoGenerado);
-            psComp.executeUpdate();
-
-            conn.commit();
-
-            pago.setIdPago(idPagoGenerado);
-            comprobante.setPago_idPago(idPagoGenerado);
-            comprobante.setSerie(serie);
-            comprobante.setNumero(numeroFormateado);
-
-            return true;
-        } catch (SQLException e) {
-            System.err.println("Error en registrarPagoYComprobante: " + e.getMessage());
-            e.printStackTrace();
-            if (conn != null) {
-                try {
-                    conn.rollback();
-                } catch (SQLException ex) {
-                    ex.printStackTrace();
-                }
-            }
-            return false;
-        } finally {
             try {
-                if (rsKeys != null) rsKeys.close();
-                if (rsNum != null) rsNum.close();
-                if (stNum != null) stNum.close();
-                if (psPago != null) psPago.close();
-                if (psComp != null) psComp.close();
-                if (conn != null) {
-                    conn.setAutoCommit(true);
-                    conn.close();
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
+                boolean ok=registrarEnConexion(conn,pago,comprobante);
+                if(ok)conn.commit();else conn.rollback();
+                return ok;
+            } catch(SQLException|RuntimeException e) {
+                conn.rollback();java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.WARNING,"Pago no registrado; transacción revertida",e);return false;
+            }
+            finally {conn.setAutoCommit(true);}
+        } catch(SQLException e) {throw new IllegalStateException("No se pudo registrar el pago",e);}
+    }
+
+    /** El llamador controla commit/rollback; comparte el bloqueo de Cita con revisiones manuales. */
+    public boolean registrarEnConexion(Connection conn,Pago pago,Comprobante comprobante) throws SQLException {
+        String serie=comprobante.getSerie()==null?"B001":comprobante.getSerie().trim();
+        if(!serie.matches("[A-Z][A-Z0-9]{3}"))return false;
+        java.math.BigDecimal monto;
+        // Mismo mutex de fila que cancelar/rechazar/eliminar: se decide con estado actual.
+        try(PreparedStatement st=conn.prepareStatement("SELECT c.Estado_idEstado,COALESCE(NULLIF(c.Importe,0),s.Costo) FROM Cita c JOIN Servicio s ON s.idServicio=c.Servicio_idServicio WHERE c.idCita=? FOR UPDATE")) {
+            st.setInt(1,pago.getCita_idCita());
+            try(ResultSet rs=st.executeQuery()) {
+                if(!rs.next()||rs.getInt(1)==5||rs.getInt(1)==6){return false;}
+                monto=rs.getBigDecimal(2);
+                if(monto==null||monto.signum()<=0){return false;}
             }
         }
+        try(PreparedStatement st=conn.prepareStatement("SELECT idPago FROM Pago WHERE Cita_idCita=? FOR UPDATE")) {
+            st.setInt(1,pago.getCita_idCita());try(ResultSet rs=st.executeQuery()){if(rs.next()){return false;}}
+        }
+        int idPago;
+        try(PreparedStatement st=conn.prepareStatement("INSERT INTO Pago(Monto,CodigoTransaccion,MetodoPago_idMetodo,Cita_idCita) VALUES(?,?,?,?)",Statement.RETURN_GENERATED_KEYS)) {
+            st.setBigDecimal(1,monto);st.setString(2,pago.getCodigoTransaccion());st.setInt(3,pago.getMetodoPago_idMetodo());st.setInt(4,pago.getCita_idCita());st.executeUpdate();
+            try(ResultSet rs=st.getGeneratedKeys()){if(!rs.next())throw new SQLException("No se genero el ID del pago");idPago=rs.getInt(1);}
+        }
+        try(PreparedStatement st=conn.prepareStatement("INSERT IGNORE INTO CorrelativoComprobante(Serie,Ultimo) VALUES(?,0)")){st.setString(1,serie);st.executeUpdate();}
+        int siguiente;
+        try(PreparedStatement st=conn.prepareStatement("SELECT Ultimo FROM CorrelativoComprobante WHERE Serie=? FOR UPDATE")) {
+            st.setString(1,serie);try(ResultSet rs=st.executeQuery()){rs.next();siguiente=rs.getInt(1)+1;}
+        }
+        if(siguiente>99999999)throw new SQLException("Serie de comprobantes agotada");
+        try(PreparedStatement st=conn.prepareStatement("UPDATE CorrelativoComprobante SET Ultimo=? WHERE Serie=?")){st.setInt(1,siguiente);st.setString(2,serie);st.executeUpdate();}
+        String numero=String.format(java.util.Locale.ROOT,"%08d",siguiente);
+        try(PreparedStatement st=conn.prepareStatement("INSERT INTO Comprobante(Serie,Numero,NombreCliente,DNICliente,Pago_idPago) VALUES(?,?,?,?,?)")) {
+            st.setString(1,serie);st.setString(2,numero);st.setString(3,comprobante.getNombreCliente());st.setString(4,comprobante.getDniCliente());st.setInt(5,idPago);st.executeUpdate();
+        }
+        pago.setIdPago(idPago);pago.setMonto(monto.doubleValue());
+        comprobante.setSerie(serie);comprobante.setNumero(numero);comprobante.setPago_idPago(idPago);
+        return true;
+    }
+    @Override public Integer obtenerEstadoCita(int id) {
+        try(Connection c=Conexion.getConection();PreparedStatement s=c.prepareStatement("SELECT Estado_idEstado FROM Cita WHERE idCita=?")) {
+            s.setInt(1,id);try(ResultSet r=s.executeQuery()){return r.next()?r.getInt(1):null;}
+        } catch(SQLException e){throw new IllegalStateException("No se pudo verificar el estado de la cita",e);}
     }
 
     @Override
     public Double obtenerCostoServicioPorCita(int idCita) {
-        String sql = "SELECT s.Costo FROM Cita c INNER JOIN Servicio s ON c.Servicio_idServicio = s.idServicio WHERE c.idCita = ?";
+        String sql = "SELECT COALESCE(NULLIF(c.Importe,0),s.Costo) AS Costo FROM Cita c INNER JOIN Servicio s ON c.Servicio_idServicio = s.idServicio WHERE c.idCita = ?";
         try (Connection conn = Conexion.getConection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, idCita);
@@ -144,8 +103,7 @@ public class PagoDaoImpl implements PagoDao {
                 return rs.next();
             }
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            throw new IllegalStateException("No se pudo verificar si la cita tiene pago. Intente nuevamente.",e);
         }
     }
 
@@ -290,10 +248,11 @@ public class PagoDaoImpl implements PagoDao {
 
     @Override
     public Map<String, Object> consultarReserva(int idCita, String dni) {
-        String sql = "SELECT c.idCita, c.FechaCita, c.HoraCita, e.TipoEstado, s.TipoServicio, "
+        String sql = "SELECT c.idCita, c.FechaCita, c.HoraCita, c.Estado_idEstado, COALESCE(NULLIF(c.Importe,0),s.Costo) AS Importe, CONCAT(od.Nombre,' ',od.Apellido) AS Odontologo, e.TipoEstado, s.TipoServicio, "
                 + "CONCAT(p.Nombre, ' ', p.Apellido) AS Paciente, "
-                + "(SELECT COUNT(*) FROM Pago pg WHERE pg.Cita_idCita = c.idCita) AS Pagos "
-                + "FROM Cita c JOIN Paciente p ON p.idPaciente = c.Paciente_idPaciente "
+                + "(SELECT COUNT(*) FROM Pago pg WHERE pg.Cita_idCita = c.idCita) AS Pagos, "
+                + "(SELECT COUNT(*) FROM Comprobante co JOIN Pago pg ON pg.idPago=co.Pago_idPago WHERE pg.Cita_idCita=c.idCita) AS Boletas "
+                + "FROM Cita c JOIN Paciente p ON p.idPaciente = c.Paciente_idPaciente JOIN Usuario od ON od.idUsuario=c.Odontologo_idUsuario "
                 + "JOIN Estado e ON e.idEstado = c.Estado_idEstado "
                 + "JOIN Servicio s ON s.idServicio = c.Servicio_idServicio "
                 + "WHERE c.idCita = ? AND p.DNI = ?";
@@ -307,12 +266,16 @@ public class PagoDaoImpl implements PagoDao {
                 }
                 Map<String, Object> r = new HashMap<>();
                 r.put("idCita", rs.getInt("idCita"));
+                r.put("estadoId",rs.getInt("Estado_idEstado"));
+                r.put("odontologo",rs.getString("Odontologo"));
+                r.put("importe",rs.getBigDecimal("Importe"));
                 r.put("fecha", String.valueOf(rs.getDate("FechaCita")));
                 r.put("hora", String.valueOf(rs.getTime("HoraCita")).substring(0, 5));
                 r.put("estado", rs.getString("TipoEstado"));
                 r.put("servicio", rs.getString("TipoServicio"));
                 r.put("paciente", rs.getString("Paciente"));
                 r.put("pagado", rs.getInt("Pagos") > 0);
+                r.put("boletaDisponible",rs.getInt("Boletas")>0);
                 return r;
             }
         } catch (SQLException e) {

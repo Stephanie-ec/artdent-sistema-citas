@@ -53,13 +53,13 @@ public class ReporteController extends HttpServlet {
     }
 
     private void calcularKpis(HttpServletRequest request, List<ReporteMensual> reporteMensual) {
-        double totalIngresos = 0;
+        java.math.BigDecimal totalIngresos = java.math.BigDecimal.ZERO;
         int totalCompletadas = 0;
         int totalCanceladas = 0;
         int totalCitasGeneral = 0;
         if (reporteMensual != null) {
             for (ReporteMensual rm : reporteMensual) {
-                totalIngresos += rm.getTotalIngresos();
+                totalIngresos = totalIngresos.add(rm.getTotalIngresos());
                 totalCompletadas += (rm.getCitasCompletadas() + rm.getReservasCompletadas());
                 totalCanceladas += (rm.getCitasCanceladas() + rm.getReservasCanceladas());
                 totalCitasGeneral += (rm.getTotalCitas() + rm.getTotalReservas());

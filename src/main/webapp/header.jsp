@@ -4,7 +4,7 @@
     <div class="container-fluid px-lg-4">
         <!-- Logo de Marca -->
         <a class="navbar-brand d-flex align-items-center gap-2" href="index.jsp">
-            <img src="https://logomaker.designfreelogoonline.com/media/productdesigner/logo/resized/0001036_dental_logo_maker_dentist_Logo-02.png" 
+            <img src="${pageContext.request.contextPath}/img/logo-artdent.png" 
                  alt="Art Dent Logo" width="46" height="46" class="d-inline-block align-text-top">
             <span class="fw-bold fs-4 text-brand-dark tracking-wide">Art <span class="text-brand-primary">Dent</span></span>
         </a>

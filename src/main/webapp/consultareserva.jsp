@@ -54,19 +54,36 @@
             <div class="card border-0 shadow-sm mt-4" style="border-radius: 16px;">
                 <div class="card-body p-4">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="fw-bold font-monospace fs-5">${codigo}</span>
-                        <span class="badge bg-warning text-dark px-3 py-2"><c:out value="${reserva.estado}"/></span>
+                        <span class="fw-bold font-monospace fs-5"><c:out value="${codigo}"/></span>
+                        <span class="badge ${reserva.estadoId == 5 || reserva.estadoId == 6 ? 'bg-danger' : reserva.estadoId == 2 ? 'bg-success' : reserva.estadoId == 3 ? 'bg-primary' : 'bg-warning text-dark'} px-3 py-2"><c:out value="${reserva.estado}"/></span>
                     </div>
                     <p class="mb-1"><strong>Paciente:</strong> <c:out value="${reserva.paciente}"/></p>
                     <p class="mb-1"><strong>Tratamiento:</strong> <c:out value="${reserva.servicio}"/></p>
-                    <p class="mb-3"><strong>Fecha y hora:</strong> ${reserva.fecha} · ${reserva.hora}</p>
-                    <div class="alert alert-info mb-0">
-                        Tu reserva aún <strong>no tiene un pago registrado</strong>. Puedes pagar en efectivo en ventanilla
-                        antes de tu atención; al pagar se emite tu boleta y podrás descargarla desde esta misma página.
-                    </div>
+                    <p class="mb-1"><strong>Odontólogo:</strong> <c:out value="${reserva.odontologo}"/></p>
+                    <p class="mb-1"><strong>Fecha y hora:</strong> <c:out value="${reserva.fecha}"/> · <c:out value="${reserva.hora}"/></p>
+                    <p class="mb-3"><strong>Importe:</strong> S/ <c:out value="${reserva.importe}"/></p>
+                    <c:choose>
+                        <c:when test="${reserva.pagado}">
+                            <span class="badge bg-success mb-3">Pagado</span>
+                            <c:choose>
+                                <c:when test="${reserva.boletaDisponible}"><a class="btn btn-outline-primary d-block" href="PagoController?action=verBoleta&amp;idCita=${reserva.idCita}">Ver / Descargar Boleta</a></c:when>
+                                <c:otherwise><p class="text-muted">El pago está registrado, pero no hay una boleta disponible. Comuníquese con la clínica; no vuelva a pagar.</p></c:otherwise>
+                            </c:choose>
+                            <c:if test="${reserva.estadoId == 5 || reserva.estadoId == 6}">
+                                <div class="alert alert-warning mt-3" role="status">Su pago y boleta se conservan. <a href="PagoManualController?cita=${reserva.idCita}">Consultar estado de la devolución</a>.</div>
+                            </c:if>
+                        </c:when>
+                        <c:when test="${reserva.estadoId != 5 && reserva.estadoId != 6}">
+                            <p class="text-muted">Pago pendiente. Puede pagar con Yape/Plin o en ventanilla.</p>
+                            <a class="btn btn-success" href="PagoManualController?cita=${reserva.idCita}">Enviar / consultar comprobante Yape / Plin</a>
+                        </c:when>
+                        <c:otherwise><div class="alert alert-secondary mb-0">Esta cita está anulada y no admite pagos.</div></c:otherwise>
+                    </c:choose>
+
                 </div>
             </div>
         </c:if>
+
     </main>
 
     <%@include file="footer.jsp"%>

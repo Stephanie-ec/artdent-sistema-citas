@@ -6,7 +6,7 @@
             <!-- Columna 1: Presentación Institucional -->
             <div class="col-12 col-md-6 col-lg-4">
                 <div class="d-flex align-items-center gap-2 mb-3">
-                    <img src="https://logomaker.designfreelogoonline.com/media/productdesigner/logo/resized/0001036_dental_logo_maker_dentist_Logo-02.png" 
+                    <img src="${pageContext.request.contextPath}/img/logo-artdent.png" 
                          alt="Art Dent Logo" width="40" height="40">
                     <h4 class="fw-bold m-0 text-white">Art <span class="text-brand-primary">Dent</span></h4>
                 </div>
