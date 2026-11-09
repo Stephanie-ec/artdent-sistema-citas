@@ -231,25 +231,25 @@ public class UsuarioDaoImpl implements UsuarioDao {
                 + "INNER JOIN Usuario_Horario uh ON u.idUsuario = uh.Usuario_idUsuario "
                 + "INNER JOIN Horario h ON uh.Horario_idHorario = h.idHorario "
                 + "LEFT JOIN Cita c ON u.idUsuario = c.Odontologo_idUsuario "
-                + "    AND c.FechaCita = ? "
+                + "    AND c.FechaCita = CAST(? AS DATE) "
                 + "    AND c.Estado_idEstado NOT IN (5, 6) "
-                + "    AND c.HoraCita < ? AND ADDTIME(c.HoraCita, '00:45:00') > ? "
+                + "    AND c.HoraCita < CAST(? AS TIME) AND ADDTIME(c.HoraCita, '00:45:00') > CAST(? AS TIME) "
                 + "WHERE us.idServicio = ? AND u.Activo = 1 "
                 + "AND us.Disponibilidad = 1 "
                 + "AND LOWER(h.diaSemana) = ? "
-                + "AND h.HoraInicio <= ? AND h.HoraFinal >= ? "   // dentro de su horario de atención
+                + "AND h.HoraInicio <= CAST(? AS TIME) AND h.HoraFinal >= CAST(? AS TIME) "   // dentro de su horario de atención
                 + "AND c.idCita IS NULL";
 
         try (Connection cx = Conexion.getConection(); PreparedStatement ps = cx.prepareStatement(sql)) {
             // Asignación de parámetros
             // Fecha y horas como texto: así no dependen de la zona horaria del servidor de Java
             ps.setString(1, fechaConv.toString());
-            ps.setString(2, horaFin.toString());
-            ps.setString(3, horaObj.toString());
+            ps.setString(2, horaFin.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss")));
+            ps.setString(3, horaObj.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss")));
             ps.setInt(4, idServicio);
             ps.setString(5, diaSemanaTexto);
-            ps.setString(6, horaObj.toString());
-            ps.setString(7, horaFin.toString());
+            ps.setString(6, horaObj.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss")));
+            ps.setString(7, horaFin.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss")));
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
