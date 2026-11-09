@@ -16,6 +16,18 @@ public class ConfigLoader {
         } catch (IOException ex) {
             throw new ExceptionInInitializerError("No se pudo leer la configuración externa de ArtDent");
         }
+        // Sin ruta externa: se usa src/main/resources/config.properties (ambiente local)
+        if (properties.isEmpty()) {
+            try (InputStream local = ConfigLoader.class.getClassLoader().getResourceAsStream("config.properties")) {
+                if (local != null) {
+                    properties.load(new java.io.InputStreamReader(local, java.nio.charset.StandardCharsets.UTF_8));
+                } else {
+                    System.err.println("No se encontró config.properties ni la variable ARTDENT_CONFIG");
+                }
+            } catch (IOException ex) {
+                System.err.println("Error al cargar config.properties: " + ex.getMessage());
+            }
+        }
     }
 
     public static String getProperty(String key) {
