@@ -60,6 +60,7 @@
             background-color: #ffffff;
         }
     </style>
+<script src="${pageContext.request.contextPath}/js/chat-render.js" defer></script>
 </head>
 
 <body>
@@ -250,7 +251,7 @@
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: 'pregunta=' + encodeURIComponent(pregunta)
                 });
-                const data = await response.text();
+                const data = await response.json();
                 agregarMensajeBot(data);
             } catch (err) {
                 agregarMensajeBot('No fue posible conectar con el asistente. Llámanos al (01) 361-3634.');
@@ -270,7 +271,7 @@
             const chatBody = document.getElementById('chat-body');
             const mensajeDiv = document.createElement('div');
             mensajeDiv.className = 'message bot-message';
-            mensajeDiv.innerHTML = mensaje;
+            window.artdentRenderBot(mensajeDiv, mensaje, '${pageContext.request.contextPath}');
             chatBody.appendChild(mensajeDiv);
             chatBody.scrollTop = chatBody.scrollHeight;
         }

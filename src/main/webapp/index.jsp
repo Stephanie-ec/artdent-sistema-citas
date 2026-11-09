@@ -1,3 +1,4 @@
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <!DOCTYPE html>
 <html lang="es">
@@ -218,6 +219,7 @@
             40% { transform: scale(1.0); }
         }
     </style>
+<script src="${pageContext.request.contextPath}/js/chat-render.js" defer></script>
 </head>
 
 <body>
@@ -339,65 +341,19 @@
         </div>
 
         <div class="row g-4 justify-content-center">
-            <!-- Doctor 1 -->
-            <div class="col-12 col-md-6 col-lg-3">
-                <div class="card doctor-card h-100">
-                    <img onerror="this.onerror=null;this.src='${pageContext.request.contextPath}/img/servicios/generico.png'" src="https://saluddata.com/wp-content/uploads/2024/07/Odontologo-Profesional-p.webp" 
-                         class="card-img-top" alt="Dr. Luis Miguel Martínez" style="height: 220px; object-fit: cover;">
-                    <div class="card-body text-center p-4">
-                        <h5 class="fw-bold text-brand-dark mb-1">Dr. Luis Miguel Martínez</h5>
-                        <span class="badge bg-mint text-dark mb-3">Especialista en Endodoncia</span>
-                        <p class="text-muted small mb-0">
-                            Más de 10 años de experiencia clínica en tratamientos de conducto, maestría en Odontología Restauradora y microcirugía apical.
-                        </p>
-                    </div>
+            <% request.setAttribute("especialistas",new pe.edu.utp.daoImpl.UsuarioDaoImpl().obtenerMedicosDisponibles()); %>
+            <c:forEach var="especialista" items="${especialistas}">
+                <div class="col-12 col-md-6 col-lg-3">
+                    <div class="card doctor-card h-100"><div class="card-body text-center p-4">
+                        <c:choose><c:when test="${not empty especialista.fotoPerfil}">
+                            <img src="${pageContext.request.contextPath}/img/equipo/lucia.jpg" alt="Odontóloga Lucía" class="rounded-circle" width="120" height="120" style="object-fit:cover">
+                        </c:when><c:otherwise><i class="bi bi-person-badge fs-1 text-brand-primary" aria-hidden="true"></i></c:otherwise></c:choose>
+                        <h3 class="h5 fw-bold text-brand-dark mt-3"><c:out value="${especialista.nombre}"/> <c:out value="${especialista.apellido}"/></h3>
+                        <p class="text-muted mb-0">Odontólogo del equipo ArtDent</p>
+                    </div></div>
                 </div>
-            </div>
-
-            <!-- Doctor 2 -->
-            <div class="col-12 col-md-6 col-lg-3">
-                <div class="card doctor-card h-100">
-                    <img onerror="this.onerror=null;this.src='${pageContext.request.contextPath}/img/servicios/generico.png'" src="https://colderechomedico.com/wp-content/uploads/2020/06/Cual-es-la-importancia-del-secreto-profesional-en-odontologia_colderecho.jpg" 
-                         class="card-img-top" alt="Dr. Rubén Cuadros" style="height: 220px; object-fit: cover;">
-                    <div class="card-body text-center p-4">
-                        <h5 class="fw-bold text-brand-dark mb-1">Dr. Rubén Cuadros</h5>
-                        <span class="badge bg-brand-primary text-white mb-3">Odontología Integral y Cirugía</span>
-                        <p class="text-muted small mb-0">
-                            Especialista apasionado por la odontología preventiva, rehabilitación oral y diseño digital de sonrisas para pacientes de todas las edades.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Doctor 3 -->
-            <div class="col-12 col-md-6 col-lg-3">
-                <div class="card doctor-card h-100">
-                    <img onerror="this.onerror=null;this.src='${pageContext.request.contextPath}/img/servicios/generico.png'" src="https://img.freepik.com/fotos-premium/retrato-hombre-dentista-pulgares-arriba-sonrisa-cuidado-bucal-especialista-felicidad-profesional-cara-hombre-o-empleado-higiene-dental-sector-salud-apoyo-revision_590464-191475.jpg" 
-                         class="card-img-top" alt="Dr. Juan Gómez" style="height: 220px; object-fit: cover;">
-                    <div class="card-body text-center p-4">
-                        <h5 class="fw-bold text-brand-dark mb-1">Dr. Juan Gómez</h5>
-                        <span class="badge bg-mint text-dark mb-3">Estética y Rehabilitación</span>
-                        <p class="text-muted small mb-0">
-                            Enfocado en devolver la función masticatoria y la armonía estética a través de prótesis fijas, carillas y blanqueamiento dental.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Doctora 4 -->
-            <div class="col-12 col-md-6 col-lg-3">
-                <div class="card doctor-card h-100">
-                    <img src="${pageContext.request.contextPath}/img/equipo/lucia.jpg" 
-                         class="card-img-top" alt="Dra. Lucía Herrera" style="height: 220px; object-fit: cover;">
-                    <div class="card-body text-center p-4">
-                        <h5 class="fw-bold text-brand-dark mb-1">Dra. Lucía Herrera</h5>
-                        <span class="badge bg-brand-primary text-white mb-3">Prevención y Estética</span>
-                        <p class="text-muted small mb-0">
-                            Limpieza, blanqueamiento, tratamiento de caries y endodoncia. Atiende también los sábados por la mañana.
-                        </p>
-                    </div>
-                </div>
-            </div>
+            </c:forEach>
+            <c:if test="${empty especialistas}"><p class="text-center text-muted">Consulte con la clínica la disponibilidad de nuestros especialistas.</p></c:if>
         </div>
     </section>
 
@@ -405,21 +361,9 @@
     <section class="container my-5 py-4 border-top">
         <div class="text-center mb-4 pt-3">
             <h4 class="fw-bold text-brand-dark">Medios de Pago Aceptados</h4>
-            <p class="text-muted small">Tarjeta de débito o crédito, Yape, Plin y efectivo en ventanilla</p>
+            <p class="text-muted small">Yape, Plin y efectivo en ventanilla</p>
         </div>
         <div class="row justify-content-center g-3">
-            <div class="col-6 col-sm-4 col-md-2">
-                <div class="pago-tile">
-                    <div class="pago-logo"><img src="${pageContext.request.contextPath}/img/visa.svg" alt="Visa"></div>
-                    <span>Visa débito / crédito</span>
-                </div>
-            </div>
-            <div class="col-6 col-sm-4 col-md-2">
-                <div class="pago-tile">
-                    <div class="pago-logo"><img src="${pageContext.request.contextPath}/img/mastercard.svg" alt="Mastercard"></div>
-                    <span>Mastercard</span>
-                </div>
-            </div>
             <div class="col-6 col-sm-4 col-md-2">
                 <div class="pago-tile">
                     <div class="pago-logo"><img src="${pageContext.request.contextPath}/img/pagos/yape.png" alt="Yape" onerror="this.outerHTML='<i class=&quot;bi bi-phone-fill&quot; style=&quot;font-size:2rem;color:#742284&quot;></i>'"></div>
@@ -521,7 +465,7 @@
                     body: 'pregunta=' + encodeURIComponent(pregunta)
                 });
 
-                const data = await response.text();
+                const data = await response.json();
                 ocultarAnimacion();
                 agregarMensajeBot(data);
             } catch (err) {
@@ -543,7 +487,7 @@
             const chatBody = document.getElementById('chat-body');
             const mensajeDiv = document.createElement('div');
             mensajeDiv.className = 'message bot-message';
-            mensajeDiv.innerHTML = mensaje;
+            window.artdentRenderBot(mensajeDiv, mensaje, '${pageContext.request.contextPath}');
             chatBody.appendChild(mensajeDiv);
             scrollToBottom();
         }

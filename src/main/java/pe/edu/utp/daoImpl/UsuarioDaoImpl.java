@@ -51,7 +51,7 @@ public class UsuarioDaoImpl implements UsuarioDao {
                    + "       TIMESTAMPDIFF(MINUTE, NOW(), u.BloqueadoHasta) AS minutosRestantes "
                    + "FROM Usuario u "
                    + "INNER JOIN Rol r ON u.Rol_idRol = r.idRol "
-                   + "WHERE u.DNI = ?";
+                   + "WHERE u.DNI = ? AND u.Activo = 1";
 
         try (Connection conn = Conexion.getConection()) {
             if (conn == null) {
@@ -195,7 +195,7 @@ public class UsuarioDaoImpl implements UsuarioDao {
     @Override
     public List<Usuario> obtenerMedicosDisponibles() {
         List<Usuario> medicos = new ArrayList<>();
-        String sql = "SELECT * FROM Usuario WHERE Rol_idRol = 3";
+        String sql = "SELECT * FROM Usuario WHERE Rol_idRol = 3 AND Activo = 1";
 
         try (Connection conn = Conexion.getConection();
              PreparedStatement stmt = conn.prepareStatement(sql);
@@ -205,6 +205,7 @@ public class UsuarioDaoImpl implements UsuarioDao {
                 medico.setIdUsuario(res.getInt("idUsuario"));
                 medico.setApellido(res.getString("Apellido"));
                 medico.setNombre(res.getString("Nombre"));
+                if("71458236".equals(res.getString("DNI")))medico.setFotoPerfil("img/equipo/lucia.jpg");
                 medicos.add(medico);
             }
         } catch (SQLException e) {
@@ -219,6 +220,7 @@ public class UsuarioDaoImpl implements UsuarioDao {
 
         // Rango de tiempo de la nueva cita (inicio y fin)
         LocalTime horaFin = horaObj.plusMinutes(45); // Hora de fin de la nueva cita
+        if(horaFin.isBefore(horaObj))return medicos;
 
         // Convertir la fecha a texto para obtener el día de la semana
         String diaSemanaTexto = convertirDiaSemana(fechaConv);
@@ -231,8 +233,8 @@ public class UsuarioDaoImpl implements UsuarioDao {
                 + "LEFT JOIN Cita c ON u.idUsuario = c.Odontologo_idUsuario "
                 + "    AND c.FechaCita = ? "
                 + "    AND c.Estado_idEstado NOT IN (5, 6) "
-                + "    AND ((c.HoraCita BETWEEN ? AND ?) OR (? BETWEEN c.HoraCita AND ADDTIME(c.HoraCita, '00:45:00'))) "
-                + "WHERE us.idServicio = ? "
+                + "    AND c.HoraCita < ? AND ADDTIME(c.HoraCita, '00:45:00') > ? "
+                + "WHERE us.idServicio = ? AND u.Activo = 1 "
                 + "AND us.Disponibilidad = 1 "
                 + "AND LOWER(h.diaSemana) = ? "
                 + "AND h.HoraInicio <= ? AND h.HoraFinal >= ? "   // dentro de su horario de atención
@@ -241,13 +243,12 @@ public class UsuarioDaoImpl implements UsuarioDao {
         try (Connection cx = Conexion.getConection(); PreparedStatement ps = cx.prepareStatement(sql)) {
             // Asignación de parámetros
             ps.setDate(1, java.sql.Date.valueOf(fechaConv));
-            ps.setTime(2, java.sql.Time.valueOf(horaObj));
-            ps.setTime(3, java.sql.Time.valueOf(horaFin));
-            ps.setTime(4, java.sql.Time.valueOf(horaObj));
-            ps.setInt(5, idServicio);
-            ps.setString(6, diaSemanaTexto);
-            ps.setTime(7, java.sql.Time.valueOf(horaObj));
-            ps.setTime(8, java.sql.Time.valueOf(horaFin));
+            ps.setTime(2, java.sql.Time.valueOf(horaFin));
+            ps.setTime(3, java.sql.Time.valueOf(horaObj));
+            ps.setInt(4, idServicio);
+            ps.setString(5, diaSemanaTexto);
+            ps.setTime(6, java.sql.Time.valueOf(horaObj));
+            ps.setTime(7, java.sql.Time.valueOf(horaFin));
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -332,12 +333,25 @@ public class UsuarioDaoImpl implements UsuarioDao {
             stmt.setInt(9, usuario.getRol_idRol());
 
             resultado = stmt.executeUpdate() > 0;
+            if (resultado) {
+                try (PreparedStatement id = conn.prepareStatement("SELECT LAST_INSERT_ID()"); ResultSet rs = id.executeQuery()) {
+                    if (rs.next()) usuario.setIdUsuario(rs.getInt(1));
+                }
+            }
 
         } catch (SQLException e) {
             System.out.println("Error al registrar usuario: " + e);
         }
 
         return resultado;
+    }
+
+    @Override
+    public boolean existeDni(String dni, int excluirId) {
+        try(Connection c=Conexion.getConection(); PreparedStatement s=c.prepareStatement("SELECT 1 FROM Usuario WHERE DNI=? AND idUsuario<>?")) {
+            s.setString(1,dni); s.setInt(2,excluirId);
+            try(ResultSet r=s.executeQuery()){return r.next();}
+        } catch(SQLException e) {throw new IllegalStateException("No se pudo verificar el DNI",e);}
     }
 
     @Override
@@ -414,7 +428,11 @@ public class UsuarioDaoImpl implements UsuarioDao {
         try (Connection conn = Conexion.getConection();
              PreparedStatement stmt = conn.prepareStatement(SQL)) {
             stmt.setInt(1, id);
-            resultado = stmt.executeUpdate() > 0;
+            stmt.execute();
+            try (PreparedStatement check = conn.prepareStatement("SELECT Activo FROM Usuario WHERE idUsuario = ?")) {
+                check.setInt(1, id);
+                try (ResultSet rs = check.executeQuery()) { resultado = rs.next() && !rs.getBoolean(1); }
+            }
 
         } catch (SQLException e) {
             System.out.println("Error al eliminar usuario: " + e);
@@ -490,6 +508,10 @@ public class UsuarioDaoImpl implements UsuarioDao {
         try (Connection conn = Conexion.getConection()) {
             conn.setAutoCommit(false);
             try {
+                try (PreparedStatement lock=conn.prepareStatement("SELECT idUsuario FROM Usuario WHERE idUsuario=? AND Activo=1 AND Rol_idRol=3 FOR UPDATE")) {
+                    lock.setInt(1,idUsuario);
+                    try(ResultSet rs=lock.executeQuery()) { if(!rs.next()){conn.rollback();return false;} }
+                }
                 try (PreparedStatement stmtDelH = conn.prepareStatement(delHorarios)) {
                     stmtDelH.setInt(1, idUsuario);
                     stmtDelH.executeUpdate();

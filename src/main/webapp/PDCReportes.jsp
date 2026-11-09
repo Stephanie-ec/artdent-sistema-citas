@@ -33,7 +33,7 @@
                     <h3 class="fw-bold mb-1" style="color: var(--artdent-primary);">
                         <i class="bi bi-bar-chart-line-fill me-2" style="color: var(--artdent-accent);"></i>Reportes y Estadísticas
                     </h3>
-                    <p class="text-muted small mb-0">Métricas analíticas de rendimiento clínico, volumen de pacientes e ingresos consolidados.</p>
+                    <p class="text-muted small mb-0">Ingresos por fecha de pago; volumen de citas por fecha de atención. Incluye pagos de citas canceladas con devolución pendiente.</p>
                 </div>
 
                 <!-- KPI Summary Cards -->
@@ -42,7 +42,7 @@
                         <div class="card border-0 shadow-sm rounded-4 text-white p-3 h-100" style="background: linear-gradient(135deg, #30a4c6 0%, #268da9 100%);">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
-                                    <div class="text-white-50 small text-uppercase fw-bold">Total Ingresos</div>
+                                    <div class="text-white-50 small text-uppercase fw-bold">Ingresos Totales (Pagos Registrados)</div>
                                     <h3 class="mb-0 fw-bold mt-1">S/ ${kpiIngresos != null ? kpiIngresos : '0.00'}</h3>
                                 </div>
                                 <div class="p-3 rounded-circle bg-white bg-opacity-25 fs-3 d-flex align-items-center justify-content-center" style="width: 54px; height: 54px;">

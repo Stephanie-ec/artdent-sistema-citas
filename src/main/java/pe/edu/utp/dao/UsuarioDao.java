@@ -26,6 +26,7 @@ public interface UsuarioDao {
     public List<Usuario> listarUsuarios();
 
     public boolean registrarUsuario(Usuario usuario);
+    boolean existeDni(String dni, int excluirId);
 
     public boolean actualizarUsuario(Usuario usuario);
 

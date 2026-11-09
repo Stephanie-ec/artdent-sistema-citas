@@ -29,6 +29,11 @@
 
             <!-- Main Content -->
             <main class="col-md-9 ms-sm-auto col-lg-10 p-4">
+                <c:choose>
+                    <c:when test="${param.msg == 'usuarioCreadoOk'}"><div class="alert alert-success" role="status">Usuario registrado correctamente.</div></c:when>
+                    <c:when test="${param.msg == 'usuarioActualizadoOk'}"><div class="alert alert-success" role="status">Usuario actualizado correctamente.</div></c:when>
+                    <c:when test="${param.msg == 'usuarioDesactivadoOk'}"><div class="alert alert-success" role="status">Usuario desactivado. Su historial se conserva.</div></c:when>
+                </c:choose>
                 <c:if test="${not empty param.error}">
                     <div class="alert alert-danger d-flex align-items-center mb-3" role="alert">
                         <i class="bi bi-exclamation-triangle-fill me-2"></i><c:out value="${param.error}"/>
@@ -103,7 +108,7 @@
                                                     </a>
                                                 </c:if>
                                                 <a href="UsuarioController?action=edit&id=${usuario.idUsuario}" class="btn btn-sm btn-outline-primary" title="Editar"><i class="bi bi-pencil-square"></i></a>
-                                                <a href="#" onclick="confirmDelete(${usuario.idUsuario})" class="btn btn-sm btn-outline-danger" title="Eliminar"><i class="bi bi-trash"></i></a>
+                                                <a href="#" onclick="confirmDelete(${usuario.idUsuario})" class="btn btn-sm btn-outline-danger" title="Desactivar usuario"><i class="bi bi-trash"></i></a>
                                             </div>
                                         </td>
                                     </tr>
@@ -191,7 +196,10 @@
     <script>
         function confirmDelete(id) {
             if (confirm("¿Está seguro de que desea eliminar este usuario del personal?")) {
-                window.location.href = "UsuarioController?action=delete&id=" + id;
+                var form=document.createElement('form');form.method='post';form.action='UsuarioController';
+                var action=document.createElement('input');action.type='hidden';action.name='action';action.value='delete';form.appendChild(action);
+                var user=document.createElement('input');user.type='hidden';user.name='id';user.value=String(id);form.appendChild(user);
+                document.body.appendChild(form);form.submit();
             }
         }
     </script>

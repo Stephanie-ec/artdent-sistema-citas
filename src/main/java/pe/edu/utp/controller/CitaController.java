@@ -102,6 +102,15 @@ public class CitaController extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
 
+        String accion = request.getParameter("accion");
+        String origen = request.getParameter("origen");
+        boolean esPresencial = "registrarPresencial".equalsIgnoreCase(accion) || "Presencial".equalsIgnoreCase(origen);
+        if (esPresencial) {
+            Object rol=request.getSession(false)==null?null:request.getSession(false).getAttribute("TipoRol");
+            if (!"Secretaria".equals(rol) && !"Administrador".equals(rol)) { response.sendError(403); return; }
+        }
+
+        try {
         // Obtener los datos del formulario
         String dniStr = request.getParameter("dni");
         // O-18 / PA-02: validar en el servidor antes de convertir los datos
@@ -130,47 +139,30 @@ public class CitaController extends HttpServlet {
         String telefonoStr = request.getParameter("telefono");
         int telefono = (telefonoStr != null && !telefonoStr.trim().isEmpty()) ? Integer.parseInt(telefonoStr.trim()) : 0;
         
-        double precio_servicio = 0.0;
-        String precioStr = request.getParameter("precio_consulta");
-        if (precioStr != null && !precioStr.trim().isEmpty()) {
-            try {
-                precio_servicio = Double.parseDouble(precioStr.trim());
-            } catch (NumberFormatException e) {
-                precio_servicio = 0.0;
-            }
+        int idServicio;
+        try { idServicio=Integer.parseInt(request.getParameter("idServicio")); }
+        catch(NumberFormatException e) { response.setStatus(400);request.setAttribute("error","Seleccione un servicio valido.");request.getRequestDispatcher("error.jsp").forward(request,response);return; }
+        pe.edu.utp.entity.Servicio servicioSel=new pe.edu.utp.daoImpl.ServicioDaoImpl().obtenerServicioPorId(idServicio);
+        if(servicioSel==null||servicioSel.getCosto()==null) {
+            response.setStatus(400);request.setAttribute("error","El servicio seleccionado no existe.");request.getRequestDispatcher("error.jsp").forward(request,response);return;
         }
-
-        int idServicio = 1;
-        String idServicioStr = request.getParameter("idServicio");
-        if (idServicioStr != null && !idServicioStr.trim().isEmpty()) {
-            try {
-                idServicio = Integer.parseInt(idServicioStr.trim());
-            } catch (NumberFormatException e) {
-                idServicio = 1;
-            }
-        }
-
-        // D-11: el importe se toma del costo vigente del servicio, no del formulario
-        pe.edu.utp.entity.Servicio servicioSel = new pe.edu.utp.daoImpl.ServicioDaoImpl().obtenerServicioPorId(idServicio);
-        if (servicioSel != null && servicioSel.getCosto() != null) {
-            precio_servicio = servicioSel.getCosto().doubleValue();
-        }
+        double precio_servicio=servicioSel.getCosto().doubleValue();
 
         String fecha = request.getParameter("fecha");
         String hora = request.getParameter("hora");
         String descripcion = request.getParameter("descripcion");
         if (descripcion == null || descripcion.trim().isEmpty()) {
-            descripcion = "Reserva Web - En espera";
+            descripcion = esPresencial ? "Cita Presencial" : "Reserva Web";
         }
 
         // Medico asignado dinámicamente desde el formulario
-        int idOdontologo = 4; // Odontólogo por defecto
+        int idOdontologo = 0; // Se asigna automaticamente solo si no se eligio uno.
         String medicoStr = request.getParameter("medico");
         if (medicoStr != null && !medicoStr.trim().isEmpty()) {
             try {
                 idOdontologo = Integer.parseInt(medicoStr.trim());
             } catch (NumberFormatException e) {
-                idOdontologo = 4;
+                response.setStatus(400);request.setAttribute("error","Seleccione un odontologo valido.");request.getRequestDispatcher("error.jsp").forward(request,response);return;
             }
         }
 
@@ -179,7 +171,7 @@ public class CitaController extends HttpServlet {
         try {
             disponibles = new pe.edu.utp.daoImpl.UsuarioDaoImpl().obtenerMedicosPorServicioYDisponibilidad(
                     idServicio, java.time.LocalDate.parse(fecha.trim()),
-                    java.time.LocalTime.parse(hora.trim().length() > 5 ? hora.trim().substring(0, 5) : hora.trim()));
+                    java.time.LocalTime.parse(hora.trim()));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -189,6 +181,9 @@ public class CitaController extends HttpServlet {
                 elegidoDisponible = true;
                 break;
             }
+        }
+        if (!elegidoDisponible && medicoStr!=null && !medicoStr.trim().isEmpty()) {
+            response.setStatus(409);request.setAttribute("error","El odontologo elegido ya no esta disponible. Elija otro horario u odontologo.");request.getRequestDispatcher("error.jsp").forward(request,response);return;
         }
         if (!elegidoDisponible) {
             if (disponibles.isEmpty()) {
@@ -202,9 +197,7 @@ public class CitaController extends HttpServlet {
         int x = citaDao.verificarExistencia(dni);
         Paciente paciente = new Paciente(x, nombre, apellido, dni, telefono, correo);
 
-        String accion = request.getParameter("accion");
-        String origen = request.getParameter("origen");
-        boolean esPresencial = "registrarPresencial".equalsIgnoreCase(accion) || "Presencial".equalsIgnoreCase(origen);
+
 
         // El DNI identifica a una sola persona: si ya está registrado con otro nombre, no se mezcla la cita
         if (x > 0) {
@@ -285,19 +278,12 @@ public class CitaController extends HttpServlet {
         String codigoReserva = (idCitaGenerada > 0) ? String.format("ART-RES-%05d", idCitaGenerada) : "ART-RES-00001";
 
         // Obtener nombre del servicio y del odontólogo para el voucher
-        String nombreServicio = request.getParameter("nombreServicio");
-        if (nombreServicio == null || nombreServicio.trim().isEmpty()) {
-            pe.edu.utp.entity.Servicio serv = new pe.edu.utp.daoImpl.ServicioDaoImpl().obtenerServicioPorId(idServicio);
-            if (serv != null && serv.getTipoServicio() != null) {
-                nombreServicio = serv.getTipoServicio();
-            } else {
-                nombreServicio = "Servicio Dental";
-            }
-        }
+        String nombreServicio = servicioSel.getTipoServicio();
 
         pe.edu.utp.entity.Usuario doc = new pe.edu.utp.daoImpl.UsuarioDaoImpl().obtenerUsuarioPorId(idOdontologo);
         String nombreDoctor = (doc != null && doc.getNombre() != null) ? (doc.getNombre() + " " + doc.getApellido()) : "Dr. Especialista";
 
+        NotificacionService.notificar(idCitaGenerada,1,"Reserva recibida",correo,"Su reserva fue recibida y está pendiente de pago. Consulte Mi reserva con su código y DNI. Código: "+codigoReserva);
         // Guardar datos en sesión para mostrar el voucher detallado en citareservada.jsp
         request.getSession().setAttribute("reservaCodigo", codigoReserva);
         request.getSession().setAttribute("reservaIdCita", String.valueOf(idCitaGenerada));
@@ -314,6 +300,15 @@ public class CitaController extends HttpServlet {
 
         // Redireccionar a la vista de confirmación
         response.sendRedirect("citareservada.jsp");
+        } catch (pe.edu.utp.utils.ReservaNoDisponibleException e) {
+            response.setStatus(HttpServletResponse.SC_CONFLICT);
+            request.setAttribute("error",e.getMessage());
+            request.getRequestDispatcher("error.jsp").forward(request,response);
+        } catch(IllegalStateException e) {
+            response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+            request.setAttribute("error","No se pudo consultar la disponibilidad. Intente nuevamente.");
+            request.getRequestDispatcher("error.jsp").forward(request,response);
+        }
     }
 
     /**

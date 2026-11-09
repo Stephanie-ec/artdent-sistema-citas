@@ -25,7 +25,9 @@ import pe.edu.utp.entity.Usuario;
 @WebServlet("/UsuarioController")
 public class UsuarioController extends HttpServlet {
 
-    private UsuarioDao usuarioDAO = new UsuarioDaoImpl();
+    private final UsuarioDao usuarioDAO;
+    public UsuarioController() { this(new UsuarioDaoImpl()); }
+    UsuarioController(UsuarioDao dao) { this.usuarioDAO=dao; }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action");
@@ -43,7 +45,7 @@ public class UsuarioController extends HttpServlet {
                 showEditForm(request, response);
                 break;
             case "delete":
-                deleteUsuario(request, response);
+                response.sendError(405,"Use el formulario para desactivar un usuario.");
                 break;
             case "disponibilidad":
                 showDisponibilidadForm(request, response);
@@ -55,11 +57,15 @@ public class UsuarioController extends HttpServlet {
     }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
         String action = request.getParameter("action");
         if (action == null || action.trim().isEmpty()) {
             action = "list";
         }
-        switch (action) {
+        try { switch (action) {
+            case "delete":
+                deleteUsuario(request,response);
+                break;
             case "add":
                 addUsuario(request, response);
                 break;
@@ -74,6 +80,7 @@ public class UsuarioController extends HttpServlet {
                 listUsuarios(request, response);
                 break;
         }
+        } catch(IllegalArgumentException e) { aviso(response,"El identificador o los datos enviados no son validos."); }
     }
 
     private void listUsuarios(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -89,37 +96,44 @@ public class UsuarioController extends HttpServlet {
         dispatcher.forward(request, response);
     }
 
-    private void addUsuario(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        // CR-06: la cuenta solo se crea si el DNI existe en RENIEC (cuando la consulta está activada)
-        String dniTexto = request.getParameter("dni") != null ? request.getParameter("dni").trim() : "";
-        String errorDni = pe.edu.utp.utils.Validador.validarNombreApellido(request.getParameter("nombre"), request.getParameter("apellido"));
-        if (errorDni == null) {
-            errorDni = pe.edu.utp.utils.Validador.validarDniTelefono(dniTexto, request.getParameter("telefono"));
-        }
-        String claveNueva = request.getParameter("clave");
-        if (errorDni == null && (claveNueva == null || claveNueva.length() < 6 || claveNueva.length() > 30)) {
-            errorDni = "La contraseña debe tener entre 6 y 30 caracteres.";
-        }
-        if (errorDni == null) {
-            errorDni = pe.edu.utp.utils.ReniecService.validarIdentidad(dniTexto, request.getParameter("nombre"), request.getParameter("apellido"));
-        }
-        if (errorDni != null) {
-            response.sendRedirect("UsuarioController?action=list&error=" + java.net.URLEncoder.encode(errorDni, "UTF-8"));
-            return;
-        }
-        String nombre = request.getParameter("nombre");
-        String apellido = request.getParameter("apellido");
-        int dni = Integer.parseInt(request.getParameter("dni"));
-        String telefono = request.getParameter("telefono");
-        String email = request.getParameter("email");
-        String direccion = request.getParameter("direccion");
-        String fechanacimiento = request.getParameter("fechanacimiento");
-        String clave = request.getParameter("clave");
-        int rol = Integer.parseInt(request.getParameter("rol"));
-        Usuario newUser = new Usuario(0, nombre, apellido, dni, telefono, email, direccion, fechanacimiento, clave, rol);
-        System.out.println("datos: " + newUser);
-        usuarioDAO.registrarUsuario(newUser);
-        response.sendRedirect("UsuarioController?action=list");
+    private void addUsuario(HttpServletRequest request,HttpServletResponse response) throws IOException {
+        guardarUsuario(request,response,true);
+    }
+
+    private static String texto(HttpServletRequest r,String clave) {
+        String valor=r.getParameter(clave);return valor==null?"":valor.trim();
+    }
+    private void aviso(HttpServletResponse res,String mensaje) throws IOException {
+        res.sendRedirect("UsuarioController?action=list&error="+java.net.URLEncoder.encode(mensaje,"UTF-8"));
+    }
+    private void guardarUsuario(HttpServletRequest req,HttpServletResponse res,boolean nuevo) throws IOException {
+        try {
+            String dni=texto(req,"dni"),nombre=texto(req,"nombre"),apellido=texto(req,"apellido");
+            String error=pe.edu.utp.utils.Validador.validarNombreApellido(nombre,apellido);
+            if(error==null)error=pe.edu.utp.utils.Validador.validarDniTelefono(dni,texto(req,"telefono"));
+            String correo=texto(req,"email"),direccion=texto(req,"direccion");
+            if(error==null && (!correo.matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$") || correo.length()>100))error="Ingrese un correo electronico valido.";
+            if(error==null && (direccion.isEmpty()||direccion.length()>100))error="Ingrese una direccion de hasta 100 caracteres.";
+            String clave=req.getParameter("clave"); if(clave==null)clave="";
+            if(error==null && ((nuevo||!clave.isEmpty()) && (clave.length()<6||clave.length()>30)))error="La contrasena debe tener entre 6 y 30 caracteres.";
+            if(error!=null){aviso(res,error);return;}
+            java.time.LocalDate nacimiento=java.time.LocalDate.parse(texto(req,"fechanacimiento"));
+            if(nacimiento.isAfter(java.time.LocalDate.now(java.time.ZoneId.of("America/Lima")))){aviso(res,"La fecha de nacimiento no puede ser futura.");return;}
+            int rol=Integer.parseInt(texto(req,"rol")),id=nuevo?0:Integer.parseInt(texto(req,"id"));
+            if(rol<1||rol>3||(!nuevo&&id<=0)){aviso(res,"Seleccione un usuario y un rol validos.");return;}
+            if(usuarioDAO.existeDni(dni,id)){aviso(res,"El DNI ya se encuentra registrado.");return;}
+            if(nuevo) {
+                error=pe.edu.utp.utils.ReniecService.validarIdentidad(dni,nombre,apellido);
+                if(error!=null){aviso(res,error);return;}
+            }
+            Usuario usuario=new Usuario(id,nombre,apellido,Integer.parseInt(dni),texto(req,"telefono"),correo,direccion,nacimiento.toString(),clave,rol);
+            boolean ok=nuevo?usuarioDAO.registrarUsuario(usuario):usuarioDAO.actualizarUsuario(usuario);
+            if(!ok){aviso(res,"No se pudo guardar el usuario. Verifique el DNI e intente nuevamente.");return;}
+            if(nuevo&&rol==3)res.sendRedirect("UsuarioController?action=disponibilidad&id="+usuario.getIdUsuario()+"&msg=configureDisponibilidad");
+            else res.sendRedirect("UsuarioController?action=list&msg="+(nuevo?"usuarioCreadoOk":"usuarioActualizadoOk"));
+        } catch(java.time.format.DateTimeParseException|NumberFormatException e) {
+            aviso(res,"Revise la fecha de nacimiento, el DNI y el rol del usuario.");
+        } catch(IllegalStateException e) { aviso(res,"No se pudo verificar o guardar el usuario. Intente nuevamente."); }
     }
 
     private void showEditForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -131,33 +145,8 @@ public class UsuarioController extends HttpServlet {
         dispatcher.forward(request, response);
     }
 
-    private void updateUsuario(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String errorDatos = pe.edu.utp.utils.Validador.validarNombreApellido(request.getParameter("nombre"), request.getParameter("apellido"));
-        if (errorDatos == null) {
-            errorDatos = pe.edu.utp.utils.Validador.validarDniTelefono(request.getParameter("dni"), request.getParameter("telefono"));
-        }
-        String claveEditada = request.getParameter("clave");
-        if (errorDatos == null && claveEditada != null && !claveEditada.isEmpty()
-                && (claveEditada.length() < 6 || claveEditada.length() > 30)) {
-            errorDatos = "La contraseña debe tener entre 6 y 30 caracteres.";
-        }
-        if (errorDatos != null) {
-            response.sendRedirect("UsuarioController?action=list&error=" + java.net.URLEncoder.encode(errorDatos, "UTF-8"));
-            return;
-        }
-        int id = Integer.parseInt(request.getParameter("id"));
-        String nombre = request.getParameter("nombre");
-        String apellido = request.getParameter("apellido");
-        int dni = Integer.parseInt(request.getParameter("dni"));
-        String telefono = request.getParameter("telefono");
-        String email = request.getParameter("email");
-        String direccion = request.getParameter("direccion");
-        String fechanacimiento = request.getParameter("fechanacimiento");
-        String clave = request.getParameter("clave");
-        int rol = Integer.parseInt(request.getParameter("rol"));
-        Usuario updatedUser = new Usuario(id, nombre, apellido, dni, telefono, email, direccion, fechanacimiento, clave, rol);
-        usuarioDAO.actualizarUsuario(updatedUser);
-        response.sendRedirect("UsuarioController?action=list");
+    private void updateUsuario(HttpServletRequest req,HttpServletResponse res) throws IOException {
+        guardarUsuario(req,res,false);
     }
 
     private Usuario getUsuario(int id) {
@@ -166,8 +155,9 @@ public class UsuarioController extends HttpServlet {
 
     private void deleteUsuario(HttpServletRequest request, HttpServletResponse response) throws IOException {
         int id = Integer.parseInt(request.getParameter("id"));
-        usuarioDAO.eliminarUsuario(id);
-        response.sendRedirect("UsuarioController?action=list");
+        if (id == Integer.parseInt(String.valueOf(request.getSession().getAttribute("idUsuario")))) { aviso(response,"No puede desactivar su propia cuenta."); return; }
+        if (!usuarioDAO.eliminarUsuario(id)) { aviso(response,"No se pudo desactivar el usuario."); return; }
+        response.sendRedirect("UsuarioController?action=list&msg=usuarioDesactivadoOk");
     }
 
     private void showDisponibilidadForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -216,7 +206,7 @@ public class UsuarioController extends HttpServlet {
             }
         }
 
-        usuarioDAO.asignarDisponibilidad(idUsuario, horariosIds, serviciosIds);
+        if (!usuarioDAO.asignarDisponibilidad(idUsuario, horariosIds, serviciosIds)) { aviso(response,"No se pudo guardar la disponibilidad.");return; }
         response.sendRedirect("UsuarioController?action=disponibilidad&id=" + idUsuario + "&guardado=ok");
     }
 

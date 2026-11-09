@@ -67,6 +67,8 @@ public class ServicioDaoImpl implements ServicioDao {
                 ser.setLema(rs.getString("Lema"));
                 ser.setDescripcion(rs.getString("Descripcion"));
                 ser.setRespuesta(rs.getString("Respuesta"));
+                ser.setCosto(rs.getBigDecimal("Costo"));
+                ser.setActivo(rs.getBoolean("Activo"));
                 ser.setLinkimagen(obtenerImagenValida(ser.getTipoServicio(), rs.getString("img")));
             }
         } catch (SQLException e) {

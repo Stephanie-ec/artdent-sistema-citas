@@ -307,7 +307,7 @@
 
                             <c:set var="nombresDias" value="Lunes,Martes,Miércoles,Jueves,Viernes,Sábado,Domingo" />
                             <c:forEach var="dia" items="${fn:split(nombresDias, ',')}" varStatus="status">
-                                <div class="day-of-events" data-day="${dia}">
+                                <div class="day-of-events" data-day="<c:out value='${dia}'/>">
                                     <dt>
                                         <div class="day-number">
                                             <%= diasNumericos.get(contador)%>
@@ -323,20 +323,21 @@
                                             <c:set var="color" value="${reserva.color}" />
                                             <dd class="event reserva-event" style="--row: ${row}; --span: 5; background-color: ${color}; color: white; cursor: pointer;"
                                                 data-bs-toggle="modal" data-bs-target="#reservaModal"
-                                                data-id="${reserva.idReserva}"
+                                                data-id="<c:out value='${reserva.idReserva}'/>"
                                                 data-tipo="reserva"
-                                                data-hora="${horaReserva}"
-                                                data-servicio="${reserva.tipoServicio}"
-                                                data-paciente="${reserva.nombrePaciente} ${reserva.apellidoPaciente}"
-                                                data-odontologo="${reserva.nombreUsuario} ${reserva.apellidoUsuario}"
-                                                data-estado="${reserva.estado}"
-                                                data-importe="${reserva.importe}"
-                                                data-descripcion="${reserva.descripcion}">
+                                                data-hora="<c:out value='${horaReserva}'/>"
+                                                data-servicio="<c:out value='${reserva.tipoServicio}'/>"
+                                                data-paciente="<c:out value='${reserva.nombrePaciente}'/> <c:out value='${reserva.apellidoPaciente}'/>"
+                                                data-odontologo="<c:out value='${reserva.nombreUsuario}'/> <c:out value='${reserva.apellidoUsuario}'/>"
+                                                data-estado="<c:out value='${reserva.estado}'/>"
+                                                data-importe="<c:out value='${reserva.importe}'/>"
+                                                data-descripcion="<c:out value='${reserva.descripcion}'/>">
                                                 <div class="d-flex justify-content-between align-items-center mb-1">
                                                     <time class="fw-bold" style="font-size: 0.75rem;"><i class="bi bi-clock me-1"></i>${fn:substring(horaReserva, 0, 5)}</time>
                                                     <span class="badge bg-white text-dark py-0 px-1" style="font-size: 0.62rem; font-weight: 600;">Web</span>
                                                 </div>
-                                                <div class="event-title fw-bold text-truncate" style="font-size: 0.82rem; line-height: 1.2;">${reserva.tipoServicio}</div>
+                                                <div class="text-truncate" style="font-size:0.72rem">Dr(a). <c:out value="${reserva.nombreUsuario}"/> <c:out value="${reserva.apellidoUsuario}"/></div>
+                                                <div class="event-title fw-bold text-truncate" style="font-size: 0.82rem; line-height: 1.2;"><c:out value="${reserva.tipoServicio}"/></div>
                                                 <div class="text-truncate opacity-90 mt-1" style="font-size: 0.72rem;"><i class="bi bi-person-fill me-1"></i>${reserva.nombrePaciente} ${reserva.apellidoPaciente}</div>
                                             </dd>
                                         </c:forEach>
@@ -350,19 +351,20 @@
                                             <c:set var="color" value="${cita.color}" />
                                             <dd class="event cita-event" style="--row: ${row}; --span: 5; background-color: ${color}; color: white; cursor: pointer;"
                                                 data-bs-toggle="modal" data-bs-target="#citaModal"
-                                                data-id="${cita.idCita}"
+                                                data-id="<c:out value='${cita.idCita}'/>"
                                                 data-tipo="cita"
-                                                data-hora="${horaCita}"
-                                                data-servicio="${cita.tipoServicio}"
-                                                data-paciente="${cita.nombrePaciente} ${cita.apellidoPaciente}"
-                                                data-odontologo="${cita.nombreUsuario} ${cita.apellidoUsuario}"
-                                                data-estado="${cita.estado}"
-                                                data-costo="${cita.costo}">
+                                                data-hora="<c:out value='${horaCita}'/>"
+                                                data-servicio="<c:out value='${cita.tipoServicio}'/>"
+                                                data-paciente="<c:out value='${cita.nombrePaciente}'/> <c:out value='${cita.apellidoPaciente}'/>"
+                                                data-odontologo="<c:out value='${cita.nombreUsuario}'/> <c:out value='${cita.apellidoUsuario}'/>"
+                                                data-estado="<c:out value='${cita.estado}'/>"
+                                                data-costo="<c:out value='${cita.costo}'/>">
                                                 <div class="d-flex justify-content-between align-items-center mb-1">
                                                     <time class="fw-bold" style="font-size: 0.75rem;"><i class="bi bi-clock me-1"></i>${fn:substring(horaCita, 0, 5)}</time>
                                                     <span class="badge bg-white text-dark py-0 px-1" style="font-size: 0.62rem; font-weight: 600;">Presencial</span>
                                                 </div>
-                                                <div class="event-title fw-bold text-truncate" style="font-size: 0.82rem; line-height: 1.2;">${cita.tipoServicio}</div>
+                                                <div class="text-truncate" style="font-size:0.72rem">Dr(a). <c:out value="${cita.nombreUsuario}"/> <c:out value="${cita.apellidoUsuario}"/></div>
+                                                <div class="event-title fw-bold text-truncate" style="font-size: 0.82rem; line-height: 1.2;"><c:out value="${cita.tipoServicio}"/></div>
                                                 <div class="text-truncate opacity-90 mt-1" style="font-size: 0.72rem;"><i class="bi bi-person-fill me-1"></i>${cita.nombrePaciente} ${cita.apellidoPaciente}</div>
                                             </dd>
                                         </c:forEach>
@@ -391,7 +393,7 @@
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                <p><strong>ID:</strong> <span id="reservaId"></span></p>
+                                <p><strong>ID:</strong> <span id="reservaId"></span> <c:if test="${sessionScope.TipoRol == 'Odontologo' || sessionScope.TipoRol == 'Administrador'}"><a id="verFichaReserva" href="#">Ver ficha clínica</a></c:if></p>
                                 <p><strong>Hora:</strong> <span id="reservaHora"></span></p>
                                 <p><strong>Servicio:</strong> <span id="reservaServicio"></span></p>
                                 <p><strong>Paciente:</strong> <span id="reservaPaciente"></span></p>
@@ -401,14 +403,14 @@
                                 <p><strong>Descripción:</strong> <span id="reservaDescripcion"></span></p>
                             </div>
                             <div class="modal-footer d-flex justify-content-between">
-                                <form id="formCompletarReserva" action="ReprogramacionController" method="post" style="display: none; margin: 0;">
-                                    <input type="hidden" name="idReserva" id="btnIdReserva" value="" />
+                                <c:if test="${sessionScope.TipoRol == 'Odontologo' || sessionScope.TipoRol == 'Administrador'}"><form id="formCompletarReserva" action="AtencionController" method="get" style="display: none; margin: 0;">
+                                    <input type="hidden" name="cita" id="btnIdReserva" value="" />
                                     <input type="hidden" name="estado" id="btnEstadoReserva" value="Confirmado" />
                                     <input type="hidden" name="accion" value="updateEstadoCompletado" />
                                     <button class="btn btn-success fw-bold" type="submit">
-                                        <i class="bi bi-check2-circle me-1"></i>Finalizar Atención (Marcar Completado)
+                                        <i class="bi bi-check2-circle me-1"></i>Registrar ficha clínica y finalizar
                                     </button>
-                                </form>
+                                </form></c:if>
                                 <button type="button" class="btn btn-secondary ms-auto" data-bs-dismiss="modal">Cerrar</button>
                             </div>
                         </div>
@@ -424,7 +426,7 @@
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                <p><strong>ID:</strong> <span id="citaId"></span></p>
+                                <p><strong>ID:</strong> <span id="citaId"></span> <c:if test="${sessionScope.TipoRol == 'Odontologo' || sessionScope.TipoRol == 'Administrador'}"><a id="verFichaCita" href="#">Ver ficha clínica</a></c:if></p>
                                 <p><strong>Hora:</strong> <span id="citaHora"></span></p>
                                 <p><strong>Servicio:</strong> <span id="citaServicio"></span></p>
                                 <p><strong>Paciente:</strong> <span id="citaPaciente"></span></p>
@@ -433,14 +435,14 @@
                                 <p><strong>Importe:</strong> <span id="citaCosto"></span></p>
                             </div>
                             <div class="modal-footer d-flex justify-content-between">
-                                <form id="formCompletarCita" action="ReprogramacionController" method="post" style="display: none; margin: 0;">
-                                    <input type="hidden" name="idCita" id="btnIdCita" value="" />
+                                <c:if test="${sessionScope.TipoRol == 'Odontologo' || sessionScope.TipoRol == 'Administrador'}"><form id="formCompletarCita" action="AtencionController" method="get" style="display: none; margin: 0;">
+                                    <input type="hidden" name="cita" id="btnIdCita" value="" />
                                     <input type="hidden" name="estado" id="btnEstadoCita" value="Confirmado" />
                                     <input type="hidden" name="accion" value="updateEstadoCompletadoCita" />
                                     <button class="btn btn-success fw-bold" type="submit">
-                                        <i class="bi bi-check2-circle me-1"></i>Finalizar Atención (Marcar Completado)
+                                        <i class="bi bi-check2-circle me-1"></i>Registrar ficha clínica y finalizar
                                     </button>
-                                </form>
+                                </form></c:if>
                                 <button type="button" class="btn btn-secondary ms-auto" data-bs-dismiss="modal">Cerrar</button>
                             </div>
                         </div>
@@ -459,6 +461,7 @@
                         modal.querySelector('#reservaHora').textContent = this.dataset.hora;
                         modal.querySelector('#reservaServicio').textContent = this.dataset.servicio;
                         modal.querySelector('#reservaPaciente').textContent = this.dataset.paciente;
+                        if (modal.querySelector('#verFichaReserva')) modal.querySelector('#verFichaReserva').href = 'AtencionController?cita=' + this.dataset.id;
                         modal.querySelector('#reservaOdontologo').textContent = this.dataset.odontologo;
                         modal.querySelector('#reservaEstado').textContent = this.dataset.estado;
                         var importeVal = parseFloat(this.dataset.importe);
@@ -467,7 +470,7 @@
 
                         var formComp = modal.querySelector('#formCompletarReserva');
                         if (formComp) {
-                            if (this.dataset.estado && this.dataset.estado.trim() === 'Confirmado') {
+                            if (this.dataset.estado && ['Confirmado', 'Reprogramado'].includes(this.dataset.estado.trim())) {
                                 formComp.style.display = 'block';
                                 modal.querySelector('#btnIdReserva').value = this.dataset.id;
                             } else {
@@ -485,6 +488,7 @@
                         modal.querySelector('#citaHora').textContent = this.dataset.hora;
                         modal.querySelector('#citaServicio').textContent = this.dataset.servicio;
                         modal.querySelector('#citaPaciente').textContent = this.dataset.paciente;
+                        if (modal.querySelector('#verFichaCita')) modal.querySelector('#verFichaCita').href = 'AtencionController?cita=' + this.dataset.id;
                         modal.querySelector('#citaOdontologo').textContent = this.dataset.odontologo;
                         modal.querySelector('#citaEstado').textContent = this.dataset.estado;
                         var costoVal = parseFloat(this.dataset.costo);
@@ -492,7 +496,7 @@
 
                         var formComp = modal.querySelector('#formCompletarCita');
                         if (formComp) {
-                            if (this.dataset.estado && this.dataset.estado.trim() === 'Confirmado') {
+                            if (this.dataset.estado && ['Confirmado', 'Reprogramado'].includes(this.dataset.estado.trim())) {
                                 formComp.style.display = 'block';
                                 modal.querySelector('#btnIdCita').value = this.dataset.id;
                             } else {

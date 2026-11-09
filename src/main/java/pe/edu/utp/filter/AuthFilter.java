@@ -19,12 +19,16 @@ import javax.servlet.http.HttpSession;
  * CR-04 / D-10: control de acceso centralizado por sesión y rol (RNF03, RNF09).
  *
  * Cada solicitud directa del navegador pasa por este filtro antes de llegar a un
- * Servlet o JSP. Las páginas públicas (sitio, reserva web, pago en línea, boleta,
+ * Servlet o JSP. Las páginas públicas (sitio, reserva web, boleta,
  * asistente e inicio de sesión) quedan libres; el resto exige sesión y el rol
  * indicado en la matriz de roles y permisos del documento.
  */
 @WebFilter(filterName = "AuthFilter", urlPatterns = {"/*"})
 public class AuthFilter implements Filter {
+    private final java.util.function.IntFunction<String> rolActual;
+    public AuthFilter(){this(id -> new pe.edu.utp.daoImpl.SesionPersonalDao().rolActivo(id));}
+    public AuthFilter(java.util.function.IntFunction<String> rolActual){this.rolActual=rolActual;}
+
 
     private static final String ADMIN = "Administrador";
     private static final String SECRETARIA = "Secretaria";
@@ -33,14 +37,14 @@ public class AuthFilter implements Filter {
     /** Páginas JSP del sitio público. */
     private static final Set<String> PAGINAS_PUBLICAS = new HashSet<>(Arrays.asList(
             "", "/", "/index.jsp", "/servicios.jsp", "/DetalleServicio.jsp", "/nosotros.jsp",
-            "/faq.jsp", "/reserva.jsp", "/reservapersonal.jsp", "/formularioreserva.jsp",
+            "/faq.jsp", "/reserva.jsp", "/reservapersonal.jsp", "/formularioreserva.jsp", "/reservacita.jsp",
             "/citareservada.jsp", "/boleta.jsp", "/iniciosesion.jsp", "/iniciosesionerror.jsp",
             "/error.jsp", "/header.jsp", "/footer.jsp", "/consultareserva.jsp"));
 
     /** Servlets públicos (los que validan el rol internamente también se listan aquí). */
     private static final Set<String> SERVLETS_PUBLICOS = new HashSet<>(Arrays.asList(
             "/InicioSesionController", "/CerrarSesionController", "/api/chatbot", "/CitaController",
-            "/ConsultaDniController"));
+            "/ConsultaDniController", "/PagoManualController"));
 
     /** Acciones públicas de ServicioController (catálogo y formulario de reserva). */
     private static final Set<String> ACCIONES_SERVICIO_PUBLICAS = new HashSet<>(Arrays.asList(
@@ -60,15 +64,26 @@ public class AuthFilter implements Filter {
         if (ruta == null) {
             ruta = "";
         }
-
-        if (esPublica(request, ruta)) {
-            chain.doFilter(req, res);
-            return;
+        if(ruta.startsWith("/css/")||ruta.startsWith("/img/")||ruta.startsWith("/js/")||ruta.startsWith("/favicon")) {
+            chain.doFilter(req,res);return;
         }
 
-        HttpSession sesion = request.getSession(false);
-        String rol = (sesion != null && sesion.getAttribute("TipoRol") != null)
-                ? sesion.getAttribute("TipoRol").toString() : null;
+        // Las respuestas con datos y las redirecciones de acceso tampoco se almacenan.
+        if(!ruta.startsWith("/css/") && !ruta.startsWith("/img/") && !ruta.startsWith("/js/")) {
+            response.setHeader("Cache-Control","no-cache, no-store, must-revalidate, max-age=0");
+            response.setHeader("Pragma","no-cache");response.setDateHeader("Expires",0);
+        }
+        HttpSession sesion=request.getSession(false);
+        String rol=sesion==null?null:(String)sesion.getAttribute("TipoRol");
+        if(rol!=null && !"/CerrarSesionController".equals(ruta)) {
+            try {
+                rol=rolActual.apply(Integer.parseInt(String.valueOf(sesion.getAttribute("idUsuario"))));
+                if(rol==null){sesion.invalidate();sesion=null;}
+                else sesion.setAttribute("TipoRol",rol);
+            } catch(NumberFormatException e){sesion.invalidate();sesion=null;rol=null;}
+              catch(IllegalStateException e){response.sendError(503,"No se pudo validar su acceso. Intente nuevamente.");return;}
+        }
+        if(esPublica(request,ruta)){chain.doFilter(req,res);return;}
 
         // Sin sesión: se pide iniciar sesión (RNF09)
         if (rol == null) {
@@ -85,7 +100,7 @@ public class AuthFilter implements Filter {
         }
 
         // Páginas restringidas: no se guardan en caché, así "Atrás" no las muestra tras cerrar sesión
-        response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+        response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate, max-age=0");
         response.setHeader("Pragma", "no-cache");
         response.setDateHeader("Expires", 0);
 
@@ -105,8 +120,8 @@ public class AuthFilter implements Filter {
             case "/ServicioController":
                 return accion != null && ACCIONES_SERVICIO_PUBLICAS.contains(accion);
             case "/PagoController":
-                // Ver boleta y pagar en línea son del paciente; el pago en efectivo es de la Secretaria
-                return "GET".equalsIgnoreCase(request.getMethod()) || "pagarEnLinea".equals(accion);
+                // Ver boleta es del paciente; el pago en efectivo es de la Secretaria
+                return "GET".equalsIgnoreCase(request.getMethod());
             case "/ReservaController":
                 // POST = registro de reserva "En espera"; los listados (GET) son del personal
                 return "POST".equalsIgnoreCase(request.getMethod());

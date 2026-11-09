@@ -5,6 +5,11 @@ import java.security.NoSuchAlgorithmException;
 import org.mindrot.jbcrypt.BCrypt;
 
 public class SecurityUtils {
+    public static String escaparHtml(String valor) {
+        if(valor==null)return "";
+        return valor.replace("&","&amp;").replace("<","&lt;").replace(">","&gt;")
+                .replace("\"","&quot;").replace("'","&#39;");
+    }
 
     /**
      * Genera un hash seguro con algoritmo BCrypt y salting automático (factor de costo 10).

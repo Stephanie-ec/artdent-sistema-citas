@@ -15,6 +15,7 @@ public class Conexion {
             config.setUsername(pe.edu.utp.utils.ConfigLoader.getProperty("db.user"));
             config.setPassword(pe.edu.utp.utils.ConfigLoader.getProperty("db.password"));
             config.setDriverClassName("com.mysql.cj.jdbc.Driver");
+            config.setConnectionInitSql("SET time_zone = '-05:00'");
             
             // Configuracion de pool para manejar alta concurrencia (RNF4)
             config.setMaximumPoolSize(50); 
@@ -32,13 +33,11 @@ public class Conexion {
     }
 
     public static Connection getConection() {
-        Connection conn = null;
+        if(dataSource==null)throw new IllegalStateException("La base de datos no esta configurada o disponible.");
         try {
-            conn = dataSource.getConnection();
+            return dataSource.getConnection();
         } catch (SQLException e) {
-            System.out.println("Error obteniendo conexion del pool");
-            e.printStackTrace();
+            throw new IllegalStateException("No se pudo obtener una conexion a la base de datos.",e);
         }
-        return conn;
     }
 }

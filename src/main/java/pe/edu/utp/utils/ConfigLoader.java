@@ -8,19 +8,21 @@ public class ConfigLoader {
     private static final Properties properties = new Properties();
 
     static {
-        try (InputStream input = ConfigLoader.class.getClassLoader().getResourceAsStream("config.properties")) {
-            if (input == null) {
-                System.err.println("No se encontró el archivo de configuración: config.properties");
-            } else {
-                properties.load(input);
-            }
+        String archivo=System.getProperty("artdent.config");
+        if(archivo==null || archivo.trim().isEmpty())archivo=System.getenv("ARTDENT_CONFIG");
+        try (InputStream input = archivo==null || archivo.trim().isEmpty()?null:
+                java.nio.file.Files.newInputStream(java.nio.file.Paths.get(archivo))) {
+            if (input != null) properties.load(new java.io.InputStreamReader(input,java.nio.charset.StandardCharsets.UTF_8));
         } catch (IOException ex) {
-            System.err.println("Error al cargar la configuración: " + ex.getMessage());
-            ex.printStackTrace();
+            throw new ExceptionInInitializerError("No se pudo leer la configuración externa de ArtDent");
         }
     }
 
     public static String getProperty(String key) {
+        String override = System.getProperty("artdent." + key);
+        if (override != null) return override;
+        override = System.getenv("ARTDENT_" + key.toUpperCase(java.util.Locale.ROOT).replace('.', '_'));
+        if (override != null) return override;
         return properties.getProperty(key);
     }
 }
