@@ -35,6 +35,7 @@ public class ReservaDaoImpl implements ReservaDao {
     private Connection cx;
 
     @Override
+    @Deprecated // F-16: usar CitaDao.createReservaWeb
     public int createReserva(Paciente p, Reserva r) {
         int x = 0;
         String SQL_1 = "{call sp_registrarusuario (?,?,?,?,?)}";  // Almacenar paciente
@@ -278,6 +279,7 @@ public class ReservaDaoImpl implements ReservaDao {
     }
 
     @Override
+    @Deprecated // F-16: usar CitaDao.createReservaWeb
     public int createReservaPacex(Paciente p, Reserva r) {
         int x = 0;
         String SQL_2 = "{call sp_crearreserva (?,?,?,?,?,?,?,?)}";  // Almacenar reserva
@@ -397,7 +399,9 @@ public class ReservaDaoImpl implements ReservaDao {
         System.out.println("Total de reservas recuperadas: " + lista.size());
         try {
             Map<Integer, Comprobante> mapComp = new PagoDaoImpl().obtenerMapaComprobantesPorCita();
+            java.util.Set<Integer> pagadas = new PagoDaoImpl().citasPagadas();
             for (VerReserva re : lista) {
+                re.setTienePago(pagadas.contains(re.getIdReserva()));
                 if (mapComp.containsKey(re.getIdReserva())) {
                     Comprobante c = mapComp.get(re.getIdReserva());
                     re.setTienePago(true);

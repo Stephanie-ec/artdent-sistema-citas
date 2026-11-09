@@ -16,14 +16,23 @@ public class EmailService {
     private static final String SENDER_PASSWORD = ConfigLoader.getProperty("mail.password"); 
 
     public static boolean sendEmail(String recipientEmail, String subject, String body) {
+        if(!"true".equalsIgnoreCase(ConfigLoader.getProperty("mail.enabled")))return false;
+        if (SENDER_EMAIL == null || SENDER_PASSWORD == null || SENDER_EMAIL.startsWith("tu_correo")
+                || SENDER_PASSWORD.startsWith("tu_token") || ConfigLoader.getProperty("mail.smtp.host") == null) {
+            return false;
+        }
         if (recipientEmail == null || recipientEmail.isEmpty()) {
             System.err.println("Correo de destino inválido.");
             return false;
         }
 
         Properties props = new Properties();
+        props.put("mail.smtp.connectiontimeout", "5000");
+        props.put("mail.smtp.timeout", "5000");
+        props.put("mail.smtp.writetimeout", "5000");
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.starttls.required", "true");
         props.put("mail.smtp.host", ConfigLoader.getProperty("mail.smtp.host"));
         props.put("mail.smtp.port", ConfigLoader.getProperty("mail.smtp.port"));
         props.put("mail.smtp.ssl.protocols", "TLSv1.2");
@@ -55,6 +64,8 @@ public class EmailService {
     }
 
     private static String getHtmlTemplate(String subject, String bodyText) {
+        subject=SecurityUtils.escaparHtml(subject);
+        bodyText=SecurityUtils.escaparHtml(bodyText);
         return "<!DOCTYPE html>" +
                "<html>" +
                "<head><meta charset='UTF-8'></head>" +

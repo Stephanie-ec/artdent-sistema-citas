@@ -1,0 +1,13 @@
+2026-11-07 America/Lima — pruebas con corrección retirada temporalmente; después restaurada.
+target/chatbot-revert-red.log
+[ERROR] Tests run: 7, Failures: 3, Errors: 0, Skipped: 0, Time elapsed: 0.514 s <<< FAILURE! -- in pe.edu.utp.controller.ChatbotSeguroTest
+[ERROR] Tests run: 7, Failures: 3, Errors: 0, Skipped: 0
+target/cierre-revert-red.log
+[ERROR] Tests run: 1, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.059 s <<< FAILURE! -- in pe.edu.utp.utils.CierreServiciosTest
+[ERROR] Tests run: 1, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.201 s <<< FAILURE! -- in pe.edu.utp.utils.ConfigExternaTest
+[ERROR]   ConfigExternaTest.configuracionExternaRespetaEntornoYPropiedadJava:16->comprobar:25 expected:<0> but was:<2>
+[ERROR] Tests run: 2, Failures: 2, Errors: 0, Skipped: 0
+target/foto-revert-red.log
+[ERROR] Tests run: 1, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.478 s <<< FAILURE! -- in pe.edu.utp.integration.CierrePendientesIT
+[ERROR]   CierrePendientesIT.luciaTieneFotoEnElListadoDinamicoSinExponerDni:96 expected:<img/equipo/lucia.jpg> but was:<null>
+[ERROR] Tests run: 1, Failures: 1, Errors: 0, Skipped: 0

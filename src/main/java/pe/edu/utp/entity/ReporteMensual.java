@@ -15,7 +15,7 @@ public class ReporteMensual {
     private int reservasConfirmadas;
     private int reservasCanceladas;
     private int totalReservas;
-    private double totalIngresos;
+    private java.math.BigDecimal totalIngresos = java.math.BigDecimal.ZERO;
 
     public ReporteMensual(String mes, int totalReservas, int totalCitas, int reservasCompletadas, int reservasCanceladas, int citasCompletadas, int citasCanceladas, int citasEnEspera, int citasReprogramadas, int citasConfirmadas, int reservasEnEspera, int reservasReprogramadas, int reservasConfirmadas) {
         this.mes = mes;
@@ -137,11 +137,11 @@ public class ReporteMensual {
         this.totalReservas = totalReservas;
     }
 
-    public double getTotalIngresos() {
+    public java.math.BigDecimal getTotalIngresos() {
         return totalIngresos;
     }
 
-    public void setTotalIngresos(double totalIngresos) {
+    public void setTotalIngresos(java.math.BigDecimal totalIngresos) {
         this.totalIngresos = totalIngresos;
     }
 

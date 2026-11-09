@@ -1,5 +1,13 @@
 package pe.edu.utp.utils;
 
+import java.time.Clock;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeParseException;
+
 /**
  * Validación de datos de entrada en el servidor (RNF03, O-18).
  * Devuelve null si los datos son válidos o el mensaje para el usuario.
@@ -27,10 +35,38 @@ public final class Validador {
         if (correo == null || !correo.trim().matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) {
             return "Ingrese un correo electrónico válido.";
         }
+        return validarFechaHora(fecha, hora);
+    }
+
+    private static final ZoneId ZONA_CLINICA = ZoneId.of("America/Lima");
+
+    /** F-08: la fecha se valida antes de consultar RENIEC o escribir en la BD. */
+    public static String validarFechaHora(String fecha, String hora) {
+        return validarFechaHora(fecha, hora, Clock.system(ZONA_CLINICA));
+    }
+
+    // El reloj inyectable permite probar límites de día/hora sin depender de la PC.
+    static String validarFechaHora(String fecha, String hora, Clock reloj) {
         if (vacio(fecha) || vacio(hora)) {
             return "Seleccione la fecha y la hora de la cita.";
         }
-        return null;
+        try {
+            if(!fecha.trim().matches("\\d{4}-\\d{2}-\\d{2}") || !hora.trim().matches("\\d{2}:\\d{2}(:\\d{2})?")) {
+                return "Ingrese una fecha y una hora válidas para la cita.";
+            }
+            LocalDate dia = LocalDate.parse(fecha.trim());
+            LocalTime inicio = LocalTime.parse(hora.trim());
+            LocalDateTime ahora = LocalDateTime.now(reloj.withZone(ZONA_CLINICA));
+            if (LocalDateTime.of(dia, inicio).isBefore(ahora)) {
+                return "No se puede reservar una cita en una fecha u hora pasada.";
+            }
+            if (dia.getDayOfWeek() == DayOfWeek.SUNDAY) {
+                return "No hay atención los domingos. Seleccione otro día.";
+            }
+            return null;
+        } catch (DateTimeParseException e) {
+            return "Ingrese una fecha y una hora válidas para la cita.";
+        }
     }
 
     /** Nombres y apellidos: solo letras (con tildes y ñ), espacios, apóstrofo y guion. */

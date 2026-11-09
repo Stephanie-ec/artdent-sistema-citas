@@ -50,6 +50,7 @@ public class InicioSesionController extends HttpServlet {
         HttpSession sesion = request.getSession();
         LoginResultDTO resultado = udao.autenticar(dni, clave);
         if (resultado != null && resultado.isExito() && resultado.getUsuario() != null) {
+            request.changeSessionId();
             InicioSesionDTO user = resultado.getUsuario();
             sesion.setAttribute("idUsuario", user.getIdUsuario());
             sesion.setAttribute("Nombre", user.getNombre());

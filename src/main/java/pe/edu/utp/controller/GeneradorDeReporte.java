@@ -40,7 +40,6 @@ public class GeneradorDeReporte {
             switch (reserva.getEstado()) {
                 case "Completado": // Reprogramada
                     reporte.setReservasCompletadas(reporte.getReservasCompletadas() + 1);
-                    reporte.setTotalIngresos(reporte.getTotalIngresos() + reserva.getImporte());
                     break;
                 case "En espera": // Reprogramada
                     reporte.setReservasEnEspera(reporte.getReservasEnEspera() + 1);
@@ -69,7 +68,6 @@ public class GeneradorDeReporte {
             switch (cita.getEstado()) {
                 case "Completado": // Confirmada
                     reporte.setCitasCompletadas(reporte.getCitasCompletadas() + 1);
-                    reporte.setTotalIngresos(reporte.getTotalIngresos() + cita.getCosto());
                     break;
                 case "En espera": // Reprogramada
                     reporte.setCitasEnEspera(reporte.getCitasEnEspera() + 1);
@@ -89,7 +87,7 @@ public class GeneradorDeReporte {
             reportePorMes.put(mes, reporte);
         }
 
-        return new ArrayList<>(reportePorMes.values());
+        return aplicarIngresos(reportePorMes,new pe.edu.utp.daoImpl.IngresosDao().filtroDoctor(idUsuario));
     }
 
     public List<ReporteMensual> generarReporteAd() throws SQLException {
@@ -107,7 +105,6 @@ public class GeneradorDeReporte {
             switch (reserva.getEstado()) {
                 case "Completado": // Reprogramada
                     reporte.setReservasCompletadas(reporte.getReservasCompletadas() + 1);
-                    reporte.setTotalIngresos(reporte.getTotalIngresos() + reserva.getImporte());
                     break;
                 case "En espera": // Reprogramada
                     reporte.setReservasEnEspera(reporte.getReservasEnEspera() + 1);
@@ -136,7 +133,6 @@ public class GeneradorDeReporte {
             switch (cita.getEstado()) {
                 case "Completado": // Confirmada
                     reporte.setCitasCompletadas(reporte.getCitasCompletadas() + 1);
-                    reporte.setTotalIngresos(reporte.getTotalIngresos() + cita.getCosto());
                     break;
                 case "En espera": // Reprogramada
                     reporte.setCitasEnEspera(reporte.getCitasEnEspera() + 1);
@@ -156,7 +152,20 @@ public class GeneradorDeReporte {
             reportePorMes.put(mes, reporte);
         }
 
-        return new ArrayList<>(reportePorMes.values());
+        return aplicarIngresos(reportePorMes,null);
+    }
+
+    private List<ReporteMensual> aplicarIngresos(Map<String,ReporteMensual> reportes,Integer doctor) throws SQLException {
+        java.util.Map<java.time.YearMonth,java.math.BigDecimal> ingresos=new pe.edu.utp.daoImpl.IngresosDao().porMes(doctor);
+        for(java.util.Map.Entry<java.time.YearMonth,java.math.BigDecimal> item:ingresos.entrySet()) {
+            String mes=obtenerMes(item.getKey().atDay(1));
+            ReporteMensual fila=reportes.computeIfAbsent(mes,k -> new ReporteMensual(k,0,0,0,0,0,0,0,0,0,0,0,0));
+            fila.setTotalIngresos(item.getValue());
+        }
+        List<ReporteMensual> filas=new ArrayList<>(reportes.values());
+        java.time.format.DateTimeFormatter formato=java.time.format.DateTimeFormatter.ofPattern("MMMM yyyy",new Locale("es","ES"));
+        filas.sort(java.util.Comparator.comparing(r -> java.time.YearMonth.parse(r.getMes(),formato)));
+        return filas;
     }
 
     // Método para obtener el mes en formato "MMMM yyyy" a partir de una fecha

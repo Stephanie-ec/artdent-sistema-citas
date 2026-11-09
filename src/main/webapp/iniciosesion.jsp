@@ -36,7 +36,7 @@
             <!-- Columna Izquierda: Identidad Institucional -->
             <div class="col-lg-7 d-none d-lg-flex login-hero text-white align-items-center justify-content-center p-5">
                 <div class="text-center" style="max-width: 500px;">
-                    <img src="https://logomaker.designfreelogoonline.com/media/productdesigner/logo/resized/0001036_dental_logo_maker_dentist_Logo-02.png" 
+                    <img src="${pageContext.request.contextPath}/img/logo-artdent.png" 
                          alt="Logo Art Dent" style="width: 100px; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.35));" class="mb-4">
                     <h1 class="display-5 fw-bold mb-2">Centro Odontológico Art <span class="text-brand-primary">Dent</span></h1>
                     <p class="lead mb-4 text-white-50">Plataforma Integral de Gestión Clínica, Citas y Auditoría Odontológica.</p>
@@ -56,7 +56,7 @@
                 <div class="w-100" style="max-width: 420px;">
                     <div class="text-center mb-4">
                         <a href="index.jsp" title="Volver al Inicio">
-                            <img src="https://logomaker.designfreelogoonline.com/media/productdesigner/logo/resized/0001036_dental_logo_maker_dentist_Logo-02.png" 
+                            <img src="${pageContext.request.contextPath}/img/logo-artdent.png" 
                                  alt="ArtDent" style="width: 70px;" class="mb-2">
                         </a>
                         <h3 class="fw-bold text-brand-dark mb-1">Acceso de Personal</h3>

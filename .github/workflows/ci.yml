@@ -9,6 +9,19 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: artdent-ci
+          MYSQL_ROOT_HOST: '%'
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
     steps:
       - name: Descargar el codigo
         uses: actions/checkout@v4
@@ -20,8 +33,28 @@ jobs:
           java-version: '17'
           cache: maven
 
-      - name: Compilar y empaquetar (WAR)
-        run: mvn -B clean package -DskipTests
+      - name: Preparar Node para pruebas de scripts
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          package-manager-cache: false
+
+      - name: Probar scripts seguros de la interfaz
+        run: node --test scripts/test-ui-segura.cjs
+
+      - name: Preparar base descartable de pruebas
+        run: |
+          node scripts/preparar-bd-pruebas.cjs
+          docker exec -i -e MYSQL_PWD=artdent-ci "${{ job.services.mysql.id }}" mysql --default-character-set=utf8mb4 -uroot < target/test-bootstrap.sql
+
+      - name: Compilar WAR y ejecutar pruebas unitarias y MySQL
+        run: >-
+          mvn -B clean verify -Pintegration
+          '-Dartdent.db.url=jdbc:mysql://127.0.0.1:3306/db_artdent_apf2_test?serverTimezone=America/Lima'
+          -Dartdent.db.user=root -Dartdent.db.password=artdent-ci
+
+      - name: Compilar todos los JSP
+        run: mvn -B org.eclipse.jetty:jetty-jspc-maven-plugin:9.4.51.v20230217:jspc
 
       - name: Guardar el WAR generado
         uses: actions/upload-artifact@v4

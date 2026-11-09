@@ -57,7 +57,8 @@
                     </div>
                 </div>
 
-                <div class="row justify-content-center">
+                <c:if test="${sessionScope.TipoRol == 'Odontologo' || sessionScope.TipoRol == 'Administrador'}"><p class="text-center"><a class="btn btn-outline-primary" href="AtencionController?cita=${tipoLista == 'DetRe' ? VerReserva[0].idReserva : VerCita[0].idCita}">Consultar ficha clínica</a></p></c:if>
+<div class="row justify-content-center">
                     <div class="col-12 col-xl-10">
                         <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
                             <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between">
@@ -111,7 +112,7 @@
                                                     </tr>
                                                     <tr>
                                                         <th class="ps-4 text-muted py-3" style="background-color: #f8fafc;">Motivo / Descripción</th>
-                                                        <td>${VerReserva[0].descripcion}</td>
+                                                        <td><c:out value="${VerReserva[0].descripcion}"/></td>
                                                     </tr>
                                                     <tr>
                                                         <th class="ps-4 text-muted py-3" style="background-color: #f8fafc;">Estado</th>

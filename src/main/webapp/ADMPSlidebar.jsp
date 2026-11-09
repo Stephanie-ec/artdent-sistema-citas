@@ -8,7 +8,7 @@
     <div class="position-sticky pt-2">
         <!-- Logo e Identidad Admin -->
         <div class="d-flex align-items-center gap-2 px-3 py-3 border-bottom" style="border-color: rgba(255,255,255,0.1) !important;">
-            <img src="https://logomaker.designfreelogoonline.com/media/productdesigner/logo/resized/0001036_dental_logo_maker_dentist_Logo-02.png" 
+            <img src="${pageContext.request.contextPath}/img/logo-artdent.png" 
                  alt="Art Dent" width="34" height="34">
             <span class="fs-6 fw-bold text-white">Admin <span class="text-brand-primary">ArtDent</span></span>
         </div>

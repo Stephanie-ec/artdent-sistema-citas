@@ -17,6 +17,9 @@ public class Usuario {
     private String Clave;
     private int Rol_idRol;
     private String Rol;
+    private String fotoPerfil;
+    public String getFotoPerfil(){return fotoPerfil;}
+    public void setFotoPerfil(String fotoPerfil){this.fotoPerfil=fotoPerfil;}
     
     public Usuario() {
     }

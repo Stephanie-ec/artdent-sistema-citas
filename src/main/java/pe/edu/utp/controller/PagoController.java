@@ -18,7 +18,9 @@ import pe.edu.utp.entity.Pago;
 @WebServlet("/PagoController")
 public class PagoController extends HttpServlet {
 
-    private final PagoDao pagoDao = new PagoDaoImpl();
+    private final PagoDao pagoDao;
+    public PagoController(){this(new PagoDaoImpl());}
+    PagoController(PagoDao dao){this.pagoDao=dao;}
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -50,9 +52,6 @@ public class PagoController extends HttpServlet {
             case "registrarPagoEfectivo":
                 registrarPagoEfectivo(request, response);
                 break;
-            case "pagarEnLinea":
-                pagarEnLinea(request, response);
-                break;
             default:
                 response.sendRedirect("index.jsp");
                 break;
@@ -63,6 +62,11 @@ public class PagoController extends HttpServlet {
             throws ServletException, IOException {
         try {
             int idCita = Integer.parseInt(request.getParameter("idCita"));
+            Integer estado=pagoDao.obtenerEstadoCita(idCita);
+            if(estado==null||estado==5||estado==6) {
+                response.setStatus(409);request.setAttribute("error","No se puede pagar una cita cancelada, rechazada o inexistente.");
+                request.getRequestDispatcher("error.jsp").forward(request,response);return;
+            }
             // D-11: el monto se calcula en el servidor desde Servicio.Costo, no se toma del formulario
             Double costo = pagoDao.obtenerCostoServicioPorCita(idCita);
             if (costo == null) {
@@ -77,7 +81,7 @@ public class PagoController extends HttpServlet {
             if (nombreCliente != null) nombreCliente = nombreCliente.trim();
             if (dniCliente != null) dniCliente = dniCliente.trim();
 
-            // Datos del titular obligatorios y con formato válido (la pasarela no acepta campos vacíos)
+            // Datos del titular obligatorios y con formato válido para el registro del pago
             if (nombreCliente == null || !nombreCliente.matches("^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ' -]{3,60}$")
                     || dniCliente == null || !dniCliente.matches("\\d{8}")) {
                 request.setAttribute("error", "Datos del titular no válidos: ingrese su nombre y un DNI de 8 dígitos.");
@@ -110,72 +114,7 @@ public class PagoController extends HttpServlet {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            request.setAttribute("error", "Error al procesar pago en efectivo: " + e.getMessage());
-            request.getRequestDispatcher("error.jsp").forward(request, response);
-        }
-    }
-
-    private void pagarEnLinea(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        try {
-            int idCita = Integer.parseInt(request.getParameter("idCita"));
-            // D-11: el monto se calcula en el servidor desde Servicio.Costo, no se toma del formulario
-            Double costo = pagoDao.obtenerCostoServicioPorCita(idCita);
-            if (costo == null) {
-                request.setAttribute("error", "No se encontró la cita indicada.");
-                request.getRequestDispatcher("error.jsp").forward(request, response);
-                return;
-            }
-            // Si la reserva ya se pagó (por ejemplo, volvió atrás en el navegador), se muestra su boleta
-            if (pagoDao.tienePago(idCita)) {
-                permitirCita(request, idCita);
-                response.sendRedirect("PagoController?action=verBoleta&idCita=" + idCita + "&yaPagado=1");
-                return;
-            }
-            double monto = costo;
-            String nombreCliente = request.getParameter("nombreCliente");
-            String dniCliente = request.getParameter("dniCliente");
-            String codigoReserva = request.getParameter("codigoReserva");
-
-            if (nombreCliente != null) nombreCliente = nombreCliente.trim();
-            if (dniCliente != null) dniCliente = dniCliente.trim();
-
-            // Datos del titular obligatorios y con formato válido (la pasarela no acepta campos vacíos)
-            if (nombreCliente == null || !nombreCliente.matches("^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ' -]{3,60}$")
-                    || dniCliente == null || !dniCliente.matches("\\d{8}")) {
-                request.setAttribute("error", "Datos del titular no válidos: ingrese su nombre y un DNI de 8 dígitos.");
-                request.getRequestDispatcher("error.jsp").forward(request, response);
-                return;
-            }
-
-            String timeStamp = new SimpleDateFormat("yyyyMMdd-").format(new Date());
-            String codTransaccion = "TXN-" + timeStamp + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
-
-            Pago pago = new Pago();
-            pago.setCita_idCita(idCita);
-            pago.setMonto(monto);
-            pago.setMetodoPago_idMetodo(1); // 1 = En línea (MetodoPago)
-            pago.setCodigoTransaccion(codTransaccion);
-
-            Comprobante comp = new Comprobante();
-            comp.setSerie("B001");
-            comp.setNombreCliente(nombreCliente);
-            comp.setDniCliente(dniCliente);
-
-            boolean exito = pagoDao.registrarPagoYComprobante(pago, comp);
-
-            if (exito) {
-                permitirCita(request, idCita);
-                // Redirigir a vista de boleta electrónica generada
-                response.sendRedirect("PagoController?action=verBoleta&idPago=" + pago.getIdPago() 
-                        + "&codigoReserva=" + (codigoReserva != null ? codigoReserva : ""));
-            } else {
-                request.setAttribute("error", "No se pudo registrar el pago. Intente nuevamente o consulte su reserva con su código y DNI.");
-                request.getRequestDispatcher("error.jsp").forward(request, response);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            request.setAttribute("error", "Error al procesar pago en línea: " + e.getMessage());
+            request.setAttribute("error", "No se pudo procesar el pago en efectivo. Verifique los datos e intente nuevamente.");
             request.getRequestDispatcher("error.jsp").forward(request, response);
         }
     }
@@ -241,10 +180,7 @@ public class PagoController extends HttpServlet {
             return;
         }
         permitirCita(request, idCita);
-        if (Boolean.TRUE.equals(r.get("pagado"))) {
-            response.sendRedirect("PagoController?action=verBoleta&idCita=" + idCita);
-            return;
-        }
+
         request.setAttribute("reserva", r);
         request.setAttribute("codigo", String.format("ART-RES-%05d", idCita));
         request.getRequestDispatcher("consultareserva.jsp").forward(request, response);
@@ -264,7 +200,9 @@ public class PagoController extends HttpServlet {
     @SuppressWarnings("unchecked")
     private static boolean citaPermitida(HttpServletRequest request, int idCita) {
         Object ids = request.getSession().getAttribute("citasPropias");
-        return ids instanceof java.util.Set && ((java.util.Set<Integer>) ids).contains(idCita);
+        if(ids instanceof java.util.Set && ((java.util.Set<Integer>)ids).contains(idCita))return true;
+        Object creada=request.getSession().getAttribute("reservaIdCita");
+        return creada!=null && String.valueOf(idCita).equals(creada.toString());
     }
 
 }

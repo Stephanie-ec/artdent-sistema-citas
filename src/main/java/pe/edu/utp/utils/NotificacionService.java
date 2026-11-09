@@ -1,11 +1,10 @@
 package pe.edu.utp.utils;
 
-import pe.edu.utp.dao.CitaDao;
 import pe.edu.utp.daoImpl.CitaDaoImpl;
 
 /**
- * RF09: envía el correo al paciente y registra la notificación en la tabla
- * Notificacion con el resultado real del envío (Enviado = 1 o 0).
+ * RF09: registra el evento y encola entregas al paciente, titular y secretaría.
+ * CorreoPendiente registra el resultado real por destinatario; encolar no es entregar.
  */
 public final class NotificacionService {
 
@@ -29,16 +28,18 @@ public final class NotificacionService {
      * @param asunto   asunto del correo (se registra en Notificacion)
      * @param correo   correo del paciente; si está vacío se registra como no enviado
      * @param mensaje  cuerpo del correo
-     * @return true si el correo se envió
+     * @return false: la entrega es asíncrona y se consulta en CorreoController
      */
     public static boolean notificar(int idCita, int idEstado, String asunto, String correo, String mensaje) {
-        boolean enviado = false;
-        if (correo != null && !correo.trim().isEmpty()) {
-            enviado = EmailService.sendEmail(correo.trim(), asunto + " - ArtDent", mensaje);
+        // La cita ya está confirmada en BD. SMTP se procesa fuera de la solicitud y de su transacción.
+        ULTIMO_ENVIO.remove();
+        try {
+            new pe.edu.utp.daoImpl.CorreoDao().encolar(idCita,idEstado,asunto,mensaje);
+            new CitaDaoImpl().registrarNotificacion(asunto,idEstado,idCita,false);
+        } catch(java.sql.SQLException|RuntimeException e) {
+            ULTIMO_ENVIO.set(false);
+            java.util.logging.Logger.getLogger(NotificacionService.class.getName()).log(java.util.logging.Level.WARNING,"Cambio guardado; no se pudo encolar la notificación",e);
         }
-        CitaDao citaDao = new CitaDaoImpl();
-        citaDao.registrarNotificacion(asunto, idEstado, idCita, enviado);
-        ULTIMO_ENVIO.set(enviado);
-        return enviado;
+        return false; // Encolado nunca equivale a entrega confirmada.
     }
 }

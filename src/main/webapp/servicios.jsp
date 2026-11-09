@@ -5,6 +5,7 @@
 <%@page import="java.util.List"%>
 <%@page import="pe.edu.utp.dao.ServicioDao"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <!DOCTYPE html>
 <html lang="es">
@@ -57,6 +58,7 @@
             transform: scale(1.04);
         }
     </style>
+<script src="${pageContext.request.contextPath}/js/chat-render.js" defer></script>
 </head>
 
 <body>
@@ -101,7 +103,7 @@
                                      alt="${servicio.tipoServicio}">
                                 <c:if test="${not empty servicio.costo}">
                                     <span class="position-absolute bottom-0 end-0 m-2 badge bg-brand-primary fs-6 shadow">
-                                        S/. ${servicio.costo}
+                                        S/ <fmt:formatNumber value="${servicio.costo}" pattern="#,##0.00"/>
                                     </span>
                                 </c:if>
                             </div>
@@ -220,7 +222,7 @@
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: 'pregunta=' + encodeURIComponent(pregunta)
                 });
-                const data = await response.text();
+                const data = await response.json();
                 agregarMensajeBot(data);
             } catch (err) {
                 agregarMensajeBot('No fue posible conectar con el asistente. Comunícate al (01) 361-3634.');
@@ -240,7 +242,7 @@
             const chatBody = document.getElementById('chat-body');
             const mensajeDiv = document.createElement('div');
             mensajeDiv.className = 'message bot-message';
-            mensajeDiv.innerHTML = mensaje;
+            window.artdentRenderBot(mensajeDiv, mensaje, '${pageContext.request.contextPath}');
             chatBody.appendChild(mensajeDiv);
             chatBody.scrollTop = chatBody.scrollHeight;
         }

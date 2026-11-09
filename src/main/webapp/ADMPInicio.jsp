@@ -77,7 +77,7 @@
                             <div class="card-body p-2">
                                 <div class="d-flex align-items-center justify-content-between">
                                     <div>
-                                        <div class="text-muted small fw-bold text-uppercase mb-1">Ingresos Totales</div>
+                                        <div class="text-muted small fw-bold text-uppercase mb-1">Ingresos Totales (Pagos Registrados)</div>
                                         <h3 class="fw-bold mb-0" style="color: #278829;">
                                             S/ <%= request.getAttribute("totalIngresos") != null ? request.getAttribute("totalIngresos") : "0.00" %>
                                         </h3>

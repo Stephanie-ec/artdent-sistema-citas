@@ -7,6 +7,8 @@ import pe.edu.utp.entity.Pago;
 public interface PagoDao {
     boolean registrarPagoYComprobante(Pago pago, Comprobante comprobante);
     boolean tienePago(int idCita);
+    Integer obtenerEstadoCita(int idCita);
+    java.util.Set<Integer> citasPagadas();
     Pago obtenerPagoPorCita(int idCita);
     Comprobante obtenerComprobantePorCita(int idCita);
     Comprobante obtenerComprobantePorPago(int idPago);

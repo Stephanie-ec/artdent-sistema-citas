@@ -52,6 +52,7 @@
         </li>
 
         <% if (userRol.equalsIgnoreCase("Secretaria") || userRol.equalsIgnoreCase("Administrador")) { %>
+        <li><a class="nav-link text-white" href="PagoManualController">Pagos Yape / Plin y devoluciones</a></li><li><a class="nav-link text-white" href="CorreoController">Entregas de correo</a></li>
         <li class="nav-item">
             <a class="nav-link text-white d-flex align-items-center <%= "formPresencial".equals(activePage) ? "active bg-brand-accent" : "" %>" 
                href="CitaController?accion=formPresencial">
