@@ -61,3 +61,76 @@ jobs:
         with:
           name: artdent-war
           path: target/*.war
+
+  recorrido:
+    needs: build
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: artdent-ci
+          MYSQL_ROOT_HOST: '%'
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          package-manager-cache: false
+
+      - name: Cargar la base de datos completa
+        run: docker exec -i -e MYSQL_PWD=artdent-ci "${{ job.services.mysql.id }}" mysql --default-character-set=utf8mb4 -uroot < src/main/java/pe/edu/utp/bd/db_artdent_apf2_completo.sql
+
+      - name: Configuracion local para la prueba
+        run: |
+          mkdir -p /tmp/comprobantes
+          cat > src/main/resources/config.properties <<'CFG'
+          db.url=jdbc:mysql://127.0.0.1:3306/db_artdent_apf2?serverTimezone=America/Lima&useUnicode=true&characterEncoding=UTF-8
+          db.user=root
+          db.password=artdent-ci
+          mail.enabled=false
+          gemini.enabled=false
+          reniec.mode=demo
+          pagos.titular=ART DENT SAC
+          pagos.numero=999999999
+          pagos.adjuntos.dir=/tmp/comprobantes
+          CFG
+
+      - name: Levantar Jetty
+        run: |
+          nohup mvn -B -DskipTests jetty:run > jetty.log 2>&1 &
+          for i in $(seq 1 60); do curl -sf http://localhost:8080/ArtDent/index.jsp >/dev/null && break; sleep 5; done
+          curl -sf http://localhost:8080/ArtDent/index.jsp >/dev/null || (tail -50 jetty.log; exit 1)
+
+      - name: Instalar Playwright
+        working-directory: e2e
+        run: |
+          npm install --no-audit --no-fund
+          npx playwright install --with-deps chromium
+
+      - name: Ejecutar el recorrido completo
+        working-directory: e2e
+        run: npm test
+
+      - name: Guardar capturas e informe
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: capturas-recorrido
+          path: |
+            e2e/capturas
+            e2e/informe
+            e2e/test-results
+            jetty.log

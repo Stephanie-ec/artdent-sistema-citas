@@ -9,3 +9,7 @@ target/
 .project
 .classpath
 src/main/temp/comprobantes/
+e2e/node_modules/
+e2e/capturas/
+e2e/informe/
+e2e/test-results/
