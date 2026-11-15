@@ -8,7 +8,7 @@ module.exports = defineConfig({
   workers: 1,
   reporter: [['list'], ['html', { open: 'never', outputFolder: 'informe' }]],
   use: {
-    baseURL: process.env.ARTDENT_URL || 'http://localhost:8080/ArtDent',
+    baseURL: process.env.ARTDENT_URL || 'http://localhost:8080/ArtDent/',
     locale: 'es-PE',
     timezoneId: 'America/Lima',
     viewport: { width: 1280, height: 800 },

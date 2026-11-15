@@ -30,24 +30,24 @@ async function elegir(page, selector, texto) {
 }
 
 async function login(page, dni, clave) {
-  await page.goto('/iniciosesion.jsp');
+  await page.goto('iniciosesion.jsp');
   await page.fill('#document', dni);
   await page.fill('#password', clave);
   await page.click('button[type="submit"]');
 }
 async function salir(page) {
-  await page.goto('/CerrarSesionController');
+  await page.goto('CerrarSesionController');
 }
 
 test.describe.serial('Recorrido Art Dent', () => {
 
   test('1. Administrador crea un odontólogo y una secretaria', async ({ page }) => {
     await login(page, ADMIN.dni, ADMIN.clave);
-    await page.goto('/UsuarioController?action=list');
+    await page.goto('UsuarioController?action=list');
     await foto(page, 'admin-usuarios');
 
     for (const [u, rol, clave] of [[ODO, 'Odontologo', 'Odonto2026'], [SEC, 'Secretaria', SEC.clave]]) {
-      await page.goto('/UsuarioController?action=list');
+      await page.goto('UsuarioController?action=list');
       await page.fill('#nombre', u.nombre);
       await page.fill('#apellido', u.apellido);
       await page.fill('#dni', u.dni);
@@ -65,7 +65,7 @@ test.describe.serial('Recorrido Art Dent', () => {
 
   test('2. Administrador asigna horario y servicio al odontólogo nuevo', async ({ page }) => {
     await login(page, ADMIN.dni, ADMIN.clave);
-    await page.goto('/UsuarioController?action=disponibilidad');
+    await page.goto('UsuarioController?action=disponibilidad');
     await elegir(page, '#selectOdontologo', ODO.apellido);
     await page.waitForLoadState('networkidle');
     for (const cb of await page.locator('input[name="horarios"]').all()) await cb.check();
@@ -78,7 +78,7 @@ test.describe.serial('Recorrido Art Dent', () => {
   });
 
   test('3. Paciente reserva y ve al odontólogo nuevo', async ({ page }) => {
-    await page.goto('/ServicioController?action=formreservaa');
+    await page.goto('ServicioController?action=formreservaa');
     await page.fill('#nombre', PAC.nombre);
     await page.fill('#apellido', PAC.apellido);
     await page.fill('#dni', PAC.dni);
@@ -99,7 +99,7 @@ test.describe.serial('Recorrido Art Dent', () => {
 
   test('4. Paciente envía su comprobante Yape/Plin', async ({ page, context }) => {
     // Misma sesión del navegador: la reserva es "propia"
-    await page.goto('/ServicioController?action=formreservaa');
+    await page.goto('ServicioController?action=formreservaa');
     await page.fill('#nombre', PAC.nombre); await page.fill('#apellido', PAC.apellido); await page.fill('#dni', PAC.dni);
     await page.fill('#telefono', PAC.telefono); await page.fill('#correo', PAC.correo);
     await elegir(page, '#motivo', 'Limpieza');
@@ -133,7 +133,7 @@ test.describe.serial('Recorrido Art Dent', () => {
 
   test('5. Secretaria nueva verifica el pago y aprueba la reserva', async ({ page }) => {
     await login(page, SEC.dni, SEC.clave);
-    await page.goto('/PagoManualController');
+    await page.goto('PagoManualController');
     await foto(page, 'secretaria-pagos-pendientes');
     const fila = page.locator('form:has(button:has-text("Aprobar pago"))').first();
     await fila.locator('input[name="verificado"]').check();
@@ -141,7 +141,7 @@ test.describe.serial('Recorrido Art Dent', () => {
     await expect(page.locator('.alert-success')).toBeVisible();
     await foto(page, 'secretaria-pago-aprobado');
 
-    await page.goto('/ReservaController?accion=listar');
+    await page.goto('ReservaController?accion=listar');
     const tr = page.locator('tr', { hasText: PAC.apellido }).first();
     await expect(tr).toBeVisible();
     await foto(page, 'secretaria-solicitudes');
@@ -152,7 +152,7 @@ test.describe.serial('Recorrido Art Dent', () => {
   });
 
   test('6. Paciente consulta "Mi reserva" y ve su boleta', async ({ page }) => {
-    await page.goto('/consultareserva.jsp');
+    await page.goto('consultareserva.jsp');
     await page.fill('#codigo', codigoReserva);
     await page.fill('#dni', PAC.dni);
     await page.click('button[type="submit"]');
@@ -161,7 +161,7 @@ test.describe.serial('Recorrido Art Dent', () => {
   });
 
   test('7. DNI repetido con otro nombre: aviso inmediato', async ({ page }) => {
-    await page.goto('/ServicioController?action=formreservaa');
+    await page.goto('ServicioController?action=formreservaa');
     await page.fill('#nombre', 'Otro'); await page.fill('#apellido', 'Nombre Distinto');
     await page.fill('#dni', PAC.dni);
     await page.dispatchEvent('#dni', 'change');
@@ -172,7 +172,7 @@ test.describe.serial('Recorrido Art Dent', () => {
 
   test('8. Seguridad: la secretaria no entra al panel del administrador', async ({ page }) => {
     await login(page, SEC.dni, SEC.clave);
-    await page.goto('/ADMPUsuarios.jsp');
+    await page.goto('ADMPUsuarios.jsp');
     await expect(page.locator('body')).toContainText(/denegado/i);
     await foto(page, 'seguridad-acceso-denegado');
     await salir(page);
@@ -186,7 +186,7 @@ test.describe.serial('Recorrido Art Dent', () => {
   });
 
   test('10. Asistente virtual responde solo temas de la clínica', async ({ page }) => {
-    await page.goto('/index.jsp');
+    await page.goto('index.jsp');
     await page.click('#chatHeader');
     await page.fill('#pregunta', 'me duele la muela al tomar frío');
     await page.click('.chat-input button');
