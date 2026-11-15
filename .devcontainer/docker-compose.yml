@@ -1,0 +1,19 @@
+services:
+  app:
+    image: mcr.microsoft.com/devcontainers/java:1-17-bookworm
+    volumes:
+      - ..:/workspaces/artdent-sistema-citas:cached
+    command: sleep infinity
+    depends_on:
+      - db
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: artdent
+      MYSQL_ROOT_HOST: "%"
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --default-time-zone=-05:00
+    volumes:
+      - mysql-data:/var/lib/mysql
+volumes:
+  mysql-data:
