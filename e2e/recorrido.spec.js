@@ -48,6 +48,8 @@ test.describe.serial('Recorrido Art Dent', () => {
 
     for (const [u, rol, clave] of [[ODO, 'Odontologo', 'Odonto2026'], [SEC, 'Secretaria', SEC.clave]]) {
       await page.goto('UsuarioController?action=list');
+      await page.click('[data-bs-target="#addUserModal"]');
+      await expect(page.locator('#addUserModal #nombre')).toBeVisible();
       await page.fill('#nombre', u.nombre);
       await page.fill('#apellido', u.apellido);
       await page.fill('#dni', u.dni);
