@@ -22,7 +22,15 @@ public class ConfigLoader {
                 if (local != null) {
                     properties.load(new java.io.InputStreamReader(local, java.nio.charset.StandardCharsets.UTF_8));
                 } else {
-                    System.err.println("No se encontró config.properties ni la variable ARTDENT_CONFIG");
+                    // mvn jetty:run desde la carpeta del proyecto: el archivo está excluido del build
+                    java.nio.file.Path enProyecto = java.nio.file.Paths.get("src", "main", "resources", "config.properties");
+                    if (java.nio.file.Files.isRegularFile(enProyecto)) {
+                        try (InputStream f = java.nio.file.Files.newInputStream(enProyecto)) {
+                            properties.load(new java.io.InputStreamReader(f, java.nio.charset.StandardCharsets.UTF_8));
+                        }
+                    } else {
+                        System.err.println("No se encontró config.properties ni la variable ARTDENT_CONFIG");
+                    }
                 }
             } catch (IOException ex) {
                 System.err.println("Error al cargar config.properties: " + ex.getMessage());
