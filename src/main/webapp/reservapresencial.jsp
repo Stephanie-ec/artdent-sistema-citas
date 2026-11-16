@@ -249,6 +249,7 @@
         })();
     </script>
     <script src="${pageContext.request.contextPath}/js/validacion-campos.js"></script>
+<script src="${pageContext.request.contextPath}/js/verificar-dni.js"></script>
 <script src="${pageContext.request.contextPath}/js/horarios.js"></script>
 </body>
 </html>

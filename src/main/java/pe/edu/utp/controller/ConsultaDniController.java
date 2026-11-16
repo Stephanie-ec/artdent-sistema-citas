@@ -37,6 +37,14 @@ public class ConsultaDniController extends HttpServlet {
         }
 
         HttpSession sesion = request.getSession();
+
+        // Verificación temprana: ¿el DNI ya pertenece a otro paciente? (no revela datos a visitantes)
+        if ("1".equals(request.getParameter("verificar"))) {
+            response.getWriter().write(verificar(dni, request.getParameter("nombre"), request.getParameter("apellido"),
+                    sesion.getAttribute("TipoRol") != null).toString());
+            return;
+        }
+
         Integer usadas = (Integer) sesion.getAttribute("consultasDni");
         usadas = usadas == null ? 1 : usadas + 1;
         sesion.setAttribute("consultasDni", usadas);
@@ -76,6 +84,33 @@ public class ConsultaDniController extends HttpServlet {
                 json.add("estado", "ERROR").add("mensaje", "No se pudo verificar en RENIEC en este momento. Complete los datos manualmente.");
         }
         response.getWriter().write(json.build().toString());
+    }
+
+    /**
+     * NUEVO: el DNI no está registrado. COINCIDE: registrado con esos mismos nombres.
+     * NO_COINCIDE: registrado a nombre de otra persona (el personal ve el nombre; el visitante no).
+     */
+    static javax.json.JsonObject verificar(String dni, String nombre, String apellido, boolean esPersonal) {
+        JsonObjectBuilder json = Json.createObjectBuilder();
+        Paciente p = new PacienteDaoImpl().obtenerPacientePorDNI(dni);
+        if (p == null || p.getIdPaciente() <= 0) {
+            return json.add("estado", "NUEVO").add("mensaje", "").build();
+        }
+        boolean coincide = normalizar(p.getNombre()).equals(normalizar(nombre))
+                && normalizar(p.getApellido()).equals(normalizar(apellido));
+        if (coincide) {
+            return json.add("estado", "COINCIDE").add("mensaje", "DNI ya registrado en la clínica; se usará su ficha.").build();
+        }
+        String msg = esPersonal
+                ? "Este DNI ya está registrado a nombre de " + n(p.getNombre()) + " " + n(p.getApellido()) + ". Use la lupa para cargar sus datos o corrija el DNI."
+                : "Este DNI ya está registrado con otros nombres. Verifique su DNI; si es suyo, escriba sus nombres tal como están en su documento.";
+        return json.add("estado", "NO_COINCIDE").add("mensaje", msg).build();
+    }
+
+    private static String normalizar(String s) {
+        if (s == null) return "";
+        String t = java.text.Normalizer.normalize(s.trim().toLowerCase(java.util.Locale.ROOT), java.text.Normalizer.Form.NFD);
+        return t.replaceAll("\\p{M}", "").replaceAll("\\s+", " ");
     }
 
     private static String n(String s) {
