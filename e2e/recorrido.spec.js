@@ -144,10 +144,12 @@ test.describe.serial('Recorrido Art Dent', () => {
     await foto(page, 'secretaria-pago-aprobado');
 
     await page.goto('ReservaController?accion=listar');
-    const tr = page.locator('tr', { hasText: PAC.apellido }).first();
+    // La paciente tiene dos reservas (paso 3 sin pago, paso 4 pagada): se elige la que ya tiene pago
+    const tr = page.locator('tr', { hasText: PAC.apellido })
+      .filter({ has: page.locator('button[title="Aprobar reserva web verificada"]') }).first();
     await expect(tr).toBeVisible();
     await foto(page, 'secretaria-solicitudes');
-    await tr.locator('button[title*="Aprobar"]').click();
+    await tr.locator('button[title="Aprobar reserva web verificada"]').click();
     await expect(page.locator('body')).toContainText('aprobada');
     await foto(page, 'secretaria-reserva-aprobada');
     await salir(page);
@@ -157,8 +159,12 @@ test.describe.serial('Recorrido Art Dent', () => {
     await page.goto('consultareserva.jsp');
     await page.fill('#codigo', codigoReserva);
     await page.fill('#dni', PAC.dni);
-    await page.click('button[type="submit"]');
-    await expect(page.locator('body')).toContainText('B001');
+    await page.click('form[action="PagoController"] button[type="submit"]');
+    await expect(page.locator('body')).toContainText('Pagado');
+    await foto(page, 'paciente-mi-reserva');
+    // La boleta se abre desde el enlace de la consulta
+    await page.click('a:has-text("Ver / Descargar Boleta")');
+    await expect(page.locator('.boleta-numero')).toContainText('B001');
     await foto(page, 'paciente-boleta');
   });
 
