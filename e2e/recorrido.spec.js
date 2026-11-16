@@ -144,13 +144,12 @@ test.describe.serial('Recorrido Art Dent', () => {
     await foto(page, 'secretaria-pago-aprobado');
 
     await page.goto('ReservaController?accion=listar');
-    // La paciente tiene dos reservas (paso 3 sin pago, paso 4 pagada): se elige la que ya tiene pago
-    const tr = page.locator('tr', { hasText: PAC.apellido })
-      .filter({ has: page.locator('button[title="Aprobar reserva web verificada"]') }).first();
+    // Al aprobar el pago Yape/Plin el sistema confirma la reserva solo (PagoManualDao).
+    // La paciente tiene dos reservas (paso 3 sin pago, paso 4 pagada): se revisa la pagada.
+    const tr = page.locator('tr', { hasText: PAC.apellido }).filter({ hasText: 'Pagado' }).first();
     await expect(tr).toBeVisible();
-    await foto(page, 'secretaria-solicitudes');
-    await tr.locator('button[title="Aprobar reserva web verificada"]').click();
-    await expect(page.locator('body')).toContainText('aprobada');
+    await expect(tr).toContainText('Confirmado');
+    await expect(tr).toContainText('B001');
     await foto(page, 'secretaria-reserva-aprobada');
     await salir(page);
   });
