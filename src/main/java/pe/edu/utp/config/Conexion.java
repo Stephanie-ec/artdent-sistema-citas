@@ -32,11 +32,30 @@ public class Conexion {
         }
     }
 
+    /** R-14: métricas del pool para la página de estado (sin exponer credenciales). */
+    public static int poolActivas() {
+        try { return dataSource == null ? -1 : dataSource.getHikariPoolMXBean().getActiveConnections(); }
+        catch (RuntimeException e) { return -1; }
+    }
+
+    public static int poolInactivas() {
+        try { return dataSource == null ? -1 : dataSource.getHikariPoolMXBean().getIdleConnections(); }
+        catch (RuntimeException e) { return -1; }
+    }
+
+    public static int poolTotal() {
+        try { return dataSource == null ? -1 : dataSource.getHikariPoolMXBean().getTotalConnections(); }
+        catch (RuntimeException e) { return -1; }
+    }
+
     public static Connection getConection() {
         if(dataSource==null)throw new IllegalStateException("La base de datos no esta configurada o disponible.");
         try {
             return dataSource.getConnection();
         } catch (SQLException e) {
+            // R-15: la caída de la base queda registrada como evento ERROR (sin credenciales)
+            pe.edu.utp.utils.EventoService.error("Base de datos",
+                    "No se pudo obtener una conexión: " + e.getErrorCode() + " " + e.getSQLState());
             throw new IllegalStateException("No se pudo obtener una conexion a la base de datos.",e);
         }
     }

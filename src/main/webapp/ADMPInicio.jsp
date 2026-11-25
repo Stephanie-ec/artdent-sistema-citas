@@ -38,6 +38,16 @@
 
             <!-- Main Content -->
             <main class="col-md-9 ms-sm-auto col-lg-10 p-4">
+                <c:if test="${alertasPendientes > 0}">
+                    <div class="alert alert-danger d-flex align-items-center justify-content-between flex-wrap gap-2 shadow-sm" role="alert">
+                        <div>
+                            <i class="bi bi-bell-fill me-2"></i>
+                            <strong>${alertasPendientes} alerta(s) sin atender.</strong>
+                            Revise el registro de eventos y registre la acción tomada.
+                        </div>
+                        <a href="EventoController?pendientes=1" class="btn btn-sm btn-danger">Revisar eventos</a>
+                    </div>
+                </c:if>
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-3 mb-4 border-bottom">
                     <div>
                         <h2 class="h3 fw-bold mb-1" style="color: var(--artdent-primary);">

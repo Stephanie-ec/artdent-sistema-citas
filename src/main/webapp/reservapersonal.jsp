@@ -183,6 +183,16 @@
                             <input type="hidden" name="nombreServicio" id="nombreServicio">
                             <input type="hidden" name="descripcion" id="descripcion" value="Reserva Web - En espera">
 
+                            <!-- R-06: consentimiento de datos personales (Ley 29733) -->
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" value="on" id="consentimiento" name="consentimiento" required>
+                                <label class="form-check-label small text-muted" for="consentimiento">
+                                    Acepto el tratamiento de mis datos personales según la
+                                    <a href="politica-privacidad.jsp" target="_blank" rel="noopener">Política de privacidad</a>.
+                                    <span class="text-danger">*</span>
+                                </label>
+                            </div>
+
                             <!-- Botón de Envío -->
                             <div class="d-grid gap-2">
                                 <button type="submit" id="btnConfirmarReserva" class="btn btn-primary btn-lg py-3 fw-bold rounded-pill shadow">

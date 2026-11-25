@@ -159,6 +159,16 @@
                                         </div>
                                     </div>
 
+                                    <!-- R-06: consentimiento de datos personales (Ley 29733) -->
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" value="on" id="consentimiento" name="consentimiento" required>
+                                        <label class="form-check-label small text-muted" for="consentimiento">
+                                            El paciente acepta el tratamiento de sus datos personales según la
+                                            <a href="politica-privacidad.jsp" target="_blank" rel="noopener">Política de privacidad</a>.
+                                            <span class="text-danger">*</span>
+                                        </label>
+                                    </div>
+
                                     <div class="d-flex justify-content-end gap-2">
                                         <a href="ReservaController?accion=listarCitas" class="btn btn-outline-secondary px-4">
                                             Cancelar

@@ -53,6 +53,9 @@ public class GeneradorDeReporte {
                 case "Cancelado": // Cancelada
                     reporte.setReservasCanceladas(reporte.getReservasCanceladas() + 1);
                     break;
+                case "No asistió": // R-09
+                    reporte.setReservasNoAsistio(reporte.getReservasNoAsistio() + 1);
+                    break;
             }
             reporte.setTotalReservas(reporte.getTotalReservas() + 1);
             reportePorMes.put(mes, reporte);
@@ -80,6 +83,9 @@ public class GeneradorDeReporte {
                     break;
                 case "Cancelado": // Cancelada
                     reporte.setCitasCanceladas(reporte.getCitasCanceladas() + 1);
+                    break;
+                case "No asistió": // R-09
+                    reporte.setCitasNoAsistio(reporte.getCitasNoAsistio() + 1);
                     break;
 
             }
@@ -118,6 +124,9 @@ public class GeneradorDeReporte {
                 case "Cancelado": // Cancelada
                     reporte.setReservasCanceladas(reporte.getReservasCanceladas() + 1);
                     break;
+                case "No asistió": // R-09
+                    reporte.setReservasNoAsistio(reporte.getReservasNoAsistio() + 1);
+                    break;
             }
             reporte.setTotalReservas(reporte.getTotalReservas() + 1);
             reportePorMes.put(mes, reporte);
@@ -145,6 +154,9 @@ public class GeneradorDeReporte {
                     break;
                 case "Cancelado": // Cancelada
                     reporte.setCitasCanceladas(reporte.getCitasCanceladas() + 1);
+                    break;
+                case "No asistió": // R-09
+                    reporte.setCitasNoAsistio(reporte.getCitasNoAsistio() + 1);
                     break;
 
             }

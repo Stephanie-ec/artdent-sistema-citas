@@ -36,6 +36,10 @@ public final class ReniecService {
 
     private static final String URL_POR_DEFECTO = "https://api.decolecta.com/v1/reniec/dni?numero={dni}";
 
+    /** R-04: mensaje exacto cuando el proveedor no responde (la reserva web se detiene). */
+    public static final String MENSAJE_SIN_RESPUESTA =
+            "No pudimos validar su DNI en este momento; intente en unos minutos o llame a la clínica.";
+
     private ReniecService() {
     }
 
@@ -71,6 +75,8 @@ public final class ReniecService {
             }
             if (codigo != 200) {
                 System.err.println("[RENIEC] Respuesta HTTP " + codigo);
+                // R-15: el proveedor sin respuesta es un evento de advertencia
+                EventoService.advertencia("RENIEC", "El proveedor de identidad respondió HTTP " + codigo);
                 return new Resultado(Estado.ERROR, null, null);
             }
             String cuerpo;
@@ -94,6 +100,7 @@ public final class ReniecService {
             return new Resultado(Estado.ENCONTRADO, capitalizar(nombres), capitalizar((paterno + " " + materno).trim()));
         } catch (Exception e) {
             System.err.println("[RENIEC] No se pudo consultar: " + e.getMessage());
+            EventoService.advertencia("RENIEC", "No se pudo consultar el proveedor de identidad: " + e.getClass().getSimpleName());
             return new Resultado(Estado.ERROR, null, null);
         } finally {
             if (con != null) {
@@ -114,12 +121,17 @@ public final class ReniecService {
             return "El DNI ingresado no figura en RENIEC. Verifique el número.";
         }
         if (r.estado != Estado.ENCONTRADO) return "demo".equalsIgnoreCase(ConfigLoader.getProperty("reniec.mode"))
-                ? null : "No se pudo verificar su identidad en RENIEC. Intente nuevamente; no se guardaron los datos.";
+                ? null : MENSAJE_SIN_RESPUESTA;
         if (normalizar(nombre).isEmpty() || normalizar(apellido).isEmpty() || !normalizar(r.nombres).equals(normalizar(nombre))
                 || !normalizar(r.apellidos).equals(normalizar(apellido))) {
             return "El nombre o el apellido no coinciden con el DNI registrado en RENIEC.";
         }
         return null;
+    }
+
+    /** True cuando el problema es del proveedor y no del DNI del paciente. */
+    public static boolean esIndisponibilidad(String mensaje) {
+        return MENSAJE_SIN_RESPUESTA.equals(mensaje);
     }
 
     private static String texto(JsonObject o, String... claves) {

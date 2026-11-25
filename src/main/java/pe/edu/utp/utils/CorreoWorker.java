@@ -15,7 +15,17 @@ public class CorreoWorker implements ServletContextListener {
         ejecutor.scheduleWithFixedDelay(()->{
             try {
                 CorreoDao dao=new CorreoDao();Map<String,Object> fila=dao.tomar();
-                if(fila!=null)dao.resultado((Long)fila.get("id"),EmailService.sendEmail((String)fila.get("destino"),(String)fila.get("asunto"),(String)fila.get("mensaje")));
+                if(fila!=null){
+                    long id=(Long)fila.get("id");
+                    boolean entregado=EmailService.sendEmail((String)fila.get("destino"),(String)fila.get("asunto"),(String)fila.get("mensaje"));
+                    dao.resultado(id,entregado);
+                    if(entregado)dao.marcarNotificacionEnviada((Integer)fila.get("cita"),(String)fila.get("asunto"));
+                    // R-15: mientras queden reintentos es una advertencia; al agotarlos es un ERROR
+                    if(!entregado){
+                        if(dao.intentos(id)>=3)EventoService.error("Correo","El correo id "+id+" agoto los 3 intentos de entrega; revise la configuracion SMTP y la cola");
+                        else EventoService.advertencia("Correo","No se pudo entregar el correo id "+id+"; queda en cola para reintento");
+                    }
+                }
             } catch(java.sql.SQLException|RuntimeException e){Logger.getLogger(getClass().getName()).log(Level.WARNING,"No se pudo procesar la cola de correo; se conservará para reintento",e);}
         },5,5,TimeUnit.SECONDS);
     }

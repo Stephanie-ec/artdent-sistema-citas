@@ -1,6 +1,6 @@
 # Guía de Usuario y Documentación Funcional: RF09 - Notificaciones Automatizadas al Paciente
 
-> **Estado del proyecto (7/11/2026):** el correo externo/Gmail se retiró por decisión del usuario. RF09 se cumple con el **registro interno de notificaciones** (`Notificacion`/`CorreoPendiente`); `mail.enabled=false` y no se envían correos reales.
+> **Estado del proyecto (22/11/2026):** no se usa la cuenta personal de nadie. El envío sale por **Internet** a una cuenta gratuita de pruebas **Ethereal** (`smtp.ethereal.email:587`, STARTTLS): los mensajes se leen en <https://ethereal.email> y ya no dependen de un Mailpit local, así funcionan con la aplicación desplegada. El registro interno se conserva en `Notificacion`/`CorreoPendiente`. Para entrega real se cambia a un relay gratuito (Brevo) o al SMTP del dominio con las mismas claves (`docs/CORREO_EN_DESPLIEGUE.md`).
 
 ---
 

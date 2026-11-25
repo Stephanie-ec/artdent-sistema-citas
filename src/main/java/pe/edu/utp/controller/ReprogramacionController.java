@@ -49,7 +49,8 @@ public class ReprogramacionController extends HttpServlet {
     @Override protected void doPost(HttpServletRequest req,HttpServletResponse res) throws ServletException,IOException {
         req.setCharacterEncoding("UTF-8");
         String accion=req.getParameter("accion");
-        boolean completar="updateEstadoCompletado".equals(accion)||"updateEstadoCompletadoCita".equals(accion);
+        boolean completar="updateEstadoCompletado".equals(accion)||"updateEstadoCompletadoCita".equals(accion)
+                ||"updateEstadoNoAsistio".equals(accion)||"updateEstadoNoAsistioCita".equals(accion);
         if(!permitido(req,completar)) { res.sendError(403); return; }
         try {
             boolean web=accion!=null && !accion.endsWith("Cita") && !"UpdateCita".equals(accion);
@@ -63,7 +64,7 @@ public class ReprogramacionController extends HttpServlet {
                 if(invalido!=null) {error(req,res,400,invalido);return;}
                 gestion.reprogramar(id,fecha,hora,web);
                 msg="reprogramadoOk"; estado=4; asunto="Cita reprogramada";
-                mensaje="Su cita se ha reprogramado para "+fecha+" a las "+hora+".";
+                mensaje="Su cita se ha reprogramado.";
             } else if("deleteReserva".equals(accion)||"deleteCita".equals(accion)) {
                 gestion.eliminar(id,actor,web);
                 res.sendRedirect("ReservaController?accion="+(web?"listar":"listarCitas")+"&msg=eliminadoOk"); return;
@@ -76,6 +77,10 @@ public class ReprogramacionController extends HttpServlet {
                     case "updateEstadoCancelar": case "updateEstadoCanceladoCita":
                         estado=5; msg="canceladoOk"; asunto="Cita cancelada";
                         mensaje="Su cita ha sido cancelada. Si tiene un pago registrado, su devolucion queda pendiente de gestion por la clinica."; break;
+                    case "updateEstadoNoAsistio": case "updateEstadoNoAsistioCita":
+                        // R-09: la BD rechaza la marca antes de la hora de la cita
+                        estado=7; msg="noAsistioOk"; asunto="No asistió a su cita";
+                        mensaje="Registramos que no asistió a su cita. Si desea reprogramar, comuníquese con la clínica."; break;
                     case "rechazarReservaWeb":
                         estado=6; msg="rechazadoOk"; asunto="Reserva rechazada";
                         String motivo=req.getParameter("motivo");
@@ -86,6 +91,9 @@ public class ReprogramacionController extends HttpServlet {
                 // F-03: nunca se lee el parametro 'estado'; la BD decide sobre el registro bloqueado.
                 gestion.cambiarEstado(id,estado,actor,web);
             }
+            // R-02: el correo indica qué cita, cuándo y dónde
+            String detalle=gestion.detalle(id);
+            if(!detalle.isEmpty())mensaje=mensaje+"\n\n"+detalle;
             String correo=notificar(id,estado,asunto,mensaje);
             res.sendRedirect("ReservaController?accion="+(completar||estado==4?"listarReservasPorDia":web?"listar":"listarCitas")+"&msg="+msg+correo);
         } catch(NumberFormatException e) {error(req,res,400,"El identificador o la sesion no son validos. Vuelva a iniciar sesion.");}

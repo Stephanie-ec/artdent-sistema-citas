@@ -93,6 +93,44 @@ public class PagoDaoImpl implements PagoDao {
         }
     }
 
+    /** R-01: datos del paciente y costo vigente para el pago en línea. */
+    public Map<String, Object> datosCobro(int idCita) {
+        String sql = "SELECT CONCAT(p.Nombre,' ',p.Apellido) AS Paciente, p.DNI, p.Correo, s.TipoServicio, "
+                + "COALESCE(NULLIF(c.Importe,0),s.Costo) AS Costo, c.Estado_idEstado "
+                + "FROM Cita c JOIN Paciente p ON p.idPaciente=c.Paciente_idPaciente "
+                + "JOIN Servicio s ON s.idServicio=c.Servicio_idServicio WHERE c.idCita=?";
+        try (Connection conn = Conexion.getConection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, idCita);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) {
+                    return null;
+                }
+                Map<String, Object> r = new HashMap<>();
+                r.put("paciente", rs.getString("Paciente"));
+                r.put("dni", rs.getString("DNI"));
+                r.put("correo", rs.getString("Correo"));
+                r.put("servicio", rs.getString("TipoServicio"));
+                r.put("costo", rs.getBigDecimal("Costo"));
+                r.put("estado", rs.getInt("Estado_idEstado"));
+                return r;
+            }
+        } catch (SQLException e) {
+            throw new IllegalStateException("No se pudieron obtener los datos de cobro de la cita", e);
+        }
+    }
+
+    /** R-01: una reserva "en espera" pasa a confirmada cuando se cobra en línea. */
+    public void confirmarCitaPagada(int idCita) {
+        try (Connection conn = Conexion.getConection();
+             PreparedStatement ps = conn.prepareStatement(
+                     "UPDATE Cita SET Estado_idEstado=3 WHERE idCita=? AND Estado_idEstado=1")) {
+            ps.setInt(1, idCita);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new IllegalStateException("No se pudo confirmar la cita pagada", e);
+        }
+    }
+
     @Override
     public boolean tienePago(int idCita) {
         String sql = "SELECT idPago FROM Pago WHERE Cita_idCita = ?";

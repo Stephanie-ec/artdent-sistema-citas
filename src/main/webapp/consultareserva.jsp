@@ -18,7 +18,7 @@
     <main class="container py-5" style="max-width: 720px;">
         <div class="text-center mb-4">
             <h1 class="h3 fw-bold text-brand-dark">Consultar mi reserva</h1>
-            <p class="text-muted mb-0">Ingresa el código de tu reserva y tu DNI para ver su estado o volver a descargar tu boleta.</p>
+            <p class="text-muted mb-0">Ingresa el código de tu reserva y tu DNI para ver su estado o volver a descargar tu comprobante de pago.</p>
         </div>
 
         <c:if test="${param.error == 'datos'}">
@@ -28,7 +28,22 @@
             <div class="alert alert-danger">No encontramos una reserva con ese código y ese DNI. Revisa los datos.</div>
         </c:if>
         <c:if test="${param.error == 'permiso'}">
-            <div class="alert alert-info">Para proteger tus datos, la boleta solo se muestra después de verificar tu código y tu DNI.</div>
+            <div class="alert alert-info">Para proteger tus datos, el comprobante solo se muestra después de verificar tu código y tu DNI.</div>
+        </c:if>
+        <c:if test="${param.ok == 'cancelada'}">
+            <div class="alert alert-success">Su reserva fue cancelada. Si tenía un pago, la devolución queda pendiente con la clínica.</div>
+        </c:if>
+        <c:if test="${param.ok == 'reprogramada'}">
+            <div class="alert alert-success">Su cita fue reprogramada. Revise la nueva fecha y hora.</div>
+        </c:if>
+        <c:if test="${param.error == 'regla'}">
+            <div class="alert alert-warning"><c:out value="${param.detalle}"/></div>
+        </c:if>
+        <c:if test="${param.error == 'formato'}">
+            <div class="alert alert-warning">Indique una fecha (AAAA-MM-DD) y una hora válidas.</div>
+        </c:if>
+        <c:if test="${param.error == 'general'}">
+            <div class="alert alert-danger">No pudimos modificar la reserva en este momento. Intente nuevamente o llame a la clínica.</div>
         </c:if>
 
         <div class="card border-0 shadow-sm" style="border-radius: 16px;">
@@ -66,11 +81,11 @@
                         <c:when test="${reserva.pagado}">
                             <span class="badge bg-success mb-3">Pagado</span>
                             <c:choose>
-                                <c:when test="${reserva.boletaDisponible}"><a class="btn btn-outline-primary d-block" href="PagoController?action=verBoleta&amp;idCita=${reserva.idCita}">Ver / Descargar Boleta</a></c:when>
-                                <c:otherwise><p class="text-muted">El pago está registrado, pero no hay una boleta disponible. Comuníquese con la clínica; no vuelva a pagar.</p></c:otherwise>
+                                <c:when test="${reserva.boletaDisponible}"><a class="btn btn-outline-primary d-block" href="PagoController?action=verBoleta&amp;idCita=${reserva.idCita}">Ver / Descargar comprobante</a></c:when>
+                                <c:otherwise><p class="text-muted">El pago está registrado, pero no hay un comprobante disponible. Comuníquese con la clínica; no vuelva a pagar.</p></c:otherwise>
                             </c:choose>
                             <c:if test="${reserva.estadoId == 5 || reserva.estadoId == 6}">
-                                <div class="alert alert-warning mt-3" role="status">Su pago y boleta se conservan. <a href="PagoManualController?cita=${reserva.idCita}">Consultar estado de la devolución</a>.</div>
+                                <div class="alert alert-warning mt-3" role="status">Su pago y comprobante se conservan. <a href="PagoManualController?cita=${reserva.idCita}">Consultar estado de la devolución</a>.</div>
                             </c:if>
                         </c:when>
                         <c:when test="${reserva.estadoId != 5 && reserva.estadoId != 6}">
@@ -79,6 +94,34 @@
                         </c:when>
                         <c:otherwise><div class="alert alert-secondary mb-0">Esta cita está anulada y no admite pagos.</div></c:otherwise>
                     </c:choose>
+
+                    <c:if test="${reserva.estadoId == 1 || reserva.estadoId == 3 || reserva.estadoId == 4}">
+                        <hr class="my-4">
+                        <h6 class="fw-bold">¿No puedes asistir?</h6>
+                        <p class="text-muted small">Puedes cancelar o reprogramar hasta 24 horas antes de tu cita. Con menos tiempo, comunícate con la clínica.</p>
+                        <form action="MiReserva" method="post" class="d-inline" onsubmit="return confirm('¿Cancelar esta reserva?');">
+                            <input type="hidden" name="formToken" value="${formToken}">
+                            <input type="hidden" name="accion" value="cancelar">
+                            <input type="hidden" name="idCita" value="${reserva.idCita}">
+                            <button type="submit" class="btn btn-outline-danger">Cancelar mi cita</button>
+                        </form>
+                        <form action="MiReserva" method="post" class="row g-2 mt-3">
+                            <input type="hidden" name="formToken" value="${formToken}">
+                            <input type="hidden" name="accion" value="reprogramar">
+                            <input type="hidden" name="idCita" value="${reserva.idCita}">
+                            <div class="col-12 col-md-5">
+                                <label class="form-label small mb-1" for="nuevaFecha">Nueva fecha</label>
+                                <input type="date" class="form-control" id="nuevaFecha" name="fecha" required>
+                            </div>
+                            <div class="col-12 col-md-4">
+                                <label class="form-label small mb-1" for="nuevaHora">Nueva hora</label>
+                                <input type="time" class="form-control" id="nuevaHora" name="hora" min="08:00" max="18:30" required>
+                            </div>
+                            <div class="col-12 col-md-3 d-flex align-items-end">
+                                <button type="submit" class="btn btn-outline-primary w-100">Reprogramar</button>
+                            </div>
+                        </form>
+                    </c:if>
 
                 </div>
             </div>

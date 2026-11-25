@@ -64,6 +64,8 @@ public class PagoController extends HttpServlet {
             int idCita = Integer.parseInt(request.getParameter("idCita"));
             Integer estado=pagoDao.obtenerEstadoCita(idCita);
             if(estado==null||estado==5||estado==6) {
+                // R-15: un pago rechazado por estado no válido queda registrado
+                pe.edu.utp.utils.EventoService.advertencia("Pagos", "Pago rechazado para la cita " + idCita + " (estado no permite cobro)");
                 response.setStatus(409);request.setAttribute("error","No se puede pagar una cita cancelada, rechazada o inexistente.");
                 request.getRequestDispatcher("error.jsp").forward(request,response);return;
             }
@@ -180,6 +182,9 @@ public class PagoController extends HttpServlet {
             return;
         }
         permitirCita(request, idCita);
+        // R-10: el DNI validado queda en sesión; el formulario no lo puede alterar
+        request.getSession().setAttribute("reservaDni:" + idCita, dni);
+        request.setAttribute("formToken", pe.edu.utp.utils.FormToken.obtener(request));
 
         request.setAttribute("reserva", r);
         request.setAttribute("codigo", String.format("ART-RES-%05d", idCita));

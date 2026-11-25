@@ -90,7 +90,7 @@
                 &copy; <%= java.time.Year.now().getValue() %> Centro Odontol&oacute;gico Art Dent. Todos los derechos reservados.
             </div>
             <div class="col-12 col-md-6 text-center text-md-end">
-                <a href="nosotros.jsp" class="text-white-50 text-decoration-none me-3">Privacidad</a>
+                <a href="politica-privacidad.jsp" class="text-white-50 text-decoration-none me-3">Privacidad</a>
                 <a href="nosotros.jsp" class="text-white-50 text-decoration-none me-3">Términos</a>
                 <a href="faq.jsp" class="text-white-50 text-decoration-none">Ayuda</a>
             </div>

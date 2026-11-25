@@ -127,6 +127,11 @@
                                             <td class="fw-semibold text-brand-dark">
                                                 <i class="bi bi-person-fill text-brand-primary me-1"></i>
                                                 ${p.nombre} ${p.apellido}
+                                                <c:if test="${not p.identidadVerificada}">
+                                                    <span class="badge bg-warning text-dark ms-1" title="RENIEC no respondió al registrar; revise el DNI físico">
+                                                        <i class="bi bi-shield-exclamation me-1"></i>Identidad por verificar
+                                                    </span>
+                                                </c:if>
                                             </td>
                                             <td class="text-center font-monospace">${p.telefono}</td>
                                             <td class="small text-muted">${p.correo}</td>

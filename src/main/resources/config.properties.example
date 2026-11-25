@@ -3,9 +3,22 @@ db.url=jdbc:mysql://localhost:3306/db_artdent_apf2?serverTimezone=America/Lima&u
 db.user=root
 db.password=tu_password_aqui
 
-# Correo externo deshabilitado por decisión del proyecto (sin Gmail).
-# Las notificaciones internas se guardan en la tabla CorreoPendiente/Notificacion.
+# R-02/R-03: correo por Internet (una app desplegada no alcanza un Mailpit local).
+# Demo sin datos personales: cuenta gratuita Ethereal (smtp.ethereal.email:587); los
+# mensajes se leen en https://ethereal.email, no se entregan al destinatario.
+# Entrega real gratis: relay de Brevo (smtp-relay.brevo.com:587, 300/dia) o Mailjet.
+# 465 usa SSL directo; 587 usa STARTTLS. mail.smtp.user solo si el relay lo pide.
+# Ver docs/CORREO_EN_DESPLIEGUE.md. Se puede sobrescribir con ARTDENT_MAIL_PASSWORD, etc.
 mail.enabled=false
+mail.sender=
+mail.from.name=Art Dent
+mail.smtp.user=
+mail.password=
+mail.smtp.host=smtp.ethereal.email
+mail.smtp.port=587
+mail.smtp.auth=true
+mail.smtp.starttls=true
+mail.smtp.ssl=false
 
 # Habilitar IA solo con una clave y un modelo admitido por la cuenta Gemini.
 gemini.enabled=false
@@ -21,5 +34,17 @@ reniec.mode=demo
 # Yape/Plin manual: complete los datos del negocio antes de usar la demo.
 pagos.titular=
 pagos.numero=
+# R-03: recordatorio de cita 24 h antes. Se activa con mail.enabled=true
+# o forzando esta clave para verificar la cola sin credenciales de correo.
+recordatorios.enabled=false
+
 # Ruta absoluta privada, fuera de src/main/webapp, target y del servidor web.
 pagos.adjuntos.dir=
+
+# R-01: pago en línea con Checkout Pro. Deje mp.enabled=false sin credenciales.
+mp.enabled=false
+mp.public.key=
+# Access Token de PRUEBA del panel de Mercado Pago (nunca en el frontend ni en el repositorio).
+mp.access.token=
+# URL absoluta del servidor para el retorno del checkout (https en producción).
+mp.base.url=http://localhost:8080/ArtDent

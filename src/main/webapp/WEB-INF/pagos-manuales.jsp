@@ -27,6 +27,16 @@
             <c:choose>
                 <c:when test="${permiteSolicitud}">
                     <p>Importe completo: S/ <strong><c:out value="${importePago}"/></strong>. La clínica verificará el movimiento antes de confirmar el pago.</p>
+                    <c:if test="${pagoEnLineaDisponible}">
+                        <div class="p-3 bg-white border rounded-3 mb-3">
+                            <h3 class="h6"><i class="bi bi-credit-card text-brand-primary me-1"></i>Pagar ahora con tarjeta</h3>
+                            <p class="small text-muted mb-2">Será redirigido al checkout seguro de Mercado Pago. El pago se registra automáticamente al aprobarse.</p>
+                            <form action="${pageContext.request.contextPath}/PagoEnLinea" method="post">
+                                <input type="hidden" name="accion" value="crear"><input type="hidden" name="cita" value="${citaPago}"><input type="hidden" name="formToken" value="${sessionScope.formToken}">
+                                <button class="btn btn-primary"><i class="bi bi-credit-card me-1"></i>Pagar S/ <c:out value="${importePago}"/> en línea</button>
+                            </form>
+                        </div>
+                    </c:if>
                     <c:choose>
                         <c:when test="${canalConfigurado}">
                             <p class="p-3 bg-brand-light rounded-3">Titular: <strong><c:out value="${titularPago}"/></strong> · Número: <strong><c:out value="${numeroPago}"/></strong></p>
@@ -34,7 +44,7 @@
                                 <input type="hidden" name="accion" value="solicitar"><input type="hidden" name="cita" value="${citaPago}"><input type="hidden" name="formToken" value="${sessionScope.formToken}">
                                 <label class="form-label" for="canal">Canal</label><select class="form-select mb-2" name="canal" id="canal"><option value="YAPE">Yape</option><option value="PLIN">Plin</option></select>
                                 <label class="form-label" for="codigo">Código de operación</label><input class="form-control mb-2" name="codigo" id="codigo" required minlength="4" maxlength="40" pattern="[A-Za-z0-9-]{4,40}">
-                                <label class="form-label" for="nombre">Nombre del titular de la boleta</label><input class="form-control mb-2" name="nombre" id="nombre" required minlength="3" maxlength="100">
+                                <label class="form-label" for="nombre">Nombre del titular del comprobante</label><input class="form-control mb-2" name="nombre" id="nombre" required minlength="3" maxlength="100">
                                 <label class="form-label" for="dni">DNI del titular</label><input class="form-control mb-2" name="dni" id="dni" required pattern="[0-9]{8}" maxlength="8" inputmode="numeric">
                                 <label class="form-label" for="comprobante">Comprobante JPEG o PNG (máximo 5 MB y 12 megapíxeles)</label><input class="form-control mb-3" type="file" name="comprobante" id="comprobante" accept="image/png,image/jpeg" required>
                                 <button class="btn btn-primary"><i class="bi bi-upload me-1"></i>Enviar para verificación</button>

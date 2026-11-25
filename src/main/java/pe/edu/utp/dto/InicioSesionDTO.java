@@ -14,6 +14,7 @@ public class InicioSesionDTO {
     private String Apellido;
     private int Dni;
     private String TipoRol;
+    private boolean debeCambiarClave;
 
     public InicioSesionDTO() {
     }
@@ -64,6 +65,15 @@ public class InicioSesionDTO {
 
     public void setTipoRol(String TipoRol) {
         this.TipoRol = TipoRol;
+    }
+
+    /** R-08: true cuando el administrador restableció la clave y debe cambiarla. */
+    public boolean isDebeCambiarClave() {
+        return debeCambiarClave;
+    }
+
+    public void setDebeCambiarClave(boolean debeCambiarClave) {
+        this.debeCambiarClave = debeCambiarClave;
     }
     
     
