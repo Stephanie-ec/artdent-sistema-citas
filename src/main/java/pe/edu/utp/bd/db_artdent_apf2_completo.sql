@@ -67,6 +67,7 @@ CREATE TABLE Usuario (
   Activo            TINYINT(1) NOT NULL DEFAULT 1,
   IntentosFallidos  TINYINT NOT NULL DEFAULT 0,
   BloqueadoHasta    DATETIME NULL,
+  DebeCambiarClave  TINYINT(1) NOT NULL DEFAULT 0,  -- R-08: clave temporal pendiente de cambio
   Rol_idRol         INT NOT NULL,
   PRIMARY KEY (idUsuario),
   UNIQUE KEY DNI_UNIQUE (DNI),
@@ -109,6 +110,8 @@ CREATE TABLE Paciente (
   DNI        CHAR(8) NOT NULL,
   Telefono   CHAR(9) NOT NULL,
   Correo     VARCHAR(100) NOT NULL,
+  ConsentimientoFecha DATETIME NULL,   -- R-06: aceptación de la Política de privacidad (Ley 29733)
+  IdentidadVerificada TINYINT(1) NOT NULL DEFAULT 1, -- R-04: 0 = pendiente de revisar por secretaría
   PRIMARY KEY (idPaciente),
   UNIQUE KEY DNI_UNIQUE (DNI),
   CONSTRAINT chk_Paciente_DNI      CHECK (DNI REGEXP '^[0-9]{8}$'),
@@ -157,6 +160,7 @@ CREATE TABLE Pago (
   Cita_idCita         INT NOT NULL,
   PRIMARY KEY (idPago),
   UNIQUE KEY Cita_UNIQUE (Cita_idCita),
+  UNIQUE KEY CodigoTransaccion_UNIQUE (CodigoTransaccion), -- R-01: una operación del proveedor no se registra dos veces
   KEY fk_Pago_Metodo_idx (MetodoPago_idMetodo),
   CONSTRAINT chk_Pago_Monto CHECK (Monto > 0),
   CONSTRAINT fk_Pago_Metodo FOREIGN KEY (MetodoPago_idMetodo) REFERENCES MetodoPago (idMetodo),
@@ -190,6 +194,41 @@ CREATE TABLE Notificacion (
   KEY fk_Notif_Cita_idx (Cita_idCita),
   CONSTRAINT fk_Notif_Estado FOREIGN KEY (Estado_idEstado) REFERENCES Estado (idEstado),
   CONSTRAINT fk_Notif_Cita   FOREIGN KEY (Cita_idCita)     REFERENCES Cita (idCita)
+) ENGINE=InnoDB;
+
+-- R-11: feriados y vacaciones (toda la clínica o un odontólogo)
+CREATE TABLE IF NOT EXISTS BloqueoAgenda (
+  idBloqueo INT NOT NULL AUTO_INCREMENT,
+  Desde DATE NOT NULL,
+  Hasta DATE NOT NULL,
+  Usuario_idUsuario INT NULL,
+  Motivo VARCHAR(200) NOT NULL,
+  Actor_idUsuario INT NOT NULL,
+  Creado DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (idBloqueo),
+  KEY idx_Bloqueo_Fechas (Desde, Hasta),
+  KEY fk_Bloqueo_Usuario_idx (Usuario_idUsuario),
+  CONSTRAINT chk_Bloqueo_Fechas CHECK (Hasta >= Desde),
+  CONSTRAINT fk_Bloqueo_Usuario FOREIGN KEY (Usuario_idUsuario) REFERENCES Usuario (idUsuario),
+  CONSTRAINT fk_Bloqueo_Actor FOREIGN KEY (Actor_idUsuario) REFERENCES Usuario (idUsuario)
+) ENGINE=InnoDB;
+
+-- R-15: registro de eventos y alertas operativas (retención 90 días)
+CREATE TABLE Evento (
+  idEvento      INT NOT NULL AUTO_INCREMENT,
+  Fecha         DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  Nivel         VARCHAR(15) NOT NULL,          -- INFO / ADVERTENCIA / ERROR
+  Origen        VARCHAR(60) NOT NULL,
+  Mensaje       VARCHAR(500) NOT NULL,
+  Atendido      TINYINT(1) NOT NULL DEFAULT 0,
+  AtendidoPor   INT NULL,
+  FechaAtencion DATETIME NULL,
+  AccionTomada  VARCHAR(500) NULL,
+  PRIMARY KEY (idEvento),
+  KEY idx_Evento_Fecha (Fecha),
+  KEY idx_Evento_Nivel (Nivel, Atendido),
+  CONSTRAINT chk_Evento_Nivel CHECK (Nivel IN ('INFO','ADVERTENCIA','ERROR')),
+  CONSTRAINT fk_Evento_Usuario FOREIGN KEY (AtendidoPor) REFERENCES Usuario (idUsuario)
 ) ENGINE=InnoDB;
 
 -- ---------------------------------------------------------------------
@@ -234,11 +273,13 @@ INSERT INTO Estado (idEstado, TipoEstado) VALUES
   (3, 'Confirmado'),
   (4, 'Reprogramado'),
   (5, 'Cancelado'),
-  (6, 'Rechazado');
+  (6, 'Rechazado'),
+  (7, 'No asistió');   -- R-09
 
 INSERT INTO MetodoPago (idMetodo, NombreMetodo) VALUES 
   (1, 'En línea'), 
-  (2, 'Efectivo');
+  (2, 'Efectivo'),
+  (3, 'Mercado Pago');  -- R-01
 
 INSERT INTO Horario (idHorario, HoraInicio, HoraFinal, DiaSemana) VALUES
   (1, '08:00:00', '18:30:00', 'Lunes'),
@@ -1320,6 +1361,11 @@ BEGIN
   IF DAYOFWEEK(pDia)=1 THEN
     SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='No hay atencion los domingos.';
   END IF;
+  -- R-11: feriados y vacaciones bloquean la agenda del odontologo o de toda la clinica.
+  IF EXISTS(SELECT 1 FROM BloqueoAgenda b WHERE (b.Usuario_idUsuario IS NULL OR b.Usuario_idUsuario=pDoctor)
+    AND pDia BETWEEN b.Desde AND b.Hasta) THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='La agenda esta bloqueada para esa fecha.';
+  END IF;
   IF NOT EXISTS(SELECT 1 FROM Usuario_Horario uh JOIN Horario h ON h.idHorario=uh.Horario_idHorario
     JOIN Usuario_Servicio us ON us.idUsuario=uh.Usuario_idUsuario AND us.idServicio=pServicio
     JOIN Servicio se ON se.idServicio=us.idServicio AND se.Activo=1
@@ -1330,7 +1376,7 @@ BEGIN
   END IF;
   -- Lectura actual, no snapshot de REPEATABLE READ, despues de obtener el mutex.
   SELECT idCita INTO vConflicto FROM Cita WHERE Odontologo_idUsuario=pDoctor AND FechaCita=pDia
-    AND idCita<>pCita AND Estado_idEstado NOT IN(5,6)
+    AND idCita<>pCita AND Estado_idEstado NOT IN(5,6,7)
     AND HoraCita<ADDTIME(pHora,'00:45:00') AND ADDTIME(HoraCita,'00:45:00')>pHora
     LIMIT 1 FOR UPDATE;
   IF vConflicto IS NOT NULL THEN
@@ -1380,13 +1426,21 @@ CREATE PROCEDURE sp_artdent_cambiarEstado(IN pCita INT, IN pDestino INT, IN pAct
 BEGIN
   DECLARE vEstado INT DEFAULT NULL; DECLARE vOrigen VARCHAR(15);
   DECLARE vRol INT DEFAULT NULL; DECLARE vPago INT DEFAULT NULL;
+  DECLARE vDoctor INT DEFAULT NULL; DECLARE vInicio DATETIME DEFAULT NULL;
   DECLARE EXIT HANDLER FOR SQLEXCEPTION BEGIN ROLLBACK; RESIGNAL; END;
   START TRANSACTION;
-  SELECT Estado_idEstado,Origen INTO vEstado,vOrigen FROM Cita WHERE idCita=pCita FOR UPDATE;
+  SELECT Estado_idEstado,Origen,Odontologo_idUsuario,TIMESTAMP(FechaCita,HoraCita)
+    INTO vEstado,vOrigen,vDoctor,vInicio FROM Cita WHERE idCita=pCita FOR UPDATE;
   SELECT Rol_idRol INTO vRol FROM Usuario WHERE idUsuario=pActor AND Activo=1;
   IF vEstado IS NULL OR vOrigen<>pOrigen THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='La cita no existe.'; END IF;
   IF pDestino=2 THEN
     SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Registre la ficha clinica para finalizar la atencion.';
+  ELSEIF pDestino=7 THEN
+    -- R-09: inasistencia solo despues de la hora y por secretaria, administrador o el titular.
+    IF vRol IS NULL OR vRol NOT IN(1,2,3) THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Su rol no permite esta operacion.'; END IF;
+    IF vRol=3 AND vDoctor<>pActor THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Solo el odontologo de la cita puede marcar la inasistencia.'; END IF;
+    IF vEstado NOT IN(3,4) THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Solo se marca inasistencia de citas confirmadas o reprogramadas.'; END IF;
+    IF vInicio>(UTC_TIMESTAMP()-INTERVAL 5 HOUR) THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Solo se marca la inasistencia despues de la hora de la cita.'; END IF;
   ELSE
     IF vRol IS NULL OR vRol NOT IN(1,2) THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Su rol no permite esta operacion.'; END IF;
     IF (pDestino=3 AND vEstado<>1) OR (pDestino IN(5,6) AND vEstado NOT IN(1,3,4))
@@ -1402,6 +1456,9 @@ BEGIN
   IF pDestino IN(5,6) AND vPago IS NOT NULL THEN
     INSERT INTO Notificacion(Asunto,Enviado,Estado_idEstado,Cita_idCita)
       VALUES('Devolucion pendiente: contactar al paciente',0,pDestino,pCita);
+  ELSEIF pDestino=7 THEN
+    INSERT INTO Notificacion(Asunto,Enviado,Estado_idEstado,Cita_idCita)
+      VALUES('Paciente no asistio: contactar para reprogramar',0,7,pCita);
   END IF;
   COMMIT;
 END;;
@@ -1535,5 +1592,55 @@ BEGIN
    VALUES(pCita,TRIM(pDiagnostico),TRIM(pTratamiento),TRIM(pObservaciones),pActor);
  UPDATE Cita SET Estado_idEstado=2 WHERE idCita=pCita;
  COMMIT;
+END;;
+
+-- R-10: el paciente cancela o reprograma desde "Mi reserva" (valida DNI y 24 horas).
+DROP PROCEDURE IF EXISTS `sp_artdent_cancelarReservaPaciente`;;
+CREATE PROCEDURE sp_artdent_cancelarReservaPaciente(IN pCita INT, IN pDni CHAR(8))
+BEGIN
+  DECLARE vEstado INT DEFAULT NULL; DECLARE vInicio DATETIME; DECLARE vDni CHAR(8);
+  DECLARE vPago INT DEFAULT NULL;
+  DECLARE EXIT HANDLER FOR SQLEXCEPTION BEGIN ROLLBACK; RESIGNAL; END;
+  START TRANSACTION;
+  SELECT c.Estado_idEstado,TIMESTAMP(c.FechaCita,c.HoraCita),p.DNI
+    INTO vEstado,vInicio,vDni
+    FROM Cita c JOIN Paciente p ON p.idPaciente=c.Paciente_idPaciente
+    WHERE c.idCita=pCita AND c.Origen='Web' FOR UPDATE;
+  IF vEstado IS NULL OR vDni<>pDni THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='La reserva no existe.'; END IF;
+  IF vEstado NOT IN(1,3,4) THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Esta reserva ya no se puede cancelar.'; END IF;
+  IF vInicio < DATE_ADD(UTC_TIMESTAMP()-INTERVAL 5 HOUR, INTERVAL 24 HOUR) THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Comuniquese con la clinica: faltan menos de 24 horas para su cita.';
+  END IF;
+  SELECT idPago INTO vPago FROM Pago WHERE Cita_idCita=pCita LIMIT 1 FOR UPDATE;
+  UPDATE Cita SET Estado_idEstado=5 WHERE idCita=pCita;
+  INSERT INTO Notificacion(Asunto,Enviado,Estado_idEstado,Cita_idCita)
+    VALUES('Reserva cancelada por el paciente',0,5,pCita);
+  IF vPago IS NOT NULL THEN
+    INSERT IGNORE INTO Devolucion(Pago_idPago) VALUES(vPago);
+    INSERT INTO Notificacion(Asunto,Enviado,Estado_idEstado,Cita_idCita)
+      VALUES('Devolucion pendiente: contactar al paciente',0,5,pCita);
+  END IF;
+  COMMIT;
+END;;
+
+DROP PROCEDURE IF EXISTS `sp_artdent_reprogramarReservaPaciente`;;
+CREATE PROCEDURE sp_artdent_reprogramarReservaPaciente(IN pCita INT, IN pDni CHAR(8), IN pDia DATE, IN pHora TIME)
+BEGIN
+  DECLARE vEstado INT DEFAULT NULL; DECLARE vInicio DATETIME; DECLARE vDni CHAR(8);
+  DECLARE vDoctor INT; DECLARE vServicio INT;
+  DECLARE EXIT HANDLER FOR SQLEXCEPTION BEGIN ROLLBACK; RESIGNAL; END;
+  START TRANSACTION;
+  SELECT c.Estado_idEstado,TIMESTAMP(c.FechaCita,c.HoraCita),p.DNI,c.Odontologo_idUsuario,c.Servicio_idServicio
+    INTO vEstado,vInicio,vDni,vDoctor,vServicio
+    FROM Cita c JOIN Paciente p ON p.idPaciente=c.Paciente_idPaciente
+    WHERE c.idCita=pCita AND c.Origen='Web' FOR UPDATE;
+  IF vEstado IS NULL OR vDni<>pDni THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='La reserva no existe.'; END IF;
+  IF vEstado NOT IN(1,3,4) THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Esta reserva ya no se puede reprogramar.'; END IF;
+  IF vInicio < DATE_ADD(UTC_TIMESTAMP()-INTERVAL 5 HOUR, INTERVAL 24 HOUR) THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Comuniquese con la clinica: faltan menos de 24 horas para su cita.';
+  END IF;
+  CALL sp_artdent_validarAgenda(pCita,vDoctor,vServicio,pDia,pHora);
+  UPDATE Cita SET FechaCita=pDia,HoraCita=pHora,Estado_idEstado=IF(vEstado=1,1,4) WHERE idCita=pCita;
+  COMMIT;
 END;;
 DELIMITER ;

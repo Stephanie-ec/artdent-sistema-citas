@@ -28,6 +28,7 @@ public class PacienteDaoImpl implements PacienteDao {
                     paciente.setDni(rs.getInt("DNI"));
                     paciente.setTelefono(rs.getInt("Telefono"));
                     paciente.setCorreo(rs.getString("Correo"));
+                    paciente.setIdentidadVerificada(rs.getBoolean("IdentidadVerificada"));
                 }
             }
         } catch (SQLException e) {
@@ -52,6 +53,7 @@ public class PacienteDaoImpl implements PacienteDao {
                     paciente.setDni(rs.getInt("DNI"));
                     paciente.setTelefono(rs.getInt("Telefono"));
                     paciente.setCorreo(rs.getString("Correo"));
+                    paciente.setIdentidadVerificada(rs.getBoolean("IdentidadVerificada"));
                 }
             }
         } catch (SQLException e) {
@@ -75,6 +77,7 @@ public class PacienteDaoImpl implements PacienteDao {
                 p.setDni(rs.getInt("DNI"));
                 p.setTelefono(rs.getInt("Telefono"));
                 p.setCorreo(rs.getString("Correo"));
+                p.setIdentidadVerificada(rs.getBoolean("IdentidadVerificada"));
                 lista.add(p);
             }
         } catch (SQLException e) {
@@ -102,6 +105,7 @@ public class PacienteDaoImpl implements PacienteDao {
                     p.setDni(rs.getInt("DNI"));
                     p.setTelefono(rs.getInt("Telefono"));
                     p.setCorreo(rs.getString("Correo"));
+                    p.setIdentidadVerificada(rs.getBoolean("IdentidadVerificada"));
                     lista.add(p);
                 }
             }
@@ -124,6 +128,32 @@ public class PacienteDaoImpl implements PacienteDao {
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             System.out.println("Error al registrar paciente: " + e.getMessage());
+            return false;
+        }
+    }
+
+    @Override
+    public boolean marcarIdentidadPorVerificar(int dni) {
+        String SQL = "UPDATE Paciente SET IdentidadVerificada = 0 WHERE DNI = ?";
+        try (Connection cx = Conexion.getConection();
+             PreparedStatement ps = cx.prepareStatement(SQL)) {
+            ps.setString(1, String.format("%08d", dni));
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.out.println("Error al marcar la identidad por verificar: " + e.getMessage());
+            return false;
+        }
+    }
+
+    @Override
+    public boolean registrarConsentimiento(int dni) {
+        String SQL = "UPDATE Paciente SET ConsentimientoFecha = NOW() WHERE DNI = ?";
+        try (Connection cx = Conexion.getConection();
+             PreparedStatement ps = cx.prepareStatement(SQL)) {
+            ps.setString(1, String.format("%08d", dni));
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.out.println("Error al registrar el consentimiento del paciente: " + e.getMessage());
             return false;
         }
     }

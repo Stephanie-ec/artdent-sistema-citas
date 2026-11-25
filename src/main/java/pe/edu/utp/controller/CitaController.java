@@ -123,9 +123,25 @@ public class CitaController extends HttpServlet {
             errorValidacion = pe.edu.utp.utils.ReniecService.validarIdentidad(request.getParameter("dni").trim(),
                     request.getParameter("nombre"), request.getParameter("apellido"));
         }
+        // R-04: si RENIEC no responde, el registro presencial puede continuar marcado para revisión;
+        // la reserva web sí se detiene con el mensaje indicado.
+        boolean identidadPorVerificar = false;
+        if (errorValidacion != null && esPresencial && pe.edu.utp.utils.ReniecService.esIndisponibilidad(errorValidacion)) {
+            identidadPorVerificar = true;
+            pe.edu.utp.utils.EventoService.advertencia("RENIEC",
+                    "Registro presencial sin verificación de identidad: el paciente queda por revisar");
+            errorValidacion = null;
+        }
         if (errorValidacion != null) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             request.setAttribute("error", errorValidacion);
+            request.getRequestDispatcher("error.jsp").forward(request, response);
+            return;
+        }
+        // R-06 (Ley 29733): sin consentimiento no se registra ningún dato personal
+        if (!pe.edu.utp.utils.Consentimiento.aceptado(request.getParameter("consentimiento"))) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            request.setAttribute("error", pe.edu.utp.utils.Consentimiento.MENSAJE_OBLIGATORIO);
             request.getRequestDispatcher("error.jsp").forward(request, response);
             return;
         }
@@ -249,6 +265,13 @@ public class CitaController extends HttpServlet {
             }
             String codigoReserva = (idCitaGenerada > 0) ? String.format("ART-RES-%05d", idCitaGenerada) : "ART-RES-00001";
 
+            // R-06: la aceptación queda guardada con el paciente
+            new pe.edu.utp.daoImpl.PacienteDaoImpl().registrarConsentimiento(dni);
+            // R-04: identidad pendiente de revisión por la secretaría
+            if (identidadPorVerificar) {
+                new pe.edu.utp.daoImpl.PacienteDaoImpl().marcarIdentidadPorVerificar(dni);
+            }
+
             // RF03 / RF09: Registrar notificación de cita presencial
             if (idCitaGenerada > 0) {
                 NotificacionService.notificar(idCitaGenerada, 3, "Cita Presencial Confirmada", correo,
@@ -256,7 +279,8 @@ public class CitaController extends HttpServlet {
                         "Su cita presencial ha sido registrada con éxito en el Centro Odontológico ArtDent.\n" +
                         "Código de Cita: " + codigoReserva + "\n" +
                         "Fecha: " + fecha + "\n" +
-                        "Hora: " + hora + "\n\n" +
+                        "Hora: " + hora + "\n" +
+                        "Sede: Jr. Chiclayo 268, Chosica\n\n" +
                         "Gracias por su preferencia.");
             }
 
@@ -276,6 +300,9 @@ public class CitaController extends HttpServlet {
             return;
         }
         String codigoReserva = (idCitaGenerada > 0) ? String.format("ART-RES-%05d", idCitaGenerada) : "ART-RES-00001";
+
+        // R-06: la aceptación queda guardada con el paciente
+        new pe.edu.utp.daoImpl.PacienteDaoImpl().registrarConsentimiento(dni);
 
         // Obtener nombre del servicio y del odontólogo para el voucher
         String nombreServicio = servicioSel.getTipoServicio();

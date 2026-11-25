@@ -36,6 +36,10 @@ public class ReporteController extends HttpServlet {
         String rol = (ss != null && ss.getAttribute("TipoRol") != null) ? ss.getAttribute("TipoRol").toString() : "";
 
         try {
+            if ("csv".equals(accion)) {
+                exportarCsv(request, response);
+                return;
+            }
             if ("reportead".equals(accion) || (accion == null && rol.equalsIgnoreCase("Administrador"))) {
                 generarReporteMensualAdmin(request, response);
             } else if ("reporte".equals(accion) || (accion == null && rol.equalsIgnoreCase("Secretaria"))) {
@@ -69,6 +73,46 @@ public class ReporteController extends HttpServlet {
         request.setAttribute("kpiCompletadas", totalCompletadas);
         request.setAttribute("kpiCanceladas", totalCanceladas);
         request.setAttribute("kpiTotal", totalCitasGeneral);
+    }
+
+    /** R-12: CSV UTF-8 con BOM (Excel), mismos totales que la pantalla. Solo Administrador. */
+    private void exportarCsv(HttpServletRequest request, HttpServletResponse response)
+            throws SQLException, IOException {
+        List<ReporteMensual> filas = generadorDeReporte.generarReporteAd();
+        response.setContentType("text/csv;charset=UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setHeader("Content-Disposition", "attachment; filename=\"reportes_artdent.csv\"");
+        response.setHeader("Cache-Control", "no-store");
+        response.getWriter().write(construirCsv(filas));
+    }
+
+    /** R-12: contenido separable para poder probarlo sin navegador. */
+    static String construirCsv(List<ReporteMensual> filas) {
+        StringBuilder csv = new StringBuilder("\uFEFF");
+        csv.append("Mes;Ingresos (S/);Citas completadas;Citas canceladas;Citas no asistio;"
+                + "Reservas completadas;Reservas canceladas;Reservas no asistio;Total citas;Total reservas\r\n");
+        java.math.BigDecimal ingresos = java.math.BigDecimal.ZERO;
+        int completadas = 0, canceladas = 0, noAsistio = 0, total = 0;
+        for (ReporteMensual f : filas) {
+            csv.append('"').append(f.getMes()).append('"').append(';')
+               .append(f.getTotalIngresos()).append(';')
+               .append(f.getCitasCompletadas()).append(';')
+               .append(f.getCitasCanceladas()).append(';')
+               .append(f.getCitasNoAsistio()).append(';')
+               .append(f.getReservasCompletadas()).append(';')
+               .append(f.getReservasCanceladas()).append(';')
+               .append(f.getReservasNoAsistio()).append(';')
+               .append(f.getTotalCitas()).append(';')
+               .append(f.getTotalReservas()).append("\r\n");
+            ingresos = ingresos.add(f.getTotalIngresos());
+            completadas += f.getCitasCompletadas() + f.getReservasCompletadas();
+            canceladas += f.getCitasCanceladas() + f.getReservasCanceladas();
+            noAsistio += f.getCitasNoAsistio() + f.getReservasNoAsistio();
+            total += f.getTotalCitas() + f.getTotalReservas();
+        }
+        csv.append("TOTAL;").append(ingresos).append(';').append(completadas).append(';')
+           .append(canceladas).append(';').append(noAsistio).append(";;;").append(total).append(";\r\n");
+        return csv.toString();
     }
 
     private void generarReporteMensual(HttpServletRequest request, HttpServletResponse response)

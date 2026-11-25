@@ -19,6 +19,12 @@ public interface UsuarioDao {
 
     boolean resetearBloqueo(int idUsuario);
 
+    /** R-08: cambia la clave del propio usuario y retira la obligación de cambiarla. */
+    boolean cambiarClave(int idUsuario, String nuevoHash);
+
+    /** R-08: deja una clave temporal y obliga al cambio en el siguiente ingreso. */
+    boolean restablecerClaveTemporal(int idUsuario, String hashTemporal);
+
     List<Usuario> obtenerMedicosDisponibles();
 
     List<Usuario> obtenerMedicosPorServicioYDisponibilidad(int idServicio, LocalDate fechaConv, LocalTime horaObj);

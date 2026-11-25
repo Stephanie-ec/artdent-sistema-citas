@@ -1,5 +1,14 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%-- R-15: los errores no controlados (5xx) quedan en la tabla Evento, sin datos personales ni trazas --%>
+<%
+    Object estadoError = request.getAttribute("javax.servlet.error.status_code");
+    if (estadoError instanceof Integer && ((Integer) estadoError) >= 500) {
+        Object uriError = request.getAttribute("javax.servlet.error.request_uri");
+        pe.edu.utp.utils.EventoService.error("Interfaz", "Error " + estadoError + " al procesar "
+                + (uriError == null ? "una solicitud" : uriError));
+    }
+%>
 <!DOCTYPE html>
 <html lang="es">
     <head>

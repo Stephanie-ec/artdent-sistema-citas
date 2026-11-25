@@ -65,6 +65,7 @@ public abstract class DbFixture {
             s.executeUpdate("DELETE FROM Comprobante WHERE Pago_idPago IN (SELECT idPago FROM Pago WHERE Cita_idCita IN (" + ids + "))");
             s.executeUpdate("DELETE FROM Pago WHERE Cita_idCita IN (" + ids + ")");
             s.executeUpdate("DELETE FROM Notificacion WHERE Cita_idCita IN (" + ids + ")");
+            s.executeUpdate("DELETE FROM BloqueoAgenda WHERE Usuario_idUsuario=" + doctor);
             s.executeUpdate("DELETE FROM Cita WHERE Odontologo_idUsuario=" + doctor);
             s.executeUpdate("DELETE FROM Usuario_Horario WHERE Usuario_idUsuario=" + doctor);
             s.executeUpdate("DELETE FROM Usuario_Servicio WHERE idUsuario=" + doctor);

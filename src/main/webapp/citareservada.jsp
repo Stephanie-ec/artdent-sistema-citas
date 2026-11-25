@@ -82,7 +82,7 @@
                                 <c:out value="${sessionScope.reservaCodigo}"/>
                             </span>
                             <small class="d-block text-muted mt-2">
-                                Guarda este código: con él y tu DNI puedes ver tu reserva y descargar tu boleta en <strong>Mi reserva</strong>.
+                                Guarda este código: con él y tu DNI puedes ver tu reserva y descargar tu comprobante de pago en <strong>Mi reserva</strong>.
                             </small>
                         </div>
 
@@ -145,6 +145,14 @@
                             <span class="fs-3 fw-bold text-brand-primary">S/ <c:out value="${sessionScope.reservaPrecio}"/></span>
                             <div class="mt-3 no-print">
                                 <a class="btn btn-success" href="PagoManualController?cita=${sessionScope.reservaIdCita}">Enviar comprobante Yape / Plin</a>
+                                <% if (pe.edu.utp.utils.MercadoPagoService.habilitado()) { %>
+                                <form action="${pageContext.request.contextPath}/PagoEnLinea" method="post" class="d-inline mt-2">
+                                    <input type="hidden" name="accion" value="crear">
+                                    <input type="hidden" name="cita" value="${sessionScope.reservaIdCita}">
+                                    <input type="hidden" name="formToken" value="<%= pe.edu.utp.utils.FormToken.obtener(request) %>">
+                                    <button type="submit" class="btn btn-primary"><i class="bi bi-credit-card me-1"></i>Pagar con tarjeta (Mercado Pago)</button>
+                                </form>
+                                <% } %>
                                 <small class="text-muted d-block mt-2">
                                     <i class="bi bi-cash-coin text-brand-accent me-1"></i> También puedes abonar en ventanilla física al acudir a tu cita.
                                 </small>
@@ -157,7 +165,7 @@
                                 <i class="bi bi-info-circle-fill text-brand-primary me-1"></i> Indicaciones para tu atención
                             </h6>
                             <p class="mb-1 small text-brand-dark">
-                                Tu reserva se encuentra <strong>En espera</strong> de verificación. Al efectuarse el pago (Yape/Plin o en caja presencial), se emitirá tu respectiva <strong>Boleta Electrónica (Serie B001)</strong>.
+                                Tu reserva se encuentra <strong>En espera</strong> de verificación. Al efectuarse el pago (Yape/Plin o en caja presencial), se emitirá tu respectivo <strong>Comprobante de pago (Serie B001)</strong>.
                             </p>
                             <p class="mb-0 small text-muted">
                                 Te sugerimos acudir con 10 minutos de anticipación a la sede elegida portando tu documento de identidad.

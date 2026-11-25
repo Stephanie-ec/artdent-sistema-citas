@@ -1,6 +1,10 @@
 
 # Configuraciones y credenciales
 src/main/resources/config.properties
+# Variables de entorno: nunca se versionan (la plantilla sí)
+.env
+.env.*
+!.env.example
 target/
 *.class
 .idea/
@@ -13,3 +17,6 @@ e2e/node_modules/
 e2e/capturas/
 e2e/informe/
 e2e/test-results/
+
+# Datos privados: respaldos, claves y comprobantes (nunca al repositorio)
+datos-privados/

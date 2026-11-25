@@ -92,6 +92,7 @@ test.describe.serial('Recorrido Art Dent', () => {
     await page.selectOption('#hora', '10:00');
     await expect(page.locator('#medico option', { hasText: ODO.apellido })).toHaveCount(1, { timeout: 15000 });
     await elegir(page, '#medico', ODO.apellido);
+    await page.check('#consentimiento');
     await foto(page, 'paciente-reserva');
     await page.click('#btnConfirmarReserva');
     await expect(page.locator('body')).toContainText('ART-RES-');
@@ -109,6 +110,7 @@ test.describe.serial('Recorrido Art Dent', () => {
     await page.selectOption('#hora', '11:00');
     await expect(page.locator('#medico option', { hasText: ODO.apellido })).toHaveCount(1, { timeout: 15000 });
     await elegir(page, '#medico', ODO.apellido);
+    await page.check('#consentimiento');
     await page.click('#btnConfirmarReserva');
     await expect(page.locator('body')).toContainText('ART-RES-');
     codigoReserva = (await page.locator('body').innerText()).match(/ART-RES-\d{5}/)[0];
@@ -162,7 +164,7 @@ test.describe.serial('Recorrido Art Dent', () => {
     await expect(page.locator('body')).toContainText('Pagado');
     await foto(page, 'paciente-mi-reserva');
     // La boleta se abre desde el enlace de la consulta
-    await page.click('a:has-text("Ver / Descargar Boleta")');
+    await page.click('a:has-text("Ver / Descargar comprobante")');
     await expect(page.locator('.boleta-numero')).toContainText('B001');
     await foto(page, 'paciente-boleta');
   });
@@ -202,5 +204,55 @@ test.describe.serial('Recorrido Art Dent', () => {
     await page.click('.chat-input button');
     await expect(page.locator('#chat-body')).toContainText(/salud bucal|dental/i, { timeout: 20000 });
     await foto(page, 'asistente-virtual');
+  });
+
+  test('11. Monitoreo: /salud responde sin datos personales', async ({ request }) => {
+    const r = await request.get('salud');
+    expect(r.status()).toBe(200);
+    const cuerpo = await r.text();
+    expect(cuerpo).not.toMatch(/@|DNI|Paciente/i);
+  });
+
+  test('12. Administrador registra y elimina un bloqueo de agenda', async ({ page }) => {
+    await login(page, ADMIN.dni, ADMIN.clave);
+    await page.goto('Bloqueos');
+    await expect(page.locator('h3')).toContainText(/Bloqueos de agenda/i);
+    const d = new Date(FECHA + 'T00:00:00');
+    d.setDate(d.getDate() + 30);
+    const desde = d.toISOString().slice(0, 10);
+    await page.fill('#desde', desde);
+    await page.fill('#motivo', 'Feriado de prueba E2E');
+    await page.click('form[action="Bloqueos"] button[type="submit"]');
+    const fila = page.locator('tr', { hasText: 'Feriado de prueba E2E' });
+    await expect(fila).toBeVisible();
+    await foto(page, 'bloqueo-agenda');
+    page.once('dialog', (d) => d.accept());
+    await fila.locator('button[type="submit"]').click();
+    await expect(page.locator('tr', { hasText: 'Feriado de prueba E2E' })).toHaveCount(0);
+  });
+
+  test('13. Reportes se descargan en CSV', async ({ page }) => {
+    await login(page, ADMIN.dni, ADMIN.clave);
+    await page.goto('PDCReportes.jsp');
+    const descarga = page.waitForEvent('download');
+    await page.click('a[href="ReporteController?accion=csv"]');
+    const archivo = await descarga;
+    expect(archivo.suggestedFilename()).toBe('reportes_artdent.csv');
+    await foto(page, 'reportes-csv');
+  });
+
+  test('14. Mi reserva permite cancelar o reprogramar con código y DNI', async ({ page }) => {
+    test.skip(!codigoReserva, 'la corrida anterior no generó una reserva web');
+    await page.goto(`PagoController?action=consultar&codigo=${codigoReserva}&dni=${PAC.dni}`);
+    await expect(page.locator('body')).toContainText(/Cancelar mi cita/i);
+    await expect(page.locator('form[action="MiReserva"] input[name="formToken"]').first()).toHaveAttribute('value', /\w+/);
+    await foto(page, 'mi-reserva-acciones');
+  });
+
+  test('15. Seguridad: el administrador ve las acciones de desbloqueo', async ({ page }) => {
+    await login(page, ADMIN.dni, ADMIN.clave);
+    await page.goto('UsuarioController?action=list');
+    await expect(page.locator('button[title^="Desbloquear"]').first()).toBeVisible();
+    await expect(page.locator('button[title^="Restablecer"]').first()).toBeVisible();
   });
 });
