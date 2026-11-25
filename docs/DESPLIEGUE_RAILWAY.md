@@ -19,7 +19,7 @@ Resumen de la arquitectura:
 |---|---|
 | URL pública | <https://artdent-production.up.railway.app> |
 | Proyecto | `ArtDent` · entorno `production` · región `iad` |
-| Repositorio | <https://github.com/ChristhianDBA/ArtDent> (rama `main`) |
+| Repositorio | <https://github.com/Stephanie-ec/artdent-sistema-citas> (rama `main`) |
 | Servicios | `MySQL` (imagen `mysql:8`, volumen `mysql-volume`) y `ArtDent` (Dockerfile, volumen `artdent-volume` en `/data`) |
 | Esquema en la base | importado con `scripts/importar-railway.sh` (20 tablas, 2 vistas, 44 rutinas) |
 | Cómo se despliega | `railway up` desde el repo local; el servicio **no** está enlazado a GitHub |
