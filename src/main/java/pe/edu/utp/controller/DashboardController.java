@@ -64,6 +64,11 @@ public class DashboardController extends HttpServlet {
         request.setAttribute("totalEnEspera", citaDao.contarEnEspera());
         request.setAttribute("citasRecientes", citasRecientes);
         request.setAttribute("reservasRecientes", reservasRecientes);
+        // R-15: alertas de nivel ERROR sin atender
+        int alertasPendientes = 0;
+        try { alertasPendientes = new pe.edu.utp.daoImpl.EventoDao().contarPendientes(); }
+        catch (java.sql.SQLException e) { alertasPendientes = 0; }
+        request.setAttribute("alertasPendientes", alertasPendientes);
 
         request.getRequestDispatcher("ADMPInicio.jsp").forward(request, response);
     }

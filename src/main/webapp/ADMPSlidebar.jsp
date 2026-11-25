@@ -47,10 +47,29 @@
                 </a>
             </li>
             <li class="nav-item">
+                <a class="nav-link text-white rounded d-flex align-items-center <%= request.getRequestURI().contains("Bloqueos") ? "active bg-brand-primary" : "" %>"
+                   href="Bloqueos">
+                    <i class="bi bi-calendar-x me-2 text-brand-accent"></i>
+                    <span>Bloqueos de agenda</span>
+                </a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link text-white rounded d-flex align-items-center <%= "reportead".equals(currentAccion) ? "active bg-brand-primary" : "" %>" 
                    href="ReporteController?accion=reportead">
                     <i class="bi bi-bar-chart-line me-2 text-brand-primary"></i>
                     <span>Reportes</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-white rounded d-flex align-items-center" href="EventoController">
+                    <i class="bi bi-journal-text me-2 text-brand-mint"></i>
+                    <span>Eventos y alertas</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-white rounded d-flex align-items-center" href="estado">
+                    <i class="bi bi-activity me-2 text-brand-accent"></i>
+                    <span>Estado del servicio</span>
                 </a>
             </li>
         </ul>
@@ -69,6 +88,12 @@
                 <a class="nav-link text-white-50 rounded d-flex align-items-center" href="index.jsp">
                     <i class="bi bi-box-arrow-up-right me-2 text-brand-mint"></i>
                     <span>Portal Público</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-white-50 rounded d-flex align-items-center" href="CambiarClaveController?action=form">
+                    <i class="bi bi-key me-2 text-brand-mint"></i>
+                    <span>Cambiar mi contraseña</span>
                 </a>
             </li>
             <li class="nav-item mt-3 pt-3 border-top" style="border-color: rgba(255,255,255,0.1) !important;">

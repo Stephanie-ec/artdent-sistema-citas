@@ -6,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Boleta Electrónica ${comprobante.codigoBoletaCompleto} - Art Dent</title>
+    <title>Comprobante de pago ${comprobante.codigoBoletaCompleto} - Art Dent</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Space+Mono:wght@400;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -93,7 +93,7 @@
     <div class="container">
         <c:if test="${yaPagado}">
             <div class="alert alert-info no-print mx-auto mt-3" style="max-width: 820px;">
-                <strong>Esta reserva ya estaba pagada.</strong> No se realizó un nuevo cobro; esta es su boleta.
+                <strong>Esta reserva ya estaba pagada.</strong> No se realizó un nuevo cobro; este es su comprobante.
             </div>
         </c:if>
         <!-- Barra de Botones no imprimible -->
@@ -103,7 +103,7 @@
             </a>
             <div class="d-flex gap-2">
                 <button onclick="window.print()" class="btn btn-artdent-primary shadow-sm">
-                    <i class="fa-solid fa-print me-1"></i> Imprimir Boleta
+                    <i class="fa-solid fa-print me-1"></i> Imprimir comprobante
                 </button>
                 <a href="index.jsp" class="btn btn-outline-dark">
                     <i class="fa-solid fa-house me-1"></i> Inicio
@@ -111,9 +111,9 @@
             </div>
         </div>
 
-        <!-- Documento de Boleta de Venta Electrónica -->
+        <!-- Comprobante de pago (documento interno) -->
         <div class="boleta-container">
-            <!-- Encabezado de la Boleta con Identidad Real del Negocio -->
+            <!-- Encabezado del comprobante con identidad real del negocio -->
             <div class="row align-items-center mb-4">
                 <div class="col-md-7">
                     <div class="d-flex align-items-center mb-2">
@@ -132,9 +132,9 @@
                 <div class="col-md-5">
                     <div class="header-box">
                         <div class="fw-bold text-muted small">R.U.C. 20601234567</div>
-                        <div class="boleta-title my-1">BOLETA DE VENTA ELECTRÓNICA</div>
+                        <div class="boleta-title my-1">COMPROBANTE DE PAGO</div>
                         <div class="boleta-numero">${comprobante.codigoBoletaCompleto}</div>
-                        <small class="text-muted d-block mt-1">Conforme a normativa tributaria de comprobantes de pago</small>
+                        <small class="text-muted d-block mt-1">Documento interno de Art Dent. No es comprobante electrónico SUNAT; la boleta o factura se emite en caja.</small>
                     </div>
                 </div>
             </div>
@@ -213,10 +213,10 @@
                 </div>
             </div>
 
-            <!-- Pie de Boleta Institucional -->
+            <!-- Pie institucional -->
             <div class="p-3 bg-light rounded text-center small text-muted">
-                <p class="mb-1"><strong>Representación impresa de la Boleta de Venta Electrónica</strong></p>
-                <p class="mb-0">Comprobante emitido conforme a la normativa para servicios de salud dental. No se emiten facturas.</p>
+                <p class="mb-1"><strong>Comprobante de pago</strong></p>
+                <p class="mb-0">Documento interno de Art Dent. No es comprobante electrónico SUNAT; la boleta o factura se emite en caja.</p>
             </div>
         </div>
     </div>

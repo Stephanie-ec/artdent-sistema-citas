@@ -57,6 +57,13 @@ public class InicioSesionController extends HttpServlet {
             sesion.setAttribute("Apellido", user.getApellido());
             sesion.setAttribute("Dni", user.getDni());
             sesion.setAttribute("TipoRol", user.getTipoRol());
+            pe.edu.utp.utils.EventoService.info("Seguridad", "Inicio de sesión exitoso (usuario id " + user.getIdUsuario() + ")");
+            // R-08: una clave temporal obliga a cambiarla antes de usar el sistema
+            sesion.setAttribute("DebeCambiarClave", user.isDebeCambiarClave());
+            if (user.isDebeCambiarClave()) {
+                response.sendRedirect("CambiarClaveController?action=form&forzado=1");
+                return;
+            }
             String rol = user.getTipoRol();
             if ("Administrador".equalsIgnoreCase(rol)) {
                 response.sendRedirect("DashboardController?action=dashboard");
@@ -69,6 +76,8 @@ public class InicioSesionController extends HttpServlet {
             }
 
         } else {
+            pe.edu.utp.utils.EventoService.info("Seguridad", "Inicio de sesión fallido"
+                    + (resultado != null && resultado.isBloqueado() ? " (cuenta bloqueada)" : ""));
             request.setAttribute("errorMensaje", resultado != null ? resultado.getMensaje() : "Usuario y/o contraseña incorrectos.");
             request.setAttribute("bloqueado", resultado != null && resultado.isBloqueado());
             request.setAttribute("intentosRestantes", resultado != null ? resultado.getIntentosRestantes() : 5);

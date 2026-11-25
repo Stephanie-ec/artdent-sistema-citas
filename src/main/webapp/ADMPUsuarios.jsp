@@ -33,6 +33,16 @@
                     <c:when test="${param.msg == 'usuarioCreadoOk'}"><div class="alert alert-success" role="status">Usuario registrado correctamente.</div></c:when>
                     <c:when test="${param.msg == 'usuarioActualizadoOk'}"><div class="alert alert-success" role="status">Usuario actualizado correctamente.</div></c:when>
                     <c:when test="${param.msg == 'usuarioDesactivadoOk'}"><div class="alert alert-success" role="status">Usuario desactivado. Su historial se conserva.</div></c:when>
+                    <c:when test="${param.msg == 'usuarioDesbloqueadoOk'}"><div class="alert alert-success" role="status">Cuenta desbloqueada: intentos fallidos en cero y bloqueo retirado.</div></c:when>
+                    <c:when test="${param.msg == 'claveRestablecidaOk'}">
+                        <div class="alert alert-warning" role="status">
+                            <strong>Contraseña temporal de <c:out value="${sessionScope.claveTemporalUsuario}"/>:</strong>
+                            <span class="badge bg-dark font-monospace fs-6"><c:out value="${sessionScope.claveTemporal}"/></span>
+                            <div class="small mt-1">Cópiela y entréguela al usuario. El sistema le exigirá cambiarla en su próximo ingreso y esta clave no se volverá a mostrar.</div>
+                            <c:remove var="claveTemporal" scope="session"/>
+                            <c:remove var="claveTemporalUsuario" scope="session"/>
+                        </div>
+                    </c:when>
                 </c:choose>
                 <c:if test="${not empty param.error}">
                     <div class="alert alert-danger d-flex align-items-center mb-3" role="alert">
@@ -108,6 +118,16 @@
                                                     </a>
                                                 </c:if>
                                                 <a href="UsuarioController?action=edit&id=${usuario.idUsuario}" class="btn btn-sm btn-outline-primary" title="Editar"><i class="bi bi-pencil-square"></i></a>
+                                                <form action="UsuarioController?action=desbloquear" method="post" class="d-inline m-0">
+                                                    <input type="hidden" name="id" value="${usuario.idUsuario}">
+                                                    <input type="hidden" name="formToken" value="${formToken}">
+                                                    <button type="submit" class="btn btn-sm btn-outline-secondary" title="Desbloquear cuenta (intentos y bloqueo en cero)"><i class="bi bi-unlock"></i></button>
+                                                </form>
+                                                <form action="UsuarioController?action=restablecerClave" method="post" class="d-inline m-0" onsubmit="return confirm('¿Generar una contraseña temporal para este usuario?');">
+                                                    <input type="hidden" name="id" value="${usuario.idUsuario}">
+                                                    <input type="hidden" name="formToken" value="${formToken}">
+                                                    <button type="submit" class="btn btn-sm btn-outline-secondary" title="Restablecer contraseña (clave temporal)"><i class="bi bi-key"></i></button>
+                                                </form>
                                                 <a href="#" onclick="confirmDelete(${usuario.idUsuario})" class="btn btn-sm btn-outline-danger" title="Desactivar usuario"><i class="bi bi-trash"></i></a>
                                             </div>
                                         </td>

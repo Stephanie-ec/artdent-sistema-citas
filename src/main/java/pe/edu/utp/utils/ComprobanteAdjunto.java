@@ -30,10 +30,27 @@ public final class ComprobanteAdjunto {
             } finally {reader.dispose();}
         }
     }
+
+    /**
+     * Carpeta privada de comprobantes. Una ruta relativa se resuelve contra {@code datos.dir}
+     * (por defecto {@code <usuario>/artdent}), de modo que la misma configuración funciona en
+     * Windows, Linux o el servidor sin editar rutas absolutas de una máquina concreta.
+     */
     public static Path directorio(String raizWeb) throws IOException {
         String valor=ConfigLoader.getProperty("pagos.adjuntos.dir");
-        if(valor==null||!Paths.get(valor).isAbsolute())throw new IOException("El almacenamiento de comprobantes no está configurado.");
-        Path dir=Paths.get(valor).toAbsolutePath().normalize();
+        if(valor==null||valor.trim().isEmpty())throw new IOException("El almacenamiento de comprobantes no está configurado.");
+        Path configurada=Paths.get(valor.trim());
+        Path dir;
+        if(configurada.isAbsolute()) {
+            dir=configurada;
+        } else {
+            String datos=ConfigLoader.getProperty("datos.dir");
+            Path base=(datos==null||datos.trim().isEmpty())
+                    ? Paths.get(System.getProperty("user.home"),"artdent")
+                    : Paths.get(datos.trim());
+            dir=base.resolve(configurada);
+        }
+        dir=dir.toAbsolutePath().normalize();
         Files.createDirectories(dir);dir=dir.toRealPath();
         if(raizWeb!=null&&dir.startsWith(Paths.get(raizWeb).toRealPath()))throw new IOException("El almacenamiento debe estar fuera del sitio público.");
         return dir;

@@ -75,6 +75,12 @@ public class UsuarioController extends HttpServlet {
             case "guardarDisponibilidad":
                 guardarDisponibilidad(request, response);
                 break;
+            case "desbloquear":
+                desbloquearUsuario(request, response);
+                break;
+            case "restablecerClave":
+                restablecerClave(request, response);
+                break;
 
             default:
                 listUsuarios(request, response);
@@ -87,6 +93,7 @@ public class UsuarioController extends HttpServlet {
         RequestDispatcher dispatcher = request.getRequestDispatcher("ADMPUsuarios.jsp");
         request.setAttribute("usuarios", usuarioDAO.listarUsuarios());
         request.setAttribute("roles", new pe.edu.utp.daoImpl.RolDaoImpl().listarRoles());
+        request.setAttribute("formToken", pe.edu.utp.utils.FormToken.obtener(request));
         dispatcher.forward(request, response);
     }
 
@@ -158,6 +165,40 @@ public class UsuarioController extends HttpServlet {
         if (id == Integer.parseInt(String.valueOf(request.getSession().getAttribute("idUsuario")))) { aviso(response,"No puede desactivar su propia cuenta."); return; }
         if (!usuarioDAO.eliminarUsuario(id)) { aviso(response,"No se pudo desactivar el usuario."); return; }
         response.sendRedirect("UsuarioController?action=list&msg=usuarioDesactivadoOk");
+    }
+
+    /** R-08: el administrador desbloquea la cuenta sin tocar SQL. */
+    private void desbloquearUsuario(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        if (!pe.edu.utp.utils.FormToken.valido(request)) { aviso(response, "La solicitud expiró. Recargue la página e intente nuevamente."); return; }
+        int id;
+        try { id = Integer.parseInt(texto(request, "id")); } catch (NumberFormatException e) { aviso(response, "Usuario no válido."); return; }
+        if (!usuarioDAO.resetearBloqueo(id)) { aviso(response, "No se pudo desbloquear la cuenta."); return; }
+        // R-08: queda registrado quien desbloqueo y a quien
+        Object actor = request.getSession().getAttribute("idUsuario");
+        pe.edu.utp.utils.EventoService.info("Seguridad",
+                "Cuenta desbloqueada por el administrador (usuario id " + actor + " -> usuario id " + id + ")");
+        response.sendRedirect("UsuarioController?action=list&msg=usuarioDesbloqueadoOk");
+    }
+
+    /** R-08: genera una clave temporal y obliga al cambio en el siguiente ingreso. */
+    private void restablecerClave(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        if (!pe.edu.utp.utils.FormToken.valido(request)) { aviso(response, "La solicitud expiró. Recargue la página e intente nuevamente."); return; }
+        int id;
+        try { id = Integer.parseInt(texto(request, "id")); } catch (NumberFormatException e) { aviso(response, "Usuario no válido."); return; }
+        Usuario usuario = usuarioDAO.obtenerUsuarioPorId(id);
+        if (usuario == null) { aviso(response, "El usuario no existe."); return; }
+        String temporal = pe.edu.utp.utils.ClaveTemporal.generar();
+        if (!usuarioDAO.restablecerClaveTemporal(id, pe.edu.utp.utils.SecurityUtils.hashPassword(temporal))) {
+            aviso(response, "No se pudo restablecer la contraseña.");
+            return;
+        }
+        // R-08: la clave temporal tambien deja rastro de quien la genero
+        Object actor = request.getSession().getAttribute("idUsuario");
+        pe.edu.utp.utils.EventoService.info("Seguridad",
+                "Clave temporal generada por el administrador (usuario id " + actor + " -> usuario id " + id + ")");
+        request.getSession().setAttribute("claveTemporal", temporal);
+        request.getSession().setAttribute("claveTemporalUsuario", usuario.getNombre() + " " + usuario.getApellido());
+        response.sendRedirect("UsuarioController?action=list&msg=claveRestablecidaOk");
     }
 
     private void showDisponibilidadForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

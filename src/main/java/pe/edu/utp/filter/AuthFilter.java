@@ -39,12 +39,13 @@ public class AuthFilter implements Filter {
             "", "/", "/index.jsp", "/servicios.jsp", "/DetalleServicio.jsp", "/nosotros.jsp",
             "/faq.jsp", "/reserva.jsp", "/reservapersonal.jsp", "/formularioreserva.jsp", "/reservacita.jsp",
             "/citareservada.jsp", "/boleta.jsp", "/iniciosesion.jsp", "/iniciosesionerror.jsp",
-            "/error.jsp", "/header.jsp", "/footer.jsp", "/consultareserva.jsp"));
+            "/error.jsp", "/header.jsp", "/footer.jsp", "/consultareserva.jsp",
+            "/politica-privacidad.jsp", "/pagoenlinea.jsp"));
 
     /** Servlets públicos (los que validan el rol internamente también se listan aquí). */
     private static final Set<String> SERVLETS_PUBLICOS = new HashSet<>(Arrays.asList(
             "/InicioSesionController", "/CerrarSesionController", "/api/chatbot", "/CitaController",
-            "/ConsultaDniController", "/PagoManualController"));
+            "/ConsultaDniController", "/PagoManualController", "/PagoEnLinea", "/salud", "/MiReserva"));
 
     /** Acciones públicas de ServicioController (catálogo y formulario de reserva). */
     private static final Set<String> ACCIONES_SERVICIO_PUBLICAS = new HashSet<>(Arrays.asList(
@@ -83,6 +84,15 @@ public class AuthFilter implements Filter {
             } catch(NumberFormatException e){sesion.invalidate();sesion=null;rol=null;}
               catch(IllegalStateException e){response.sendError(503,"No se pudo validar su acceso. Intente nuevamente.");return;}
         }
+        // R-08: con clave temporal pendiente solo se permite cambiarla o salir
+        Object debeCambiar = sesion == null ? null : sesion.getAttribute("DebeCambiarClave");
+        if (rol != null && Boolean.TRUE.equals(debeCambiar)
+                && !"/CambiarClaveController".equals(ruta) && !"/CerrarSesionController".equals(ruta)
+                && !esPublica(request, ruta)) {
+            response.sendRedirect(request.getContextPath() + "/CambiarClaveController?action=form&forzado=1");
+            return;
+        }
+
         if(esPublica(request,ruta)){chain.doFilter(req,res);return;}
 
         // Sin sesión: se pide iniciar sesión (RNF09)
@@ -140,7 +150,10 @@ public class AuthFilter implements Filter {
         if (ruta.startsWith("/ADMP") || ruta.equals("/UsuarioController") || ruta.equals("/DashboardController")
                 || ruta.equals("/ServicioController") || ruta.equals("/MenuController")
                 || ruta.startsWith("/resources") || ruta.equals("/ReporteController")
-                || ruta.equals("/PDCReportes.jsp")) {
+                || ruta.equals("/PDCReportes.jsp")
+                || ruta.equals("/EventoController") || ruta.equals("/ADMPEventos.jsp")
+                || ruta.equals("/estado") || ruta.equals("/ADMPEstado.jsp")
+                || ruta.equals("/Bloqueos") || ruta.equals("/ADMPBloqueos.jsp")) {
             return admin;
         }
         // Registro de pago en efectivo: Secretaria (o Administrador)

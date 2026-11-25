@@ -1,0 +1,17 @@
+.git
+.github
+.idea
+.devcontainer
+target
+datos-privados
+capturas
+docs
+e2e
+herramientas
+scripts
+*.md
+*.sha256
+src/main/resources/config.properties
+.env
+.env.*
+!.env.example

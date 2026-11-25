@@ -47,7 +47,7 @@ public class UsuarioDaoImpl implements UsuarioDao {
         }
 
         String sql = "SELECT u.idUsuario, u.Nombre, u.Apellido, u.DNI, u.Clave, "
-                   + "       u.IntentosFallidos, u.BloqueadoHasta, r.TipoRol, "
+                   + "       u.IntentosFallidos, u.BloqueadoHasta, u.DebeCambiarClave, r.TipoRol, "
                    + "       TIMESTAMPDIFF(MINUTE, NOW(), u.BloqueadoHasta) AS minutosRestantes "
                    + "FROM Usuario u "
                    + "INNER JOIN Rol r ON u.Rol_idRol = r.idRol "
@@ -112,6 +112,7 @@ public class UsuarioDaoImpl implements UsuarioDao {
                             res.getString("TipoRol")
                         );
 
+                        usuarioDTO.setDebeCambiarClave(res.getBoolean("DebeCambiarClave"));
                         resultado.setExito(true);
                         resultado.setUsuario(usuarioDTO);
                         resultado.setIntentosRestantes(5);
@@ -153,6 +154,33 @@ public class UsuarioDaoImpl implements UsuarioDao {
     }
 
     @Override
+    public boolean cambiarClave(int idUsuario, String nuevoHash) {
+        String sql = "UPDATE Usuario SET Clave = ?, DebeCambiarClave = 0 WHERE idUsuario = ?";
+        try (Connection conn = Conexion.getConection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, nuevoHash);
+            stmt.setInt(2, idUsuario);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.out.println("Error al cambiar la clave: " + e.getMessage());
+            return false;
+        }
+    }
+
+    @Override
+    public boolean restablecerClaveTemporal(int idUsuario, String hashTemporal) {
+        String sql = "UPDATE Usuario SET Clave = ?, DebeCambiarClave = 1, IntentosFallidos = 0, "
+                + "BloqueadoHasta = NULL WHERE idUsuario = ?";
+        try (Connection conn = Conexion.getConection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, hashTemporal);
+            stmt.setInt(2, idUsuario);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.out.println("Error al restablecer la clave temporal: " + e.getMessage());
+            return false;
+        }
+    }
+
+    @Override
     public boolean resetearBloqueo(int idUsuario) {
         try (Connection conn = Conexion.getConection()) {
             resetearBloqueo(conn, idUsuario);
@@ -178,6 +206,8 @@ public class UsuarioDaoImpl implements UsuarioDao {
             stmt.setInt(1, idUsuario);
             stmt.executeUpdate();
         }
+        // R-15: el bloqueo es un evento de seguridad
+        pe.edu.utp.utils.EventoService.registrarBloqueoCuenta(idUsuario);
     }
 
     private void actualizarClaveHash(Connection conn, int idUsuario, String nuevoHash) {
@@ -238,7 +268,10 @@ public class UsuarioDaoImpl implements UsuarioDao {
                 + "AND us.Disponibilidad = 1 "
                 + "AND LOWER(h.diaSemana) = ? "
                 + "AND h.HoraInicio <= CAST(? AS TIME) AND h.HoraFinal >= CAST(? AS TIME) "   // dentro de su horario de atención
-                + "AND c.idCita IS NULL";
+                + "AND c.idCita IS NULL "
+                // R-11: feriados y vacaciones excluyen al odontologo de la busqueda
+                + "AND NOT EXISTS (SELECT 1 FROM BloqueoAgenda b WHERE (b.Usuario_idUsuario IS NULL "
+                + "OR b.Usuario_idUsuario = u.idUsuario) AND CAST(? AS DATE) BETWEEN b.Desde AND b.Hasta)";
 
         try (Connection cx = Conexion.getConection(); PreparedStatement ps = cx.prepareStatement(sql)) {
             // Asignación de parámetros
@@ -250,6 +283,7 @@ public class UsuarioDaoImpl implements UsuarioDao {
             ps.setString(5, diaSemanaTexto);
             ps.setString(6, horaObj.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss")));
             ps.setString(7, horaFin.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss")));
+            ps.setString(8, fechaConv.toString());
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {

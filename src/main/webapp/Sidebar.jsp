@@ -82,6 +82,13 @@
         <% } %>
     </ul>
 
+    <div class="px-3 pb-2">
+        <a class="nav-link text-white px-0 d-flex align-items-center" href="CambiarClaveController?action=form">
+            <i class="bi bi-key me-2 text-brand-mint"></i>
+            <span>Cambiar mi contraseña</span>
+        </a>
+    </div>
+
     <!-- Pie del Sidebar: Salir -->
     <div class="pt-3 border-top mt-auto" style="border-color: rgba(255,255,255,0.12) !important;">
         <a class="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center gap-2 py-2" 

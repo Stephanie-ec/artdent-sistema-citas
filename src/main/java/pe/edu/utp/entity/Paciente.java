@@ -8,6 +8,7 @@ public class Paciente {
     private int Dni;
     private int Telefono;
     private String Correo;
+    private boolean identidadVerificada = true;
 
     public Paciente() {
     }
@@ -67,6 +68,15 @@ public class Paciente {
 
     public void setCorreo(String Correo) {
         this.Correo = Correo;
+    }
+
+    /** R-04: false cuando RENIEC no respondió y la secretaría debe revisar el DNI físico. */
+    public boolean isIdentidadVerificada() {
+        return identidadVerificada;
+    }
+
+    public void setIdentidadVerificada(boolean identidadVerificada) {
+        this.identidadVerificada = identidadVerificada;
     }
 
 }

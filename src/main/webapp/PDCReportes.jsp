@@ -36,6 +36,12 @@
                     <p class="text-muted small mb-0">Ingresos por fecha de pago; volumen de citas por fecha de atención. Incluye pagos de citas canceladas con devolución pendiente.</p>
                 </div>
 
+                <div class="mb-3">
+                    <a class="btn btn-sm btn-outline-primary" href="ReporteController?accion=csv">
+                        <i class="bi bi-download me-1"></i>Descargar CSV (Excel)
+                    </a>
+                </div>
+
                 <!-- KPI Summary Cards -->
                 <div class="row g-3 mb-4">
                     <div class="col-sm-6 col-xl-3">

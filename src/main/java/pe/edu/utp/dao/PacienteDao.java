@@ -22,4 +22,10 @@ public interface PacienteDao {
     boolean registrarPaciente(Paciente p);
 
     boolean actualizarPaciente(Paciente p);
+
+    /** R-06: guarda la fecha y hora en que el paciente aceptó la Política de privacidad. */
+    boolean registrarConsentimiento(int dni);
+
+    /** R-04: marca al paciente para que la secretaría revise el DNI físico. */
+    boolean marcarIdentidadPorVerificar(int dni);
 }

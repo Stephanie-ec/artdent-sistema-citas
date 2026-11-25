@@ -51,6 +51,7 @@ public class PagoManualController extends HttpServlet {
             List<Map<String,Object>> solicitudes=dao.solicitudes(cita);
             req.setAttribute("solicitudes",solicitudes);req.setAttribute("devoluciones",dao.devoluciones(cita));
             req.setAttribute("canalConfigurado",configurado());req.setAttribute("titularPago",ConfigLoader.getProperty("pagos.titular"));req.setAttribute("numeroPago",ConfigLoader.getProperty("pagos.numero"));
+            req.setAttribute("pagoEnLineaDisponible",pe.edu.utp.utils.MercadoPagoService.habilitado());
             if(cita!=null) {
                 pe.edu.utp.daoImpl.PagoDaoImpl pagos=new pe.edu.utp.daoImpl.PagoDaoImpl();
                 req.setAttribute("importePago",pagos.obtenerCostoServicioPorCita(cita));

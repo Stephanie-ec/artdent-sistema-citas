@@ -37,7 +37,7 @@
                 <h3 class="fw-bold text-brand-dark mb-1">
                     <span class="text-brand-primary">Solicitudes de Citas</span> y Reservas Web
                 </h3>
-                <p class="text-muted small mb-0">Gestión de flujo de recepción: validación de reservas web, citas presenciales, cobros y emisión de boletas</p>
+                <p class="text-muted small mb-0">Gestión de flujo de recepción: validación de reservas web, citas presenciales, cobros y emisión de comprobantes de pago</p>
             </div>
 
             <!-- Alertas Informativas del Sistema -->
@@ -65,7 +65,7 @@
                 <div class="alert alert-artdent-mint alert-dismissible fade show d-flex align-items-center mb-3" role="alert">
                     <i class="bi bi-cash-coin fs-4 me-2 text-brand-accent"></i>
                     <div>
-                        <strong>¡Pago en ventanilla registrado con éxito!</strong> Se emitió la boleta electrónica <span class="badge bg-brand-primary fs-6 font-monospace">${param.boleta}</span>. La reserva ahora puede ser confirmada formalmente.
+                        <strong>¡Pago en ventanilla registrado con éxito!</strong> Se emitió el comprobante de pago <span class="badge bg-brand-primary fs-6 font-monospace">${param.boleta}</span>. La reserva ahora puede ser confirmada formalmente.
                     </div>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
@@ -151,7 +151,7 @@
                                 <th>Fecha y Hora</th>
                                 <th>Tratamiento</th>
                                 <th>Estado</th>
-                                <th>Pago / Boleta</th>
+                                <th>Pago / Comprobante</th>
                                 <th class="text-center pe-4">Acciones</th>
                             </tr>
                         </thead>
@@ -194,7 +194,7 @@
                                                 </c:choose>
                                             </td>
 
-                                            <!-- Pago / Boleta -->
+                                            <!-- Pago / Comprobante -->
                                             <td>
                                                 <c:choose>
                                                     <c:when test="${reserva.tienePago}">
@@ -202,8 +202,8 @@
                                                             <i class="bi bi-check-circle-fill text-brand-accent me-1"></i>Pagado
                                                         </span>
                                                         <div class="small font-monospace fw-bold text-brand-dark">${reserva.codigoBoleta}</div>
-                                                        <a href="PagoController?action=verBoleta&idCita=${reserva.idReserva}" target="_blank" class="btn btn-sm btn-outline-primary mt-1 py-0 px-2 rounded-pill" title="Ver Boleta Electrónica">
-                                                            <i class="bi bi-receipt"></i> Boleta
+                                                        <a href="PagoController?action=verBoleta&idCita=${reserva.idReserva}" target="_blank" class="btn btn-sm btn-outline-primary mt-1 py-0 px-2 rounded-pill" title="Ver comprobante de pago">
+                                                            <i class="bi bi-receipt"></i> Comprobante
                                                         </a>
                                                     </c:when>
                                                     <c:otherwise>
@@ -250,7 +250,7 @@
                                                                             </form>
                                                                         </c:when>
                                                                         <c:otherwise>
-                                                                            <button class="btn btn-accion btn-secondary" type="button" onclick="alert('No se puede aprobar la reserva: Requiere pago verificado registrado previamente. Por favor, registre el pago en efectivo o espere la verificación del comprobante Yape/Plin.')" title="Bloqueado: Requiere Pago">
+                                                                            <button class="btn btn-accion btn-secondary" type="button" data-bs-toggle="modal" data-bs-target="#modalSinPago${reserva.idReserva}" title="Bloqueado: Requiere Pago">
                                                                                 <i class="bi bi-lock-fill"></i>
                                                                             </button>
                                                                         </c:otherwise>
@@ -318,7 +318,7 @@
                                                 </span>
                                             </td>
 
-                                            <!-- Pago / Boleta -->
+                                            <!-- Pago / Comprobante -->
                                             <td>
                                                 <c:choose>
                                                     <c:when test="${cita.tienePago}">
@@ -326,8 +326,8 @@
                                                             <i class="bi bi-check-circle-fill text-brand-accent me-1"></i>Pagado
                                                         </span>
                                                         <div class="small font-monospace fw-bold text-brand-dark">${cita.codigoBoleta}</div>
-                                                        <a href="PagoController?action=verBoleta&idCita=${cita.idCita}" target="_blank" class="btn btn-sm btn-outline-primary mt-1 py-0 px-2 rounded-pill" title="Ver Boleta Electrónica">
-                                                            <i class="bi bi-receipt"></i> Boleta
+                                                        <a href="PagoController?action=verBoleta&idCita=${cita.idCita}" target="_blank" class="btn btn-sm btn-outline-primary mt-1 py-0 px-2 rounded-pill" title="Ver comprobante de pago">
+                                                            <i class="bi bi-receipt"></i> Comprobante
                                                         </a>
                                                     </c:when>
                                                     <c:otherwise>
@@ -378,6 +378,15 @@
                                                                     <i class="bi bi-calendar2-range"></i>
                                                                 </button>
                                                             </form>
+                                                            <c:if test="${cita.estado == 'Confirmado' || cita.estado == 'Reprogramado'}">
+                                                            <form action="ReprogramacionController" method="post" class="d-inline" onsubmit="return confirm('¿Marcar que el paciente no asistió? Solo es posible después de la hora de la cita.');">
+                                                                <input type="hidden" name="idCita" value="${cita.idCita}" />
+                                                                <input type="hidden" name="accion" value="updateEstadoNoAsistioCita" />
+                                                                <button class="btn btn-accion btn-outline-danger" type="submit" title="Marcar inasistencia">
+                                                                    <i class="bi bi-person-x"></i>
+                                                                </button>
+                                                            </form>
+                                                            </c:if>
                                                             <c:if test="${cita.estado == 'En espera' || cita.estado == 'Confirmado' || cita.estado == 'Reprogramado'}">
                                                             <form action="ReprogramacionController" method="post" class="d-inline" onsubmit="return confirm('¿Cancelar esta cita? Se enviará un correo al paciente.');">
                                                                 <input type="hidden" name="idCita" value="${cita.idCita}" />
@@ -411,6 +420,7 @@
                     <i class="bi bi-clipboard2-check"></i>Completar
                     <i class="bi bi-calendar2-range"></i>Reprogramar
                     <i class="bi bi-ban"></i>Cancelar
+                    <i class="bi bi-person-x"></i>No asistió
                     <i class="bi bi-trash"></i>Eliminar
                 </div>
             </div>
@@ -436,7 +446,7 @@
                             </div>
                             <div class="modal-body p-4">
                                 <p class="text-muted small mb-3">
-                                    Se registrará el cobro físico y se emitirá correlativamente la <strong>Boleta Electrónica (Serie B001)</strong>.
+                                    Se registrará el cobro físico y se emitirá correlativamente el <strong>Comprobante de pago (Serie B001)</strong>.
                                 </p>
                                 <div class="mb-3">
                                     <label class="form-label small fw-bold text-muted">Nombre del Paciente / Pagador</label>
@@ -505,6 +515,30 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Modal Aviso: la reserva aún no tiene pago verificado -->
+            <div class="modal fade" id="modalSinPago${reserva.idReserva}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
+                        <div class="modal-header bg-warning-subtle border-0 py-3">
+                            <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2">
+                                <i class="bi bi-lock-fill text-warning-emphasis"></i> Pago pendiente de verificación
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body p-4">
+                            <p class="mb-3">La reserva <strong>#RES-${reserva.idReserva}</strong> todavía no tiene un pago verificado registrado.</p>
+                            <ul class="small text-muted mb-0 ps-3">
+                                <li>Para confirmarla hoy, use el botón <strong>Cobrar</strong> de la fila y registre el cobro en ventanilla.</li>
+                                <li>Si el paciente envió su comprobante Yape/Plin, espere la verificación en <strong>Pagos Yape / Plin y devoluciones</strong>.</li>
+                            </ul>
+                        </div>
+                        <div class="modal-footer bg-light border-0">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Entendido</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </c:forEach>
     </c:if>
 
@@ -526,7 +560,7 @@
                             </div>
                             <div class="modal-body p-4">
                                 <p class="text-muted small mb-3">
-                                    Emisión de <strong>Boleta Electrónica (Serie B001)</strong> para cita en consultorio.
+                                    Emisión de <strong>Comprobante de pago (Serie B001)</strong> para cita en consultorio.
                                 </p>
                                 <div class="mb-3">
                                     <label class="form-label small fw-bold text-muted">Nombre del Paciente / Pagador</label>
@@ -547,7 +581,7 @@
                             <div class="modal-footer bg-light border-0">
                                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
                                 <button type="submit" class="btn btn-success fw-bold px-4">
-                                    <i class="bi bi-check-circle me-1"></i> Emitir Boleta
+                                    <i class="bi bi-check-circle me-1"></i> Emitir comprobante
                                 </button>
                             </div>
                         </form>
