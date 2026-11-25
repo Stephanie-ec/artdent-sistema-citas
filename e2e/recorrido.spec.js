@@ -252,6 +252,7 @@ test.describe.serial('Recorrido Art Dent', () => {
   test('15. Seguridad: el administrador ve las acciones de desbloqueo', async ({ page }) => {
     await login(page, ADMIN.dni, ADMIN.clave);
     await page.goto('UsuarioController?action=list');
-    await expect(page.locator('body')).toContainText(/Desbloquear|Restablecer/i);
+    await expect(page.locator('button[title^="Desbloquear"]').first()).toBeVisible();
+    await expect(page.locator('button[title^="Restablecer"]').first()).toBeVisible();
   });
 });
